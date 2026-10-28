@@ -1,0 +1,148 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>GamePad</title>
+    <link rel='stylesheet' type='text/css' href='default.css' />
+
+    <script>
+        var animationFrameId = 0;
+        var previousGl = null;
+
+        function LoadContent(url, colour, js) {
+            document.documentElement.style.setProperty('--bg-color', colour || '#12354dDD');
+            var content = document.getElementById('content');
+            content.innerHTML = "<p>Loading...</p>";
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) { throw new Error('Network response was not ok'); }
+
+                    // Clear out any existing timers
+                    IntervalManager.clearAll();
+
+                    return response.text();
+                })
+                .then(html => {
+                    content.innerHTML = html;
+
+                    if (js !== null) {
+                        // Stop any existing animations
+                        if (animationFrameId > 0)
+                            cancelAnimationFrame(animationFrameId);
+
+                        // Clear out previous resources
+                        document.body.querySelectorAll("canvas").forEach(canvas => canvas.remove());
+
+                        if (previousGl) {
+                            var loseExt = previousGl.getExtension('WEBGL_lose_context');
+                            if (loseExt) loseExt.loseContext();
+                        }
+
+                        const script = document.createElement("script");
+                        script.src = js;
+                        content.appendChild(script);
+                    }
+                })
+                .catch(() => {
+                    content.innerHTML = "<p class='warning'>Sorry, unable load resource.</p>";
+                });
+        }
+
+        const IntervalManager = (() => {
+            const ids = [];
+
+            return {
+                add(fn, delay) {
+                    const id = setInterval(fn, delay);
+                    ids.push(id);
+                    return id;
+                },
+                clearAll() {
+                    ids.forEach(clearInterval);
+                    ids.length = 0;
+                }
+            };
+        })();
+
+        const ResizeManager = (() => {
+            let resizeHandler = null;
+
+            return {
+                attach(fn) {
+                    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+                    resizeHandler = fn;
+                    window.addEventListener('resize', resizeHandler);
+                },
+                detach() {
+                    if (resizeHandler) {
+                        window.removeEventListener('resize', resizeHandler);
+                        resizeHandler = null;
+                    }
+                },
+                isAttached() {
+                    return !!resizeHandler;
+                }
+            };
+        })();
+
+    </script>
+</head>
+
+<body>
+    <div class="root">
+        <header id="header" class='header'>
+            <h1>Test</h1>
+
+            <div class="menu-container">
+                <div class="menu-item" onclick="LoadContent('001.html', '#12354dDD', '001.js');">001</div>
+                <div class="menu-item" onclick="LoadContent('002.html', '#12354dDD', '002.js');">002</div>
+                <div class="menu-item" onclick="LoadContent('003.html', '#12354dDD', '003.js');">003</div>
+                <div class="menu-item" onclick="LoadContent('004.html', '#00000099', '004.js');">004</div>
+                <div class="menu-item" onclick="LoadContent('005.html', '#00320088', '005.js');">005</div>
+                <div class="menu-item" onclick="LoadContent('006.html', '#00320088', '006.js');">006</div>
+                <div class="menu-item" onclick="LoadContent('007.html', '#00320088', '007.js');">007</div>
+                <div class="menu-item" onclick="LoadContent('008.html', '#00320088', '008.js');">008</div>
+                <div class="menu-item" onclick="LoadContent('009.html', '#00320088', '009.js');">009</div>
+                <div class="menu-item" onclick="LoadContent('010.html', '#00320088', '010.js');">010</div>
+                <div class="menu-item" onclick="LoadContent('011.html', '#12354dDD', '011.js');">011</div>
+                <div class="menu-item" onclick="LoadContent('012.html', '#12354dDD', '012.js');">012</div>
+                <div class="menu-item" onclick="LoadContent('013.html', '#12354dDD', '013.js');">013</div>
+                <div class="menu-item" onclick="LoadContent('014.html', '#00000099', '014.js');">014</div>
+                <div class="menu-item" onclick="LoadContent('015.html', '#00320088', '015.js');">015</div>
+                <div class="menu-item" onclick="LoadContent('016.html', '#00320088', '016.js');">016</div>
+                <div class="menu-item" onclick="LoadContent('017.html', '#00320088', '017.js');">017</div>
+                <div class="menu-item" onclick="LoadContent('018.html', '#00320088', '018.js');">018</div>
+                <div class="menu-item" onclick="LoadContent('019.html', '#00320088', '019.js');">019</div>
+                <div class="menu-item" onclick="LoadContent('020.html', '#00320088', '020.js');">020</div>
+                <div class="menu-item" onclick="LoadContent('021.html', '#12354dDD', '021.js');">021</div>
+                <div class="menu-item" onclick="LoadContent('022.html', '#12354dDD', '022.js');">022</div>
+                <div class="menu-item" onclick="LoadContent('023.html', '#12354dDD', '023.js');">023</div>
+                <div class="menu-item" onclick="LoadContent('024.html', '#00000099', '024.js');">024</div>
+                <div class="menu-item" onclick="LoadContent('025.html', '#00320088', '025.js');">025</div>
+                <div class="menu-item" onclick="LoadContent('026.html', '#00320088', '026.js');">026</div>
+                <div class="menu-item" onclick="LoadContent('027.html', '#00320088', '027.js');">027</div>
+                <div class="menu-item" onclick="LoadContent('028.html', '#00320088', '028.js');">028</div>
+                <div class="menu-item" onclick="LoadContent('029.html', '#00320088', '029.js');">029</div>
+            </div>
+        </header>
+
+        <div id='content' class='content'>
+        </div>
+
+        <div class='footer'>
+            <p class="footer-middle"><i>(c) 2025-2026 MisterB @ I The P</i></p>
+            <!-- <div class='footer-right'>
+                <div class="bouncing-arrow">➜</div>
+                <label for='detailsToggle'>Details</label>
+                <input type='checkbox' id='detailsToggle'>
+                <label for='shaderToggle'>Pretty</label>
+                <input type='checkbox' id='shaderToggle' onchange='toggleShaderEffect()'>
+            </div> -->
+        </div>
+    </div>
+
+    <script>LoadContent('001.html', '#12354dDD', '001.js');</script>
+</body>
+
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link rel='stylesheet' type='text/css' href='default.css' />
+    <style>
+        .fire-ui-container {
+            position: fixed;
+            left: 8px;
+            right: 8px;
+            top: 8px;
+            z-index: 9999;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            pointer-events: none;
+        }
+        .fire-ui {
+            background: rgba(0,0,0,0.69);
+            color: #fff;
+            padding: 8px 10px;
+            font-family: sans-serif;
+            font-size: 12px;
+            border-radius: 6px;
+            user-select: none;
+            width: 200px;
+            box-sizing: border-box;
+            pointer-events: auto;
+            max-height: calc(100vh - 24px);
+            overflow: auto visible;
+        }
+        .fire-ui-row {
+            margin-bottom: 6px;
+            display: grid;
+            grid-template-columns: 1fr 45px;
+            align-items: center;
+            gap: 0px;
+        }
+        .fire-ui-row > .fire-ui-label {
+            grid-column: 1 / -1;
+        }
+        .fire-ui-row:has(> input[type="checkbox"]) > .fire-ui-label {
+            grid-column: 1;
+        }
+        .fire-ui-row > input[type="range"] {
+            grid-column: 1;
+        }
+        .fire-ui-row > .fire-ui-value {
+            grid-column: 2;
+            text-align: right;
+            margin-left: 0;
+            align-self: center;
+        }
+        .fire-ui-row > input[type="checkbox"] {
+            grid-column: 2;
+            justify-self: end;
+        }
+        .fire-ui-row > .fire-ui-text {
+            grid-column: 1 / -1;
+        }
+        .fire-ui-row > .fire-ui-dropdown {
+            grid-column: 1 / -1;
+        }
+        .fire-ui-heading {
+            border-top: solid 2px skyblue;
+            padding-top: 10px;
+            margin: 20px 0px 8px 0px;
+            font-size: 16px;
+            font-weight: bold;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: skyblue;
+        }
+        .fire-ui-text {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 4px 6px;
+            border: 1px solid rgba(255,255,255,0.25);
+            background: rgba(0,0,0,0.4);
+            color: #fff;
+            border-radius: 3px;
+        }
+        .fire-ui-check {
+            transform: translateY(1px);
+        }
+        .fire-ui-label {
+            display: block;
+            margin-bottom: 2px;
+        }
+        .fire-ui-range {
+            width: 100%;
+            height: 16px;
+            position: relative;
+            z-index: 2;
+            cursor: pointer;
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+        }
+        .fire-ui-range::-webkit-slider-runnable-track {
+            height: 6px;
+            background: linear-gradient(to right, dodgerblue var(--val, 50%), rgba(255,255,255,0.3) var(--val, 50%));
+            border-radius: 3px;
+            transition: height 120ms ease;
+        }
+        .fire-ui-range::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            margin-top: -4px;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            transition: width 120ms ease, height 120ms ease, margin-top 120ms ease;
+        }
+        .fire-ui-range::-moz-range-track {
+            height: 6px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 3px;
+            transition: height 120ms ease;
+        }
+        .fire-ui-range::-moz-range-progress {
+            height: 6px;
+            background: dodgerblue;
+            border-radius: 3px;
+            transition: height 120ms ease;
+        }
+        .fire-ui-range::-moz-range-thumb {
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+            transition: width 120ms ease, height 120ms ease;
+        }
+        .fire-ui-range:hover,
+        .fire-ui-range:focus-visible {
+            z-index: 3;
+        }
+        .fire-ui-range.expanded {
+            position: fixed;
+            width: 50vw;
+            height: 32px;
+            z-index: 10001;
+        }
+        .fire-ui-range.expanded::-webkit-slider-runnable-track {
+            height: 12px;
+            border-radius: 6px;
+        }
+        .fire-ui-range.expanded::-webkit-slider-thumb {
+            width: 24px;
+            height: 24px;
+            margin-top: -6px;
+        }
+        .fire-ui-range.expanded::-moz-range-track {
+            height: 12px;
+            border-radius: 6px;
+        }
+        .fire-ui-range.expanded::-moz-range-progress {
+            height: 12px;
+            border-radius: 6px;
+        }
+        .fire-ui-range.expanded::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+        }
+        /* Right-side panel value positioning */
+        .fire-ui:last-child .fire-ui-row {
+            position: relative;
+        }
+        .fire-ui:last-child .fire-ui-row > .fire-ui-value {
+            position: absolute;
+            right: 0;
+            top: 19px;
+        }
+        .fire-ui-value {
+            font-size: 11px;
+            min-width: 45px;
+            text-align: right;
+        }
+        .fire-ui-dropdown {
+            position: relative;
+            width: 90%;
+        }
+        .fire-ui-button {
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid rgba(255,255,255,0.25);
+            padding: 4px 6px;
+            background: rgba(0,0,0,0.4);
+            gap: 6px;
+            box-sizing: border-box;
+        }
+        .fire-ui-swatch {
+            width: 70px;
+            height: 10px;
+            border: none;
+            display: block;
+            flex: 0 0 70px;
+            min-width: 70px;
+            max-width: 70px;
+            box-sizing: border-box;
+            background-clip: padding-box;
+            background-size: 100% 100%;
+            background-repeat: no-repeat;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.2);
+        }
+        .fire-ui-list {
+            display: none;
+            position: absolute;
+            left: 10px;
+            right: 10px;
+            top: 50%;
+            margin-top: 4px;
+            background: rgba(0,0,0,0.9);
+            border: none;
+            z-index: 10000;
+            width: 100%;
+            box-sizing: border-box;
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            background-clip: padding-box;
+            outline: solid 2px white;
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.25);
+        }
+        .fire-ui-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 6px;
+            padding: 4px 6px;
+            cursor: pointer;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            box-sizing: border-box;
+            width: 100%;
+            background: rgba(0,0,0,0.9);
+            outline: none;
+            overflow: hidden;
+        }
+        .fire-ui-preview {
+            margin: 6px 0 10px;
+        }
+        .fire-ui-preview-label {
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 6px;
+        }
+        .fire-ui-preview-canvas {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: block;
+            border-radius: 4px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.35);
+        }
+    </style>
+</head>
+
+<body>
+    <div class='container'>
+        <!-- <p>This is a test</p> -->
+    </div>
+
+    <div id='content' class='content'>
+    </div>
+
+    <script src='Fire - 001.js'></script>
+
+</body>

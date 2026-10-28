@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<body>
+<button id="start">Start Listening</button>
+<div id="output"></div>
+
+<script>
+  const SpeechRecognition =
+    window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  const recog = new SpeechRecognition();
+  recog.continuous = true;        // keep listening
+  recog.interimResults = true;    // get partial results
+  recog.lang = "en-US";
+
+  const output = document.getElementById("output");
+
+  recog.onresult = (event) => {
+    const transcript = Array.from(event.results)
+      .map(r => r[0].transcript)
+      .join("");
+    output.textContent = transcript;
+    // You can use `transcript` in your JS logic here
+  };
+
+  document.getElementById("start").onclick = () => {
+    recog.start();  // triggers microphone permission
+  };
+</script>
+</body>
+</html>
