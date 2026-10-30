@@ -1,0 +1,184 @@
+<!-- <canvas id="shader" style="z-index: -1; top: 0; left: 0; position: fixed"></canvas> -->
+<link href="https://fonts.googleapis.com/css2?
+family=Roboto:wght@700&
+family=Playfair+Display:wght@700&
+family=Press+Start+2P&
+family=Great+Vibes&
+family=Bangers&
+family=Creepster&
+family=Lobster&
+family=Pacifico&
+family=VT323&
+family=Courier+Prime:wght@700&
+family=Comic+Neue:wght@700&
+family=Playwrite+Italia+Tradizionale&
+family=Noto+Sans+Old+Hungarian&
+family=Rubik+Storm&
+family=Rubik+Spray+Paint&
+family=Noto+Sans&
+family=Rubik+Puddles&
+family=New+Rocker&
+family=McLaren&
+family=Chicle&
+family=Bonbon&
+family=Slackey&
+family=Cherry+Cream+Soda&
+family=Permanent+Marker&
+family=Bungee+Outline&
+family=Rock+Salt&
+family=Henny+Penny&
+family=Kablammo&
+family=Schoolbell&
+family=Finger+Paint&
+family=Astloch&
+family=Edu+SA+Hand&
+family=Indie+Flower&
+family=Princess+Sofia&
+family=Lily+Script+One&
+family=Crafty+Girls&
+family=Mountains+of+Christmas
+&display=swap" rel="stylesheet">
+
+<div class="shaderOverlay">
+    <!-- <div style="padding: 25px;">
+    </div> -->
+</div>
+
+<!-- Controls panel -->
+<div id="controls-panel">
+    <div id="controls-header">
+        <button id="toggle-panel">≡</button>
+        <span>Shader Controls</span>
+    </div>
+    <div id="controls-body">
+        <div id="presets-row">
+            <label for="preset-select">Preset:</label>
+            <select id="preset-select"></select>
+            <button id="btn-load-preset">Load</button>
+            <button id="btn-reset-all">Reset All</button>
+            <button id="btn-json">JSON</button>
+        </div>
+
+        <select id="font-select" style="width: 100%; margin-bottom: 8px; background: #1a1a2e; color: #ddd; border: 1px solid #555; font-family: monospace; font-size: 11px; padding: 2px;">
+            <option value="monospace">Monospace (Default)</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Press Start 2P">Press Start 2P</option>
+            <option value="Great Vibes">Great Vibes</option>
+            <option value="Bangers">Bangers</option>
+            <option value="Creepster">Creepster</option>
+            <option value="Lobster">Lobster</option>
+            <option value="Pacifico">Pacifico</option>
+            <option value="VT323">VT323</option>
+            <option value="Courier Prime">Courier Prime</option>
+            <option value="Comic Neue">Comic Neue</option>
+        </select>
+
+        <div id="controls-list"></div>
+    </div>
+</div>
+
+<style>
+    #controls-panel {
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        width: 380px;
+        max-height: 90vh;
+        background: rgba(10, 10, 20, 0.92);
+        color: #ddd;
+        font-family: monospace;
+        font-size: 11px;
+        border: 1px solid #333;
+        border-radius: 4px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+    #controls-header {
+        padding: 6px 10px;
+        background: #1a1a2e;
+        border-bottom: 1px solid #333;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: bold;
+    }
+    #toggle-panel {
+        background: #333;
+        color: #ddd;
+        border: 1px solid #555;
+        cursor: pointer;
+        font-size: 14px;
+        padding: 1px 8px;
+        border-radius: 2px;
+    }
+    #controls-body {
+        overflow-y: auto;
+        padding: 8px;
+    }
+    #controls-body.collapsed { display: none; }
+    #presets-row {
+        display: flex;
+        gap: 4px;
+        margin-bottom: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        padding-bottom: 8px;
+        border-bottom: 1px solid #333;
+    }
+    #presets-row label { color: #888; }
+    #preset-select {
+        flex: 1;
+        min-width: 100px;
+        background: #1a1a2e;
+        color: #ddd;
+        border: 1px solid #555;
+        font-family: monospace;
+        font-size: 11px;
+    }
+    #presets-row button {
+        background: #333;
+        color: #ddd;
+        border: 1px solid #555;
+        cursor: pointer;
+        font-family: monospace;
+        font-size: 11px;
+        padding: 2px 6px;
+        border-radius: 2px;
+    }
+    #presets-row button:hover { background: #444; }
+    .ctrl-row {
+        display: grid;
+        grid-template-columns: 130px 1fr 62px 30px;
+        gap: 4px;
+        align-items: center;
+        margin-bottom: 3px;
+    }
+    .ctrl-row label { color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .ctrl-row input[type=range] { width: 100%; }
+    .ctrl-row input[type=number] {
+        background: #1a1a2e;
+        color: #ddd;
+        border: 1px solid #555;
+        font-family: monospace;
+        font-size: 10px;
+        padding: 1px 3px;
+        width: 100%;
+        text-align: right;
+    }
+    .ctrl-row .reset-btn {
+        background: #333;
+        color: #888;
+        border: 1px solid #555;
+        cursor: pointer;
+        font-size: 10px;
+        padding: 0 4px;
+        border-radius: 2px;
+    }
+    .ctrl-row .reset-btn:hover { color: #fff; background: #444; }
+</style>
+
+<!-- <script src='shader_logo_smoosh.js'></script> -->
+<script src="shader_script.js"></script>
