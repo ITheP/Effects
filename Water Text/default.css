@@ -458,3 +458,10 @@ button:hover {
     font-size: 11px;
     padding: 2px;
 }
+
+.ctrl-group-body {
+    display: contents;
+}
+.ctrl-group-body.collapsed > * {
+    display: none !important;
+}

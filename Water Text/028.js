@@ -397,7 +397,7 @@ var CONTROLS = [
                 details: "Strength of the normal mapping from surface gradients — how 'bumpy' the water looks."
             },
             {
-                icon: "🔍", key: "refractionStrength", def: 0.051, min: 0.0, max: 0.5, step: 0.001,
+                icon: "🔍", key: "refractionStrength", def: 0.051, min: -10.0, max: 10.0, step: 0.01,
                 label: "Refraction",
                 details: "How much the surface refracts the riverbed beneath it."
             },
@@ -588,6 +588,16 @@ var CONTROLS = [
                 label: "Bed Depth Scale",
                 details: "World-space depth of the riverbed plane for ray-traced caustics. Higher = more parallax/depth, lower = shallower."
             },
+            {
+                icon: "🔍", key: "causticScale", def: 1.0, min: 0.1, max: 4.0, step: 0.01,
+                label: "Caustic Scale",
+                details: "Size of caustic features. 1.0 = natural, lower = finer/denser, higher = chunkier."
+            },
+            {
+                icon: "🌊", key: "oceanCausticGain", def: 1.0, min: -2.0, max: 2.0, step: 0.1,
+                label: "Ocean Caustic Gain",
+                details: "Amplifies the ocean-derived caustic contribution. Higher = brighter ocean caustics on the bed."
+            }
         ]
     },
     {
@@ -952,6 +962,146 @@ var PRESETS = [
         "causticRGBScale": 0,
         "causticRGBAngle": -6.28,
         "bedDepthScale": 13.9,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 50,
+        "specularStrength": 0.141,
+        "fresnelPower": 0.67,
+        "skyHorizonR": 0.576,
+        "skyHorizonG": 0.424,
+        "skyHorizonB": 0.394,
+        "skyZenithR": 0.545,
+        "skyZenithG": 0.323,
+        "skyZenithB": 0.293
+    }
+},
+{
+    "name": "Preset 22",
+    "iteration": 22,
+    "values": {
+        "timeScale": 1.2,
+        "rainRate": 2.0,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": -0.2,
+        "rippleDriftY": -0.1,
+        "dropFallSpeed": 10.3,
+        "dropFallHeight": 10,
+        "dropSize": 0.0059,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "letterSpacing": 0.37,
+        "letterSpeed": 0.01,
+        "letterStrength": 0.116,
+        "letterSize": 0.257,
+        "letterYOffset": 0.15,
+        "letterWavelength": 0.0212,
+        "oceanWindSpeed": 4.5,
+        "oceanWindAngle": -0.2,
+        "oceanWaveScale": 1.53,
+        "oceanHeightAmp": 0.03,
+        "oceanChop": -1.5,
+        "oceanSmallWaveCut": 0.6,
+        "oceanDirectionSpread": 0.69,
+        "oceanDetail": 1.57,
+        "oceanFoamThreshold": 0.67,
+        "oceanFoamStrength": 0.71,
+        "cameraHeight": 2.4,
+        "surfaceTilt": 0.33,
+        "waterDepth": 0,
+        "absorption": 0,
+        "surfaceDepth": 0.727,
+        "refractionStrength": 0.5,
+        "waterColorR": 0.253,
+        "waterColorG": 0.293,
+        "waterColorB": 0.364,
+        "waterDeepR": 0.202,
+        "waterDeepG": 0.242,
+        "waterDeepB": 0.354,
+        "bgImageIndex": 6,
+        "envMapStrength": 0.55,
+        "envMapZoom": 1.3,
+        "envMapPanY": 0.6,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 8,
+        "bedImageSeamless": 9,
+        "causticStrength": 2,
+        "simCausticStrength": 0.46,
+        "causticRGBScale": 0,
+        "causticRGBAngle": -6.28,
+        "bedDepthScale": 11.1,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 50,
+        "specularStrength": 0.141,
+        "fresnelPower": 0.67,
+        "skyHorizonR": 0.576,
+        "skyHorizonG": 0.424,
+        "skyHorizonB": 0.394,
+        "skyZenithR": 0.545,
+        "skyZenithG": 0.323,
+        "skyZenithB": 0.293
+    }
+},
+{
+    "name": "Preset 23",
+    "iteration": 23,
+    "values": {
+        "timeScale": 1.2,
+        "rainRate": 2,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": -0.2,
+        "rippleDriftY": -0.1,
+        "dropFallSpeed": 10.3,
+        "dropFallHeight": 10,
+        "dropSize": 0.0059,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "letterSpacing": 0.37,
+        "letterSpeed": 0.01,
+        "letterStrength": 0.116,
+        "letterSize": 0.257,
+        "letterYOffset": 0.15,
+        "letterWavelength": 0.0212,
+        "oceanWindSpeed": 4.5,
+        "oceanWindAngle": -0.2,
+        "oceanWaveScale": 1.53,
+        "oceanHeightAmp": 0.03,
+        "oceanChop": -1.5,
+        "oceanSmallWaveCut": 0.6,
+        "oceanDirectionSpread": 0.69,
+        "oceanDetail": 1.57,
+        "oceanFoamThreshold": 0.67,
+        "oceanFoamStrength": 0.71,
+        "cameraHeight": 2.4,
+        "surfaceTilt": 0.33,
+        "waterDepth": 0,
+        "absorption": 0,
+        "surfaceDepth": 0.727,
+        "refractionStrength": 0.5,
+        "waterColorR": 0.253,
+        "waterColorG": 0.293,
+        "waterColorB": 0.364,
+        "waterDeepR": 0.202,
+        "waterDeepG": 0.242,
+        "waterDeepB": 0.354,
+        "bgImageIndex": 6,
+        "envMapStrength": 0.55,
+        "envMapZoom": 1.3,
+        "envMapPanY": 0.6,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 8,
+        "bedImageSeamless": 9,
+        "causticStrength": 2,
+        "simCausticStrength": 0.03,
+        "causticRGBScale": 0,
+        "causticRGBAngle": -6.28,
+        "bedDepthScale": 11.1,
         "sunAngle": 1.47,
         "sunHeight": 1.224,
         "specularPower": 50,
@@ -1796,8 +1946,8 @@ function buildSphereMesh(gl, segments) {
 // SHADERS
 // =====================================================================
 
-var FFT_SIZE = 256;
-var FFT_LOG2_SIZE = 8;
+var FFT_SIZE = 512;
+var FFT_LOG2_SIZE = 9;
 
 var VERTEX_SHADER = `#version 300 es
     precision highp float;
@@ -1815,6 +1965,7 @@ var VERTEX_SHADER = `#version 300 es
     uniform sampler2D oceanTex;
     uniform vec2  oceanTexSize;
     uniform float oceanPatchSize;
+uniform sampler2D oceanLaplacianTex; // packed laplacian
 
     uniform float letterRippleSpeed;
     uniform vec2  rippleDrift;
@@ -2040,18 +2191,23 @@ function buildFragmentSource() {
         uniform float debugSim;
         uniform float foamThreshold, foamStrength;
 
-        uniform sampler2D simTexture;
-        uniform vec2 simDrift;
-        uniform float simRes;
-        uniform float causticStrength;
-        uniform float simCausticStrength;
-        uniform float causticRGBScale;
-        uniform float causticRGBAngle;
-        uniform float causticRGBAffectedBySurface;
-        uniform float rgbSplit;
-        uniform float rgbAngle;
+ uniform sampler2D simTexture;
+uniform vec2 simDrift;
+uniform float simRes;
+uniform float causticStrength;
+uniform float simCausticStrength;
+uniform float causticScale;
+uniform float oceanCausticGain;          // ← add here
+uniform sampler2D oceanLaplacianTex;      // ← add here (if not already added)
+uniform float causticRGBScale;
+uniform float causticRGBAngle;
+uniform float causticRGBAffectedBySurface;
+uniform float rgbSplit;
+uniform float rgbAngle;
 
         uniform float bedDepthScale;
+        uniform float oceanPatchSize;
+        uniform sampler2D oceanTex;
 
         uniform sampler2D bedTextureA, bedTextureB;
         uniform float bedBlend;
@@ -2102,48 +2258,36 @@ function buildFragmentSource() {
             return proc * 3.0;
         }
 
-        // Trace the refracted view ray down to an implicit bed plane at z = -bedDepth,
-        // and return the UV where it hits, plus a mask (1 = hit inside the bed, 0 = missed).
-vec3 traceToBed(vec3 worldPos, vec3 V, vec3 N, out vec2 bedUV) {
-    // Project view direction onto the water plane (xy)
-    vec2 viewXY = V.xy;  // V points from surface toward camera, so -V is view
-    // Parallax offset proportional to depth and view angle
-    vec2 offset = -viewXY * (waterDepth * bedDepthScale / max(cameraHeight, 0.1));
-    bedUV = worldPos.xy / 4.0 + 0.5 + offset;
-    // Mask: bed must be in front of the camera and inside the UV range
-    float inFront = 1.0;  // always for near-overhead view
-    float inU = step(0.0, bedUV.x) * step(bedUV.x, 1.0);
-    float inV = step(0.0, bedUV.y) * step(bedUV.y, 1.0);
-    return vec3(bedUV, inFront * inU * inV);
+        // Sample the sim texture's Laplacian at a UV.
+float simLaplacianAt(vec2 uv) {
+    vec2 texel = (1.0 / vec2(simRes)) * 2.5;
+    float l = texture(simTexture, uv - vec2(texel.x, 0.0)).r;
+    float r = texture(simTexture, uv + vec2(texel.x, 0.0)).r;
+    float d = texture(simTexture, uv - vec2(0.0, texel.y)).r;
+    float u = texture(simTexture, uv + vec2(0.0, texel.y)).r;
+    float c = texture(simTexture, uv).r;
+    return ((l + r + d + u) - 4.0 * c) / (2.5 * 2.5);
 }
 
-        // Sample the sim texture's Laplacian at a UV.
-        float simLaplacianAt(vec2 uv) {
-            vec2 texel = 1.0 / vec2(simRes);
-            float l = texture(simTexture, uv - vec2(texel.x, 0.0)).r;
-            float r = texture(simTexture, uv + vec2(texel.x, 0.0)).r;
-            float d = texture(simTexture, uv - vec2(0.0, texel.y)).r;
-            float u = texture(simTexture, uv + vec2(0.0, texel.y)).r;
-            float c = texture(simTexture, uv).r;
-            return (l + r + d + u) - 4.0 * c;
-        }
+        // Rain-only caustic contribution (signed). Ocean contribution is sampled
+        // separately from fftOutputTex so it also responds to causticScale.
+float simCausticOnly(float simLaplacian) {
+    float c = clamp(-simLaplacian * 500.0, -1.0, 1.0);
+    c = sign(c) * pow(abs(c), 4.0);
+    return c;
+}
 
-        // Combine ocean (FFT Jacobian) and rain (sim Laplacian) caustics,
-        // then attenuate by depth. Signed: zero where flat, positive = bright,
-        // negative = dark.
-        float causticFromLaplacian(float simLaplacian) {
-            float oceanCaustic = v_foam;
-            float simCaustic = clamp(-simLaplacian * 500.0, -1.0, 1.0);
-            float caustic = oceanCaustic + simCaustic * simCausticStrength;
-            float depthFactor = exp(-absorption * waterDepth * 2.0);
-            return caustic * depthFactor;
-        }
+       //## float simCausticOnly(float simLaplacian) {
+       //##     return clamp(-simLaplacian * 500.0, -1.0, 1.0);
+        //##}
 
-        // Caustic on the riverbed only. Bed UV and mask come from the ray trace,
-        // so the caustic is anchored to the bed rather than the screen.
+        // Caustic on the riverbed only. Bed UV comes from the parallax +
+        // refraction pipeline; caustic contribution is computed in main()
+        // by combining a sampled ocean term with the rain Laplacian term.
 vec3 shadeChannel(vec3 N, vec3 L, vec3 V, vec3 H, vec3 waterBody, vec2 bedUV, float caustic) {
     vec3 sand = sandAt(bedUV + N.xy * refractionStrength);
-    sand *= 1.0 + causticStrength * caustic;
+    float denom = max(1.0 - causticStrength * caustic, 0.15);
+    sand /= denom;
     float depthWeight = (1.0 - clamp(waterDepth, 0.0, 1.0)) * exp(-absorption * 0.5);
     vec3 underCol = mix(waterBody, sand, depthWeight);
     float cosV = clamp(dot(N, V), 0.02, 1.0);
@@ -2159,43 +2303,51 @@ vec3 shadeChannel(vec3 N, vec3 L, vec3 V, vec3 H, vec3 waterBody, vec2 bedUV, fl
                 fragColor = vec4(max(-(s.r - 0.5) * 2.0, 0.0), max((s.r - 0.5) * 2.0, 0.0), abs(s.g - 0.5) * 2.0, 1.0);
                 return;
             }
-vec3 L = normalize(sunDir);
-vec3 V = normalize(vec3(0.0, 0.0, cameraHeight) - v_worldPos);
-vec3 H = normalize(L + V);
-vec3 waterBody = mix(waterDeep, waterColor, smoothstep(-0.015, 0.015, v_height));
+            vec3 L = normalize(sunDir);
+            vec3 V = normalize(vec3(0.0, 0.0, cameraHeight) - v_worldPos);
+            vec3 H = normalize(L + V);
+            vec3 waterBody = mix(waterDeep, waterColor, smoothstep(-0.015, 0.015, v_height));
 
-// Bed: parallax only (retains relative size), refraction applied per-channel in shadeChannel.
-vec2 parallax = -V.xy * bedDepthScale * 0.1;
-vec2 bedUV = v_uv + parallax;
+            // Bed: parallax only (retains relative size), refraction applied per-channel in shadeChannel.
+            vec2 parallax = -V.xy * bedDepthScale * 0.1;
+            vec2 bedUV = v_uv + parallax;
 
-// Caustic: same bed anchor, plus green-channel refraction, then depth-scaled finer.
-vec2 refractedBedUV = bedUV + normalize(v_normal_g).xy * refractionStrength;
-float causticScale = 1.0 / (1.0 + waterDepth * 2.0);
-vec2 causticUV = (refractedBedUV - 0.5) * causticScale + 0.5 + simDrift;
+            // Caustic: same bed anchor, plus green-channel refraction, then scaled by causticScale.
+            vec2 refractedBedUV = bedUV + normalize(v_normal_g).xy * refractionStrength;
+            vec2 causticUV = (refractedBedUV - 0.5) * causticScale + 0.5 + simDrift;
 
-vec2 causticDir = vec2(cos(causticRGBAngle), sin(causticRGBAngle)) * causticRGBScale;
-vec2 surfDir = vec2(cos(rgbAngle), sin(rgbAngle)) * rgbSplit;
-vec2 combinedDir = causticRGBAffectedBySurface > 0.5
-    ? surfDir + causticDir
-    : causticDir;
+            vec2 causticDir = vec2(cos(causticRGBAngle), sin(causticRGBAngle)) * causticRGBScale;
+            vec2 surfDir = vec2(cos(rgbAngle), sin(rgbAngle)) * rgbSplit;
+            vec2 combinedDir = causticRGBAffectedBySurface > 0.5
+                ? surfDir + causticDir
+                : causticDir;
 
-vec2 offR =  combinedDir;
-vec2 offG =  vec2(0.0);
-vec2 offB = -combinedDir;
+            vec2 offR =  combinedDir;
+            vec2 offG =  vec2(0.0);
+            vec2 offB = -combinedDir;
 
-float causticR = 0.0, causticG = 0.0, causticB = 0.0;
+            float causticR = 0.0, causticG = 0.0, causticB = 0.0;
 
 if (causticStrength > 0.001) {
-    causticR = causticFromLaplacian(simLaplacianAt(causticUV + offR));
-    causticG = causticFromLaplacian(simLaplacianAt(causticUV + offG));
-    causticB = causticFromLaplacian(simLaplacianAt(causticUV + offB));
+    // Sample precomputed Laplacian from the FFT output (packed signed into [0,1]).
+    // Unpack: packed in [0,1] -> signed in [-0.5, 0.5] -> scaled by 2 -> [-1, 1].
+    vec2 oceanWorldXZ = (causticUV - simDrift - 0.5) * 4.0;
+    vec2 oceanUV = fract(oceanWorldXZ / oceanPatchSize);
+    float oceanPacked = texture(oceanLaplacianTex, oceanUV).r;
+    float oceanCaustic = clamp((oceanPacked - 0.5) * 2.0 * oceanCausticGain, -1.0, 1.0);
+
+    float depthFactor = exp(-absorption * waterDepth * 2.0);
+
+    causticR = (oceanCaustic + simCausticOnly(simLaplacianAt(causticUV + offR)) * simCausticStrength) * depthFactor;
+    causticG = (oceanCaustic + simCausticOnly(simLaplacianAt(causticUV + offG)) * simCausticStrength) * depthFactor;
+    causticB = (oceanCaustic + simCausticOnly(simLaplacianAt(causticUV + offB)) * simCausticStrength) * depthFactor;
 }
 
-vec3 color = vec3(
-    shadeChannel(normalize(v_normal_r), L, V, H, waterBody, bedUV, causticR).r,
-    shadeChannel(normalize(v_normal_g), L, V, H, waterBody, bedUV, causticG).g,
-    shadeChannel(normalize(v_normal_b), L, V, H, waterBody, bedUV, causticB).b
-);
+            vec3 color = vec3(
+                shadeChannel(normalize(v_normal_r), L, V, H, waterBody, bedUV, causticR).r,
+                shadeChannel(normalize(v_normal_g), L, V, H, waterBody, bedUV, causticG).g,
+                shadeChannel(normalize(v_normal_b), L, V, H, waterBody, bedUV, causticB).b
+            );
 
             float d = distance(v_uv, vec2(0.5));
             float vig = smoothstep(vignetteRadius, vignetteRadius + vignetteSoftness, d);
@@ -2226,6 +2378,7 @@ var COPY_FRAGMENT_SHADER = `#version 300 es
     uniform sampler2D tex;
     uniform vec2  invRes;
     uniform float fxaaStrength;
+    uniform float causticScale;
 
     float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
 
@@ -2560,9 +2713,9 @@ var SPECTRUM_FRAGMENT_SHADER = `#version 300 es
         float w = dot(khat, what);
         float expo = mix(16.0, 1.0, directionSpread);
         float directional = pow(max(w, 0.0), expo);
-        // ## float w = dot(khat, what);
-        // ## float expo = mix(16.0, 1.0, directionSpread);
-        // ## float directional = pow(abs(w), expo);
+        //## float w = dot(khat, what);
+        //## float expo = mix(16.0, 1.0, directionSpread);
+        //## float directional = pow(abs(w), expo);
 
         // Classic 1/k^4, with a gentle artistic tilt from waveScale
         float power = 4.0 + (waveScale - 1.0) * 2.0;
@@ -2609,7 +2762,7 @@ var SPECTRUM_FRAGMENT_SHADER = `#version 300 es
 
         // Two independent uniforms from the canonical index
         vec2 uv = hash22(vec2(float(cx), float(cy)));
-        // ## vec2 uv = hash22(vec2(float(pix.x) + 0.5, float(pix.y) + 0.5));
+        //## vec2 uv = hash22(vec2(float(pix.x) + 0.5, float(pix.y) + 0.5));
 
         float u1 = max(uv.x, 1e-6);
         float u2 = uv.y;
@@ -2627,12 +2780,12 @@ var SPECTRUM_FRAGMENT_SHADER = `#version 300 es
          } else if (isNegativeHalf) {
              h0 = vec2(h0.x, -h0.y);         // conjugate of the positive side
          }
-        // ## bool isDC      = (pix.x == 0 && pix.y == 0);
-        // ## bool isNyqX    = (pix.x == Nhalf);
-        // ## bool isNyqY    = (pix.y == Nhalf);
-        // ## if (isDC || isNyqX || isNyqY) {
-        // ##     h0.y = 0.0;
-        // ## }
+        //## bool isDC      = (pix.x == 0 && pix.y == 0);
+        //## bool isNyqX    = (pix.x == Nhalf);
+        //## bool isNyqY    = (pix.y == Nhalf);
+        //## if (isDC || isNyqX || isNyqY) {
+        //##     h0.y = 0.0;
+        //## }
 
         fragColor = vec4(h0, 0.0, 1.0);
     }
@@ -2762,7 +2915,8 @@ var FFT_VERTICAL_SHADER = `#version 300 es
 
 var FFT_OUTPUT_SHADER = `#version 300 es
     precision highp float;
-    out vec4 fragColor;
+    layout(location = 0) out vec4 fragColor;   // h, chop.x, chop.y, foam
+    layout(location = 1) out vec4 fragLap;     // laplacian (in .r), rest unused
 
     uniform sampler2D fftResult;
     uniform int   N;
@@ -2782,7 +2936,6 @@ var FFT_OUTPUT_SHADER = `#version 300 es
     void main() {
         ivec2 pix = ivec2(gl_FragCoord.xy);
 
-        // bits = log2(N) – works for any power-of-two size
         int bits = 0;
         int tmp = N;
         while (tmp > 1) { bits++; tmp >>= 1; }
@@ -2792,7 +2945,6 @@ var FFT_OUTPUT_SHADER = `#version 300 es
         int pyD = (pix.y > 0)     ? pix.y - 1 : N - 1;
         int pyU = (pix.y < N - 1) ? pix.y + 1 : 0;
 
-        // Diagonal neighbours for mixed derivative
         int pxLD = pxL, pyLD = pyD;
         int pxLU = pxL, pyLU = pyU;
         int pxRD = pxR, pyRD = pyD;
@@ -2822,28 +2974,28 @@ var FFT_OUTPUT_SHADER = `#version 300 es
         float texelWorld = patchSize / float(N);
         float invTexel   = 1.0 / texelWorld;
 
-        // First derivatives
         float dHdx = (hR - hL) * 0.5 * invTexel;
         float dHdy = (hU - hD) * 0.5 * invTexel;
 
-        // Second derivatives
         float d2Hdx2 = (hR - 2.0*h + hL) * invTexel * invTexel;
         float d2Hdy2 = (hU - 2.0*h + hD) * invTexel * invTexel;
-        // Mixed derivative (central)
         float d2Hdxdy = (hRU - hRD - hLU + hLD) * 0.25 * invTexel * invTexel;
 
-        // Spatial-derivative approximation of Tessendorf chop
         vec2 chop = vec2(dHdx, dHdy) * choppiness;
 
-        // Full 2×2 Jacobian of the map x → x + D(x)
         float jxx = 1.0 + choppiness * d2Hdx2;
         float jyy = 1.0 + choppiness * d2Hdy2;
         float jxy =     + choppiness * d2Hdxdy;
         float jacobian = jxx * jyy - jxy * jxy;
 
         float foam = clamp(1.0 - jacobian, 0.0, 1.0);
-
         fragColor = vec4(h, chop.x, chop.y, foam);
+
+        // Laplacian of the height field. Signed: negative = concave = converging = bright.
+        // Pack signed value into [0,1] so it survives RGBA8/16F/32F quantisation.
+        float laplacian = d2Hdx2 + d2Hdy2;
+        float packed = clamp(-laplacian * 0.5 + 0.5, 0.0, 1.0);
+        fragLap = vec4(packed, 0.0, 0.0, 1.0);
     }
 `;
 
@@ -3194,36 +3346,38 @@ function main() {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxArr, gl.STATIC_DRAW);
         indexCount = idxArr.length;
+
+        rebuildWaterVAO();   // ← new line: VAO must re-point at the new buffers
     }
     meshRebuildFn = buildMesh;
 
-    function cacheUniforms() {
-        timeLocation = gl.getUniformLocation(program, "time");
-        var names = [
-            "simTexture", "simDrift",
-            "oceanTex", "oceanTexSize", "oceanPatchSize",
-            "letterRippleSpeed", "rippleDrift",
-            "letterAtlas", "letterSpread", "letterSize", "letterStrengthGlobal", "letterCount",
-            "letterRipples[0]", "letterRippleParams[0]", "letterRippleV[0]",
-            "letterSpeed", "letterWavelength", "letterThickness",
-            "rgbSplit", "rgbAngle", "surfaceDepth", "surfaceTilt", "perspectiveStrength", "cameraHeight",
-            "waterColor", "waterDeep", "skyHorizon", "skyZenith", "sunDir",
-            "specularPower", "specularStrength", "fresnelPower",
-            "vignetteRadius", "vignetteSoftness",
-            "waterDepth", "absorption", "sandScale", "sandContrast", "sandColor", "refractionStrength",
-            "envMapA", "envMapB", "envMapBlend",
-            "envMapStrength", "envMapZoom", "envMapPan", "simDebugTex", "debugSim",
-            "bedTextureA", "bedTextureB", "bedBlend", "bedImageEnabled", "bedImageTile",
-            "foamThreshold", "foamStrength",
-            "simRes",
-            "causticStrength", "simCausticStrength",
-            "causticRGBScale", "causticRGBAngle", "causticRGBAffectedBySurface", "bedDepthScale"
-        ];
-        names.forEach(function (n) {
-            var key = n.replace(/\[0\]$/, "");
-            u[key] = gl.getUniformLocation(program, n);
-        });
-    }
+function cacheUniforms() {
+    timeLocation = gl.getUniformLocation(program, "time");
+    var names = [
+        "simTexture", "simDrift",
+        "oceanTex", "oceanTexSize", "oceanPatchSize",
+        "letterRippleSpeed", "rippleDrift",
+        "letterAtlas", "letterSpread", "letterSize", "letterStrengthGlobal", "letterCount",
+        "letterRipples[0]", "letterRippleParams[0]", "letterRippleV[0]",
+        "letterSpeed", "letterWavelength", "letterThickness",
+        "rgbSplit", "rgbAngle", "surfaceDepth", "surfaceTilt", "perspectiveStrength", "cameraHeight",
+        "waterColor", "waterDeep", "skyHorizon", "skyZenith", "sunDir",
+        "specularPower", "specularStrength", "fresnelPower",
+        "vignetteRadius", "vignetteSoftness",
+        "waterDepth", "absorption", "sandScale", "sandContrast", "sandColor", "refractionStrength",
+        "envMapA", "envMapB", "envMapBlend",
+        "envMapStrength", "envMapZoom", "envMapPan", "simDebugTex", "debugSim",
+        "bedTextureA", "bedTextureB", "bedBlend", "bedImageEnabled", "bedImageTile",
+        "foamThreshold", "foamStrength",
+        "simRes",
+        "causticStrength", "simCausticStrength", "causticScale","oceanLaplacianTex", "oceanCausticGain",
+        "causticRGBScale", "causticRGBAngle", "causticRGBAffectedBySurface", "bedDepthScale"
+    ];
+    names.forEach(function (n) {
+        var key = n.replace(/\[0\]$/, "");
+        u[key] = gl.getUniformLocation(program, n);
+    });
+}
 
     sdfAtlas = buildSDFAtlas(gl);
 
@@ -3394,8 +3548,22 @@ function main() {
     var fftPingFBO = [makeFFTFBO(fftPingTex[0]), makeFFTFBO(fftPingTex[1])];
 
     // Output texture is sampled at fractional UVs by the water vertex shader — LINEAR.
-    var fftOutputTex = makeFFTTexture(fftInternalFormat, gl.RGBA, fftType, true);
-    var fftOutputFBO = makeFFTFBO(fftOutputTex);
+// FFT output texture (height/chop/foam) — sampled with LINEAR by the water shader.
+var fftOutputTex = makeFFTTexture(fftInternalFormat, gl.RGBA, fftType, true);
+// Second FFT output (Laplacian) — packed signed into [0,1], sampled LINEAR at bed UVs.
+var fftLaplacianTex = makeFFTTexture(fftInternalFormat, gl.RGBA, fftType, true);
+
+// Combined FBO with two color attachments.
+var fftOutputFBO = gl.createFramebuffer();
+gl.bindFramebuffer(gl.FRAMEBUFFER, fftOutputFBO);
+gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fftOutputTex, 0);
+gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, fftLaplacianTex, 0);
+gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
+var fboStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+if (fboStatus !== gl.FRAMEBUFFER_COMPLETE) {
+    console.error("FFT output MRT FBO incomplete:", fboStatus);
+}
+gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
     function buildFFTProgram(fragSource) {
         var prog = gl.createProgram();
@@ -3554,6 +3722,7 @@ function main() {
 
         // Pass 4: output — derive height, chop, foam from FFT result
         gl.bindFramebuffer(gl.FRAMEBUFFER, fftOutputFBO);
+gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
         gl.useProgram(fftOutProgram);
         gl.uniform1i(fftU.out_N, fftSize);
         gl.uniform1f(fftU.out_choppiness, state.oceanChop);
@@ -3589,6 +3758,8 @@ function main() {
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
         gl.bindVertexArray(null);
     }
+
+    rebuildWaterVAO();
 
     function rebuildDropVAO() {
         gl.bindVertexArray(dropVAO);
@@ -4033,14 +4204,15 @@ function main() {
             if (u.letterSpread) gl.uniform1f(u.letterSpread, sdfAtlas.spread / sdfAtlas.cellSize);
             if (u.letterStrengthGlobal) gl.uniform1f(u.letterStrengthGlobal, state.letterStrength);
 
-            if (u.simRes) gl.uniform1f(u.simRes, simRes);
-            if (u.causticStrength) gl.uniform1f(u.causticStrength, state.causticStrength);
-            if (u.simCausticStrength) gl.uniform1f(u.simCausticStrength, state.simCausticStrength);
-            if (u.causticRGBScale) gl.uniform1f(u.causticRGBScale, state.causticRGBScale);
-            if (u.causticRGBAngle) gl.uniform1f(u.causticRGBAngle, state.causticRGBAngle);
-            if (u.causticRGBAffectedBySurface) gl.uniform1f(u.causticRGBAffectedBySurface, state.causticRGBAffectedBySurface);
+if (u.simRes) gl.uniform1f(u.simRes, simRes);
+if (u.causticStrength) gl.uniform1f(u.causticStrength, state.causticStrength);
+if (u.simCausticStrength) gl.uniform1f(u.simCausticStrength, state.simCausticStrength);
+if (u.causticScale) gl.uniform1f(u.causticScale, state.causticScale);
+if (u.causticRGBScale) gl.uniform1f(u.causticRGBScale, state.causticRGBScale);
+if (u.causticRGBAngle) gl.uniform1f(u.causticRGBAngle, state.causticRGBAngle);
+if (u.causticRGBAffectedBySurface) gl.uniform1f(u.causticRGBAffectedBySurface, state.causticRGBAffectedBySurface);
 if (u.bedDepthScale) gl.uniform1f(u.bedDepthScale, state.bedDepthScale);
-            gl.uniform2f(u.rippleDrift, state.rippleDriftX, state.rippleDriftY);
+gl.uniform2f(u.rippleDrift, state.rippleDriftX, state.rippleDriftY);
 
             var lArr = lArrScratch;
             var lParamArr = lParamArrScratch;
@@ -4077,6 +4249,11 @@ if (u.bedDepthScale) gl.uniform1f(u.bedDepthScale, state.bedDepthScale);
             gl.activeTexture(gl.TEXTURE6);
             gl.bindTexture(gl.TEXTURE_2D, fftOutputTex);
             if (u.oceanTex) gl.uniform1i(u.oceanTex, 6);
+
+gl.activeTexture(gl.TEXTURE7);
+gl.bindTexture(gl.TEXTURE_2D, fftLaplacianTex);
+if (u.oceanLaplacianTex) gl.uniform1i(u.oceanLaplacianTex, 7);
+if (u.oceanCausticGain) gl.uniform1f(u.oceanCausticGain, state.oceanCausticGain);
 
             gl.activeTexture(gl.TEXTURE2);
             gl.bindTexture(gl.TEXTURE_2D, sdfAtlas.texture);
@@ -4217,6 +4394,7 @@ if (u.bedDepthScale) gl.uniform1f(u.bedDepthScale, state.bedDepthScale);
 
             gl.useProgram(program);
 
+            gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D, null);
             gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D, null);
             gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, null);
             gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D, null);
