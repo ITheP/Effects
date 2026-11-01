@@ -1,0 +1,6140 @@
+// =====================================================================
+// SCALE OPTIONS
+// =====================================================================
+
+var SCALE_OPTIONS = [
+    { label: "256 x 256", w: 256, h: 256 },
+    { label: "512 x 256", w: 512, h: 256 },
+    { label: "512 x 512", w: 512, h: 512 },
+    { label: "1024 x 512", w: 1024, h: 512 },
+    { label: "1024 x 1024", w: 1024, h: 1024 },
+    { label: "2048 x 1024", w: 2048, h: 1024 }
+];
+
+// =====================================================================
+// CONTROL DECLARATIONS
+// =====================================================================
+
+var CONTROLS = [
+    {
+        heading: "⚙️ Global Settings", showExtras: false, openByDefault: true, controls: [
+            {
+                icon: "🔲", key: "gridResolution", def: 1024, min: 48, max: 2048, step: 16, int: true, savedInPreset: false, canRandomise: false,
+                label: "Grid Resolution",
+                details: "Resolution of the water surface mesh. Higher = smoother waves, but slower."
+            },
+            {
+                icon: "🪞", key: "fxaaStrength", def: 1.0, min: 0.0, max: 1.0, step: 0.01, savedInPreset: false,
+                label: "FXAA Strength",
+                details: "Anti-aliasing blend amount applied to the final image (0 = off, 1 = full)."
+            },
+            {
+                icon: "🎞️", key: "presetTransitionTime", def: 2.0, min: 0, max: 5, step: 0.01, savedInPreset: false,
+                label: "Preset Transition",
+                details: "Seconds over which to smoothly blend between presets (0 = instant)."
+            }
+        ]
+    },
+    {
+        heading: "⚙️ General Settings", openByDefault: true, controls: [
+            {
+                icon: "⏱️", key: "timeScale", def: 2, min: -1.0, max: 10.0, step: 0.1,
+                label: "Time Scale",
+                details: "Global multiplier on simulated time — speeds up or slows down every animated effect."
+            },
+            {
+                icon: "🌧️", key: "rainRate", def: 200, min: 0.0, max: 200.0, step: 0.1,
+                label: "Rain Rate",
+                details: "Number of raindrops spawned per second."
+            },
+            {
+                icon: "⭕", key: "vignetteRadius", def: 0.683, min: 0.0, max: 1.5, step: 0.001,
+                label: "Vignette Radius",
+                details: "Distance from centre where darkening begins."
+            },
+            {
+                icon: "🌫️", key: "vignetteSoftness", def: 0.38, min: 0.0, max: 1.0, step: 0.01,
+                label: "Vignette Softness",
+                details: "How gradually the vignette darkening fades out."
+            }
+        ]
+    },
+    {
+        heading: "🎥 Camera Settings", controls: [
+            {
+                icon: "📐", key: "cameraHeight", def: 3.27, min: 0.0, max: 40.0, step: 0.1,
+                label: "Camera Height",
+                details: "Height of the camera above the water surface."
+            },
+            {
+                icon: "📐", key: "surfaceTilt", def: 0.62, min: -1.0, max: 1.0, step: 0.01,
+                label: "Surface Tilt",
+                details: "Pitch of the water plane relative to the camera view."
+            },
+            {
+                icon: "👁️", key: "perspectiveStrength", def: 0.66, min: -1.0, max: 2.0, step: 0.01,
+                label: "Perspective Strength",
+                details: "Blends between orthographic (0) and strong perspective (1+) projection."
+            },
+            {
+                icon: "↔️", key: "cameraOffsetX", def: 0.0, min: -2.0, max: 2.0, step: 0.001,
+                label: "Camera Offset X",
+                details: "Horizontal shift of the camera view. Positive moves the scene right."
+            },
+            {
+                icon: "↕️", key: "cameraOffsetY", def: 0.0, min: -2.0, max: 2.0, step: 0.001,
+                label: "Camera Offset Y",
+                details: "Vertical shift of the camera view. Positive moves the scene down."
+            }
+        ]
+    },
+    {
+        heading: "🔧 Simulation", controls: [
+            {
+                icon: "🧵", key: "simTension", def: 0.455, min: 0.01, max: 0.5, step: 0.001,
+                label: "Sim Tension",
+                details: "Surface tension of the ripple simulation — higher pulls waves back faster."
+            },
+            {
+                icon: "🛑", key: "simDamping", def: 0.9636, min: 0.8, max: 0.9999, step: 0.0001,
+                label: "Sim Damping",
+                details: "Energy loss per step in the ripple sim — lower values calm the surface quicker."
+            },
+            {
+                icon: "🌊", key: "simQuadraticDrag", def: 0.0, min: 0.0, max: 20.0, step: 0.01,
+                label: "Non-linear Drag",
+                details: "Quadratic velocity damping — large impulses fade faster than small ones. 0 = pure linear (old behaviour)."
+            },
+            {
+                icon: "💥", key: "simRainImpulse", def: 0.08, min: 0.0, max: 2.0, step: 0.01,
+                label: "Global Impact",
+                details: "Global response of the water surface to a drop — scales every drop's kick."
+            },
+            {
+                icon: "🌀", key: "simSpringiness", def: 0.27, min: 0.0, max: 0.5, step: 0.001,
+                label: "Sim Springiness",
+                details: "Restoring force pulling the surface back to flat — adds bounciness."
+            },
+            {
+                icon: "🌊", key: "surfaceDepth", def: 0.529, min: 0.0, max: 2.0, step: 0.001,
+                label: "Surface Depth",
+                details: "Strength of the normal mapping from surface gradients — how 'bumpy' the water looks."
+            },
+            {
+                icon: "🐞", key: "debugSim", def: 0, min: 0.0, max: 1.0, step: 1.0, canRandomise: false,
+                label: "Debug Sim",
+                details: "Show the raw ripple simulation buffer instead of shaded water."
+            }
+        ]
+    },
+    {
+        heading: "💧 Drops", controls: [
+            {
+                icon: "⬇️", key: "dropFallSpeed", def: 0.5, min: 0.1, max: 20.0, step: 0.1,
+                label: "Fall Speed",
+                details: "Speed of raindrops falling toward the surface."
+            },
+            {
+                icon: "🎲", key: "dropFallSpeedVariance", def: 0.25, min: 0.0, max: 1.0, step: 0.01,
+                label: "Fall Speed Variance",
+                details: "Random spread applied to each raindrop's fall speed."
+            },
+            {
+                icon: "📏", key: "dropFallHeight", def: 1.25, min: 1.0, max: 25.0, step: 1.0,
+                label: "Fall Height",
+                details: "Distance raindrops fall from before hitting the water."
+            },
+            {
+                icon: "🔵", key: "dropSize", def: 0.0035, min: 0.001, max: 0.05, step: 0.0001,
+                label: "Drop Size",
+                details: "Visual radius of each falling raindrop sphere."
+            },
+            {
+                icon: "🎲", key: "dropSizeVariance", def: 0.35, min: 0.0, max: 5.0, step: 0.01,
+                label: "Size Variance",
+                details: "Random spread applied to each raindrop's visual size."
+            },
+            {
+                icon: "🔘", key: "sphereQuality", def: 16, min: 4, max: 64, step: 1, int: true,
+                label: "Sphere Quality",
+                details: "Tessellation of the raindrop sphere mesh — higher = rounder, slower."
+            }
+        ]
+    },
+    {
+        heading: "💦 Splashes", controls: [
+            {
+                icon: "🔢", key: "dropSplashCount", def: 2, min: 0, max: 8, step: 1, int: true,
+                label: "Splash Count",
+                details: "Maximum number of secondary droplets launched when a drop lands."
+            },
+            {
+                icon: "📏", key: "dropSplashHeightFactor", def: 0.18, min: 0.0, max: 0.5, step: 0.01,
+                label: "Splash Height",
+                details: "Apex height of splash droplets as a fraction of the parent drop's height."
+            },
+            {
+                icon: "💪", key: "dropSplashStrengthFactor", def: 0.25, min: 0.0, max: 1.0, step: 0.01,
+                label: "Splash Strength",
+                details: "How much of the parent drop's ripple amplitude the splash inherits."
+            },
+            {
+                icon: "🔵", key: "dropSplashSizeFactor", def: 0.35, min: 0.0, max: 1.0, step: 0.01,
+                label: "Splash Size",
+                details: "Visual size of splash droplets relative to the parent drop."
+            },
+            {
+                icon: "🌬️", key: "dropSplashDriftInheritance", def: 0.5, min: 0.0, max: 2.0, step: 0.01,
+                label: "Splash Drift",
+                details: "How much of the ripple drift velocity splash droplets inherit when launched."
+            }
+        ]
+    },
+    {
+        heading: "💧 Ripples", controls: [
+            {
+                icon: "📶", key: "rippleStrength", def: 1.0, min: 0.0, max: 1.0, step: 0.01,
+                label: "Ripple Strength",
+                details: "Per-drop base amplitude — how big a splash each raindrop makes."
+            },
+            {
+                icon: "🎲", key: "rippleStrengthVariance", def: 0.85, min: 0.0, max: 10.0, step: 0.01,
+                label: "Strength Variance",
+                details: "Random spread applied to each drop's amplitude around Ripple Strength."
+            },
+            {
+                icon: "🏎️", key: "rippleSpeed", def: 1.0, min: 0.0, max: 1.0, step: 0.01,
+                label: "Ripple Speed",
+                details: "Propagation speed of ripples — 1.0 is normal, lower is slower."
+            },
+            {
+                icon: "➡️", key: "rippleDriftX", def: -0.055, min: -1.0, max: 1.0, step: 0.1,
+                label: "Drift X",
+                details: "Horizontal drift velocity of the ripple field over time."
+            },
+            {
+                icon: "⬆️", key: "rippleDriftY", def: -0.05, min: -1.0, max: 1.0, step: 0.1,
+                label: "Drift Y",
+                details: "Vertical drift velocity of the ripple field over time."
+            },
+            {
+                icon: "🔘", key: "simDropRadius", def: 0.010, min: 0.001, max: 0.1, step: 0.001,
+                label: "Drop Radius",
+                details: "Radius of the impulse applied to the ripple simulation when a drop lands."
+            },
+            {
+                icon: "⚫", key: "simDropCore", def: 0.28, min: 0.01, max: 0.99, step: 0.01,
+                label: "Drop Core",
+                details: "Softness of the drop impulse falloff — lower = sharper peak."
+            }
+        ]
+    },
+    {
+        heading: "🔤 Letter Handling", controls: [
+            {
+                icon: "⏱️", key: "letterRate", def: 9.09, min: 0.0, max: 20.0, step: 0.01,
+                label: "Letter Rate",
+                details: "Number of letters typed per second."
+            },
+            {
+                icon: "⏸️", key: "letterLineDelay", def: 1.3, min: 0.5, max: 10.0, step: 0.1,
+                label: "Line Delay",
+                details: "Pause in seconds between finishing one line of text and starting the next."
+            },
+            {
+                icon: "↔️", key: "letterSpacing", def: 0.48, min: 0.1, max: 2.0, step: 0.01,
+                label: "Letter Spacing",
+                details: "Horizontal gap between letters, relative to letter size."
+            },
+            {
+                icon: "📐", key: "letterMaxLineWidth", def: 0.7, min: 0.1, max: 1.0, step: 0.01,
+                label: "Max Line Width",
+                details: "If a line's rendered width exceeds this fraction of the screen, the whole line is uniformly scaled down to fit."
+            }
+        ]
+    },
+    {
+        heading: "🔤 Letter Appearance", controls: [
+            {
+                icon: "📶", key: "letterStrength", def: 0.101, min: -0.5, max: 0.5, step: 0.001,
+                label: "Letter Strength",
+                details: "Amplitude of the ripple wave emanating from each letter."
+            },
+            {
+                icon: "🔵", key: "letterSize", def: 0.2, min: 0.01, max: 1.0, step: 0.001,
+                label: "Letter Size",
+                details: "Base size of rendered letter glyphs."
+            },
+            {
+                icon: "🎲", key: "letterSizeVariance", def: 0.35, min: 0.0, max: 1.0, step: 0.01,
+                label: "Size Variance",
+                details: "Random spread applied to each letter's size."
+            },
+            {
+                icon: "🎲", key: "letterAngleVariance", def: 0.54, min: 0.0, max: 3.14, step: 0.01,
+                label: "Angle Variance",
+                details: "Random rotation range applied to each letter."
+            },
+            {
+                icon: "↕️", key: "letterYOffset", def: -0.15, min: -0.5, max: 0.5, step: 0.01,
+                label: "Y Offset",
+                details: "Vertical offset of the text line from the surface centre."
+            },
+            {
+                icon: "🎲", key: "letterYVariance", def: 0.05, min: 0.0, max: 0.5, step: 0.01,
+                label: "Y Variance",
+                details: "Random vertical jitter applied to each letter."
+            }
+        ]
+    },
+    {
+        heading: "💧Letter Ripples", controls: [
+            {
+                icon: "〰️", key: "letterWavelength", def: 0.35, min: 0.02, max: 1.0, step: 0.01,
+                label: "Letter Edge Softness",
+                details: "Softness of the stamped glyph edge in the simulation. Higher = softer bulge, lower = sharp ring."
+            },
+            {
+                icon: "📏", key: "letterThickness", def: 3.0, min: 0.1, max: 10.0, step: 0.01,
+                label: "Letter Bulge",
+                details: "Blends the stamp between a hollow outline (low) and a solid filled glyph (high). Internally mapped to 0..1."
+            }
+        ]
+    },
+    {
+        heading: "🎤 Live Text", controls: [
+            {
+                icon: "🎙️", key: "liveText", def: 0, min: 0, max: 1, step: 1, int: true, canRandomise: false,
+                label: "Live Text",
+                details: "Enable speech recognition — spoken words become ripple letters."
+            },
+            {
+                icon: "📚", key: "liveTextMaxBacklog", def: 5, min: 1, max: 20, step: 1, int: true,
+                label: "Max Backlog",
+                details: "Maximum number of recognised words queued up before new ones are dropped."
+            }
+        ]
+    },
+    {
+        heading: "🌊 Ocean (FFT)", controls: [
+            {
+                icon: "↔️", key: "oceanPatchSize", def: 4.0, min: 1.0, max: 16.0, step: 0.1,
+                label: "Patch Size",
+                details: "World-space size of one FFT tile — larger = longer, broader waves."
+            },
+            {
+                icon: "🏎️", key: "oceanPropagation", def: 1.0, min: 0.0, max: 1.0, step: 0.01,
+                label: "Propagation",
+                details: "How much the spectrum animates over time (0 = frozen, 1 = full motion)."
+            },
+            {
+                icon: "🏎️", key: "oceanSpeed", def: 1.0, min: 0.01, max: 3.0, step: 0.01,
+                label: "Ocean Speed",
+                details: "Overall speed multiplier for ocean wave animation."
+            },
+            {
+                icon: "🏎️", key: "oceanWindSpeed", def: 8.0, min: 0.1, max: 30.0, step: 0.1,
+                label: "Wind Speed",
+                details: "Wind speed driving the FFT spectrum — higher creates larger waves."
+            },
+            {
+                icon: "🧭", key: "oceanWindAngle", def: 0.0, min: -6.28, max: 6.28, step: 0.01,
+                label: "Wind Angle",
+                details: "Direction the wind blows, in radians."
+            },
+            {
+                icon: "📏", key: "oceanWaveScale", def: 1.0, min: 0.05, max: 4.0, step: 0.01,
+                label: "Wave Scale",
+                details: "Scales the characteristic wavelength — shifts the spectrum toward longer or shorter waves."
+            },
+            {
+                icon: "↕️", key: "oceanHeightAmp", def: 0.02, min: 0.0, max: 0.15, step: 0.001,
+                label: "Height Amp",
+                details: "Overall amplitude of the FFT ocean — controls wave height."
+            },
+            {
+                icon: "🪓", key: "oceanChop", def: 0.6, min: -1.5, max: 1.5, step: 0.01,
+                label: "Choppiness",
+                details: "Horizontal displacement of wave peaks — adds sharp crests and foam."
+            },
+            {
+                icon: "✂️", key: "oceanSmallWaveCut", def: 0.5, min: 0.0, max: 1.0, step: 0.01,
+                label: "Small Wave Cut",
+                details: "Suppresses high-frequency ripples — higher = smoother, calmer water."
+            },
+            {
+                icon: "🎯", key: "oceanDirectionSpread", def: 0.5, min: 0.0, max: 1.0, step: 0.01,
+                label: "Direction Spread",
+                details: "How much waves deviate from the wind direction — 0 = narrow, 1 = chaotic."
+            },
+            {
+                icon: "🔍", key: "oceanDetail", def: 1.0, min: 0.0, max: 5.0, step: 0.01,
+                label: "Detail",
+                details: "Multiplier on FFT output height — brings out fine wave detail."
+            },
+            {
+                icon: "🧼", key: "oceanFoamThreshold", def: 0.7, min: 0.0, max: 1.0, step: 0.01,
+                label: "Foam Threshold",
+                details: "Jacobian value below which foam appears on wave crests."
+            },
+            {
+                icon: "🫧", key: "oceanFoamStrength", def: 0.5, min: 0.0, max: 2.0, step: 0.01,
+                label: "Foam Strength",
+                details: "Opacity multiplier for foam rendered on the water surface."
+            },
+            {
+                icon: "🔬", key: "oceanFoamScale", def: 1.7, min: 0.3, max: 100.0, step: 0.01,
+                label: "Foam Scale",
+                details: "Size of the bubble pattern. Higher = smaller, denser bubbles; lower = larger blobs."
+            },
+            {
+                icon: "🎚️", key: "oceanFoamContrast", def: 0.4, min: 0.05, max: 1.0, step: 0.01,
+                label: "Foam Contrast",
+                details: "Sharpness of the foam edge. Low = soft wispy fade, high = crisp boundary."
+            },
+            {
+                icon: "🧵", key: "oceanFoamDetail", def: 0.4, min: 0.0, max: 1.0, step: 0.01,
+                label: "Foam Detail",
+                details: "Balance between large foam shapes (0) and fine bubble texture (1)."
+            },
+            {
+                icon: "🎨", key: "oceanFoamTint", def: 0.15, min: 0.0, max: 1.0, step: 0.01,
+                label: "Foam Tint",
+                details: "How much the water colour bleeds into the foam. 0 = pure white, higher = tinted by the water."
+            }
+        ]
+    },
+    {
+        heading: "🪣 Water Settings", controls: [
+            {
+                icon: "🌊", key: "waterDepth", def: 0.202, min: 0.0, max: 1.0, step: 0.001,
+                label: "Water Depth",
+                details: "Simulated depth of the water body, affecting how much the riverbed shows through."
+            },
+            {
+                icon: "🕳️", key: "absorption", def: 0.61, min: 0.0, max: 10.0, step: 0.01,
+                label: "Absorption",
+                details: "How strongly water absorbs light with depth — higher = darker, murkier."
+            },
+            {
+                icon: "🔍", key: "refractionStrength", def: 0.051, min: -2.0, max: 2.0, step: 0.01,
+                label: "Refraction",
+                details: "How much the surface refracts the riverbed beneath it."
+            },
+            {
+                icon: "🌈", key: "dispersionStrength", def: 0.008, min: 0.0, max: 0.05, step: 0.0001,
+                label: "Dispersion",
+                details: "Per-channel IOR spread for real chromatic refraction through the water. Physical water ≈ 0.008. 0 = monochrome refraction."
+            },
+            {
+                icon: "🔴", key: "rgbSplit", def: 0, min: -0.1, max: 0.1, step: 0.001,
+                label: "RGB Split",
+                details: "Chromatic aberration — offsets the RGB channels to create rainbow fringes."
+            },
+            {
+                icon: "🧭", key: "rgbAngle", def: 0, min: -6.28, max: 6.28, step: 0.01,
+                label: "RGB Angle",
+                details: "Direction of the chromatic aberration offset."
+            },
+            {
+                icon: "🔴", key: "waterColorR", def: 0.475, min: 0.0, max: 1.0, step: 0.001,
+                label: "Water Colour R",
+                details: "Red channel of the shallow water colour."
+            },
+            {
+                icon: "🟢", key: "waterColorG", def: 0.72, min: 0.0, max: 1.0, step: 0.001,
+                label: "Water Colour G",
+                details: "Green channel of the shallow water colour."
+            },
+            {
+                icon: "🔵", key: "waterColorB", def: 0.899, min: 0.0, max: 1.0, step: 0.001,
+                label: "Water Colour B",
+                details: "Blue channel of the shallow water colour."
+            },
+            {
+                icon: "🔴", key: "waterDeepR", def: 0.131, min: 0.0, max: 1.0, step: 0.001,
+                label: "Deep Water R",
+                details: "Red channel of the deep water colour."
+            },
+            {
+                icon: "🟢", key: "waterDeepG", def: 0.253, min: 0.0, max: 1.0, step: 0.001,
+                label: "Deep Water G",
+                details: "Green channel of the deep water colour."
+            },
+            {
+                icon: "🔵", key: "waterDeepB", def: 0.374, min: 0.0, max: 1.0, step: 0.001,
+                label: "Deep Water B",
+                details: "Blue channel of the deep water colour."
+            }
+        ]
+    },
+    {
+        heading: "🎨 Background / Environment", controls: [
+            {
+                icon: "🖼️", key: "bgImageEnabled", def: 0, min: 0, max: 1, step: 1, int: true, canRandomise: false,
+                label: "Background Image",
+                details: "Enable rendering a background/environment image instead of clear colour."
+            },
+            {
+                icon: "🖼️", key: "bgImageIndex", def: 1, min: 0, max: 10, step: 1, int: true, discreteSwap: true,
+                label: "Background Index",
+                details: "Which background image to load from the image set."
+            },
+            {
+                icon: "📏", key: "bgImageScale", def: 1, min: 0, max: SCALE_OPTIONS.length - 1, step: 1, int: true, special: "scale", discreteSwap: true,
+                label: "Background Scale",
+                details: "Target resample size for the background image."
+            },
+            {
+                icon: "🔁", key: "bgImageSeamless", def: 0, min: 0, max: 100, step: 1, int: true, discreteSwap: true,
+                label: "Background Seamless",
+                details: "Blend strength for edges when tiling the background — 0 = off, 100 = full."
+            },
+            {
+                icon: "↔️", key: "bgImageTileX", def: 1, min: 1, max: 64, step: 1, int: true,
+                label: "Background Tile X",
+                details: "Horizontal repeat count for the background image."
+            },
+            {
+                icon: "↕️", key: "bgImageTileY", def: 1, min: 1, max: 64, step: 1, int: true,
+                label: "Background Tile Y",
+                details: "Vertical repeat count for the background image."
+            },
+            {
+                icon: "📶", key: "envMapStrength", def: 0.1, min: 0.0, max: 1.0, step: 0.01,
+                label: "Env Map Strength",
+                details: "How strongly the environment map reflects in the water surface."
+            },
+            {
+                icon: "🔍", key: "envMapZoom", def: 1.0, min: 0.1, max: 3.0, step: 0.01,
+                label: "Env Map Zoom",
+                details: "Zoom factor applied to environment reflections."
+            },
+            {
+                icon: "↔️", key: "envMapPanX", def: 0.5, min: -1.0, max: 1.0, step: 0.01,
+                label: "Env Map Pan X",
+                details: "Horizontal pan of the environment map UVs."
+            },
+            {
+                icon: "↕️", key: "envMapPanY", def: 0.5, min: -1.0, max: 1.0, step: 0.01,
+                label: "Env Map Pan Y",
+                details: "Vertical pan of the environment map UVs."
+            }
+        ]
+    },
+    {
+        heading: "🏞️ Riverbed", controls: [
+            {
+                icon: "🖼️", key: "bedImageEnabled", def: 0, min: 0, max: 1, step: 1, int: true, canRandomise: false,
+                label: "Riverbed Image",
+                details: "Use an image texture for the riverbed instead of procedural sand."
+            },
+            {
+                icon: "🖼️", key: "bedImageIndex", def: 1, min: 0, max: 10, step: 1, int: true, discreteSwap: true,
+                label: "Riverbed Index",
+                details: "Which riverbed image to load from the image set."
+            },
+            {
+                icon: "📏", key: "bedImageScale", def: 1, min: 0, max: SCALE_OPTIONS.length - 1, step: 1, int: true, special: "scale", discreteSwap: true,
+                label: "Riverbed Scale",
+                details: "Target resample size for the riverbed image."
+            },
+            {
+                icon: "🔁", key: "bedImageSeamless", def: 0, min: 0, max: 100, step: 1, int: true, discreteSwap: true,
+                label: "Riverbed Seamless",
+                details: "Blend strength for edges when tiling the riverbed — 0 = off, 100 = full."
+            },
+            {
+                icon: "↔️", key: "bedImageTileX", def: 1, min: 0, max: 8, step: 1,
+                label: "Riverbed Tile X",
+                details: "Horizontal repeat count for the riverbed image."
+            },
+            {
+                icon: "↕️", key: "bedImageTileY", def: 1, min: 0, max: 8, step: 1,
+                label: "Riverbed Tile Y",
+                details: "Vertical repeat count for the riverbed image."
+            },
+            {
+                icon: "⛰️", key: "bedDisplacement", def: 0.0, min: -1.0, max: 1.0, step: 0.01,
+                label: "Bed Displacement",
+                details: "Direction and sign of the parallax bump strength. 0 = flat. Positive pushes bright texels toward the viewer, negative away."
+            },
+            {
+                icon: "📏", key: "bedHeightScale", def: 0.15, min: 0.0, max: 0.5, step: 0.001,
+                label: "Bed Height Scale",
+                details: "Overall parallax offset magnitude for the riverbed heightmap. Higher = bigger apparent bumps."
+            },
+            {
+                icon: "🌫️", key: "bedHeightBlur", def: 30, min: 0, max: 100, step: 1,
+                label: "Heightmap Blur",
+                details: "Blur radius used when inferring the heightmap from the riverbed image. 0 = raw luminance (noisy), higher = smoother depth-like terrain."
+            },
+            {
+                icon: "📏", key: "sandScale", def: 3190, min: 0, max: 10000, step: 1,
+                label: "Sand Scale",
+                details: "Noise frequency for procedural sand grain."
+            },
+            {
+                icon: "🎚️", key: "sandContrast", def: 0.69, min: 0.0, max: 1.0, step: 0.01,
+                label: "Sand Contrast",
+                details: "Contrast of the procedural sand pattern."
+            },
+            {
+                icon: "🔴", key: "sandR", def: 0.727, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sand Colour R",
+                details: "Red channel of the sand colour."
+            },
+            {
+                icon: "🟢", key: "sandG", def: 0.717, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sand Colour G",
+                details: "Green channel of the sand colour."
+            },
+            {
+                icon: "🔵", key: "sandB", def: 0.636, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sand Colour B",
+                details: "Blue channel of the sand colour."
+            }
+        ]
+    },
+    {
+        heading: "✨ Caustics", controls: [
+            {
+                icon: "✨", key: "causticStrength", def: 0.01, min: 0.0, max: 1.0, step: 0.01,
+                label: "Caustic Strength",
+                details: "Brightness of light-focusing patterns on the riverbed. 0 disables caustics entirely."
+            },
+            {
+                icon: "🌧️", key: "simCausticStrength", def: 0.3, min: 0.0, max: 1.0, step: 0.01,
+                label: "Rain Caustics",
+                details: "Contribution of rain-ripple distortion to the caustic pattern."
+            },
+            {
+                icon: "🌈", key: "causticRGBScale", def: 0.5, min: 0.0, max: 2.0, step: 0.01,
+                label: "Caustic RGB Split",
+                details: "Chromatic dispersion strength of caustics — how far apart R/G/B caustic patterns are offset. 0 = monochrome caustics."
+            },
+            {
+                icon: "🧭", key: "causticRGBAngle", def: 0.0, min: -6.28, max: 6.28, step: 0.01,
+                label: "Caustic RGB Angle",
+                details: "Direction of the caustic chromatic offset. Independent of the water surface's RGB split angle."
+            },
+            {
+                icon: "🔗", key: "causticRGBAffectedBySurface", def: 0, min: 0, max: 1, step: 1, int: true,
+                label: "Caustic RGB Follows Surface",
+                details: "If on, the caustic RGB direction and magnitude are added to the water surface's own rgbSplit/rgbAngle rather than being independent."
+            },
+            {
+                icon: "📐", key: "bedDepthScale", def: 4.0, min: 0.5, max: 20.0, step: 0.1,
+                label: "Bed Depth Scale",
+                details: "World-space depth of the riverbed plane for ray-traced caustics. Higher = more parallax/depth, lower = shallower."
+            },
+            {
+                icon: "🔍", key: "causticScale", def: 1.0, min: 0.1, max: 4.0, step: 0.01,
+                label: "Caustic Scale",
+                details: "Size of caustic features. 1.0 = natural, lower = finer/denser, higher = chunkier."
+            },
+            {
+                icon: "🌊", key: "oceanCausticGain", def: 1.0, min: -2.0, max: 2.0, step: 0.1,
+                label: "Ocean Caustic Gain",
+                details: "Amplifies the ocean-derived caustic contribution. Higher = brighter ocean caustics on the bed."
+            }
+        ]
+    },
+    {
+        heading: "🌅 Sunlight", controls: [
+            {
+                icon: "🧭", key: "sunAngle", def: -0.53, min: -6.28, max: 6.28, step: 0.01,
+                label: "Sun Angle",
+                details: "Azimuth of the sun on the horizon, in radians."
+            },
+            {
+                icon: "↕️", key: "sunHeight", def: 0.224, min: -1.0, max: 1.0, step: 0.01,
+                label: "Sun Height",
+                details: "Elevation of the sun above the horizon (-1 = below, 1 = zenith)."
+            },
+            {
+                icon: "✨", key: "specularPower", def: 13, min: 0.0, max: 10, step: 0.1,
+                label: "Specular Power",
+                details: "Sharpness of the sun's specular highlight on the water."
+            },
+            {
+                icon: "💡", key: "specularStrength", def: -0.231, min: -2.0, max: 2.0, step: 0.001,
+                label: "Specular Strength",
+                details: "Intensity of the specular highlight — negative values invert it."
+            },
+            {
+                icon: "🪞", key: "fresnelPower", def: 0.51, min: -1.0, max: 2.0, step: 0.01,
+                label: "Fresnel Power",
+                details: "Sharpness of the Fresnel edge — how abruptly reflections appear at glancing angles."
+            }
+        ]
+    },
+    {
+        heading: "🌤️ Sky Settings", controls: [
+            {
+                icon: "🔴", key: "skyHorizonR", def: 0.707, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sky Horizon R",
+                details: "Red channel of the procedural sky at the horizon."
+            },
+            {
+                icon: "🟢", key: "skyHorizonG", def: 0.737, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sky Horizon G",
+                details: "Green channel of the procedural sky at the horizon."
+            },
+            {
+                icon: "🔵", key: "skyHorizonB", def: 0.515, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sky Horizon B",
+                details: "Blue channel of the procedural sky at the horizon."
+            },
+            {
+                icon: "🔴", key: "skyZenithR", def: 0.211, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sky Zenith R",
+                details: "Red channel of the procedural sky at the zenith."
+            },
+            {
+                icon: "🟢", key: "skyZenithG", def: 0.333, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sky Zenith G",
+                details: "Green channel of the procedural sky at the zenith."
+            },
+            {
+                icon: "🔵", key: "skyZenithB", def: 0.596, min: 0.0, max: 1.0, step: 0.001,
+                label: "Sky Zenith B",
+                details: "Blue channel of the procedural sky at the zenith."
+            }
+        ]
+    }
+];
+
+// =====================================================================
+// DERIVED TABLES
+// =====================================================================
+
+var CONTROL_BY_KEY = {};
+CONTROLS.forEach(function (g) {
+    g.controls.forEach(function (c) { CONTROL_BY_KEY[c.key] = c; });
+});
+
+var DEFAULTS = {};
+var INT_KEYS = {};
+var COLOUR_KEYS = {};
+var DISCRETE_KEYS = {};
+var STANDALONE_KEYS = {};
+
+Object.keys(CONTROL_BY_KEY).forEach(function (key) {
+    var c = CONTROL_BY_KEY[key];
+    DEFAULTS[key] = c.def;
+    if (c.int) INT_KEYS[key] = true;
+    if (c.discreteSwap) DISCRETE_KEYS[key] = true;
+    if (c.savedInPreset === false) STANDALONE_KEYS[key] = true;
+    if (/R$|G$|B$/.test(key) && c.min === 0 && c.max === 1 && c.step === 0.001 && !c.int) {
+        COLOUR_KEYS[key] = true;
+    }
+});
+
+// =====================================================================
+// PRESETS
+// =====================================================================
+
+var PRESETS = [
+    { name: "Default", iteration: 11, values: {} },
+    {
+        name: "Splish Splash", iteration: 12, values: {
+            timeScale: 2.31, dropFallSpeed: 2.7, dropSize: 0.0089, dropSizeVariance: 0.35,
+            dropFallHeight: 5.0, surfaceTilt: 0.13,
+            oceanWindSpeed: 3.0, oceanWindAngle: 0.4, oceanWaveScale: 0.8, oceanHeightAmp: 0.008,
+            oceanChop: 0.3, oceanDirectionSpread: 0.35, oceanSmallWaveCut: 0.6,
+            oceanFoamThreshold: 0.9, oceanFoamStrength: 0.15
+        }
+    },
+    {
+        name: "Height Test", iteration: 13, values: {
+            timeScale: 3.03, rainRate: 1, dropFallSpeed: 3.3, dropFallHeight: 2.0,
+            dropSize: 0.0188, surfaceTilt: 0.07, cameraHeight: 6.83,
+            oceanWindSpeed: 4.0, oceanWindAngle: 0.0, oceanWaveScale: 1.0, oceanHeightAmp: 0.015,
+            oceanChop: 0.4, oceanDirectionSpread: 0.4, oceanSmallWaveCut: 0.5
+        }
+    },
+    {
+        name: "Autumn Drips", iteration: 14, values: {
+            timeScale: 1.21, rainRate: 10.1, rippleStrengthVariance: 2, dropFallSpeed: 10.3,
+            dropFallHeight: 10, dropSize: 0.0059, dropSplashCount: 3, dropSplashHeightFactor: 0.02,
+            dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51,
+            letterStrength: 0.08, letterSize: 0.163, letterYOffset: 0.15,
+            letterWavelength: 0.0212, letterThickness: 2.7, surfaceDepth: 0.256, surfaceTilt: 0,
+            cameraHeight: 3.07, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5, fresnelPower: 0.4,
+            envMapStrength: 1,
+            oceanWindSpeed: 5.0, oceanWindAngle: 0.2, oceanWaveScale: 1.0, oceanHeightAmp: 0.012,
+            oceanChop: 0.4, oceanDirectionSpread: 0.45, oceanSmallWaveCut: 0.55
+        }
+    },
+    {
+        name: "Autumn Rain", iteration: 15, values: {
+            timeScale: 1.21, rainRate: 94.95, rippleStrengthVariance: 2, dropFallSpeed: 18,
+            dropFallHeight: 10, dropSize: 0.0059, dropSplashCount: 3, dropSplashHeightFactor: 0.02,
+            dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51,
+            letterStrength: 0.18, letterSize: 0.208, letterSpacing: 0.56, letterYOffset: 0.15,
+            letterWavelength: 0.0161, letterThickness: 2.7, surfaceDepth: 0.256,
+            surfaceTilt: 0, cameraHeight: 3.07, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5,
+            fresnelPower: 0.4, envMapStrength: 1,
+            oceanWindSpeed: 7.0, oceanWindAngle: 0.3, oceanWaveScale: 1.2, oceanHeightAmp: 0.022,
+            oceanChop: 0.55, oceanDirectionSpread: 0.5, oceanSmallWaveCut: 0.5
+        }
+    },
+    {
+        name: "Autumn Nicey", iteration: 16, values: {
+            timeScale: 1.21, rainRate: 10.1, rippleStrengthVariance: 2, dropFallSpeed: 10.3,
+            dropFallHeight: 10, dropSize: 0.0059, dropSplashCount: 3, dropSplashHeightFactor: 0.02,
+            dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51,
+            letterStrength: 0.08, letterSize: 0.163, letterYOffset: 0.15,
+            letterWavelength: 0.0212, letterThickness: 2.7, surfaceDepth: 0.256, surfaceTilt: 0,
+            cameraHeight: 3.07, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5, fresnelPower: 0.4,
+            envMapStrength: 0.52, waterDepth: 0.636, refractionStrength: 0.32, bedImageEnabled: 1,
+            oceanWindSpeed: 5.5, oceanWindAngle: 0.2, oceanWaveScale: 1.0, oceanHeightAmp: 0.012,
+            oceanChop: 0.4, oceanDirectionSpread: 0.45, oceanSmallWaveCut: 0.55
+        }
+    },
+    {
+        name: "FXAA Test", iteration: 17, values: {
+            timeScale: 1.21, rainRate: 10.1, gridResolution: 1016, rippleStrengthVariance: 2,
+            dropFallSpeed: 10.3, dropFallHeight: 10, dropSize: 0.0059, dropSplashCount: 3,
+            dropSplashHeightFactor: 0.02, dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29,
+            dropSplashDriftInheritance: 0.51, letterStrength: 0.08, letterSize: 0.163,
+            letterYOffset: 0.15, letterWavelength: 0.0212, letterThickness: 2.7,
+            surfaceTilt: 0.39, waterDepth: 0.636, surfaceDepth: 0.256, refractionStrength: 0.32,
+            fxaaStrength: 1, bgImageIndex: 9, envMapStrength: 1, envMapZoom: 2.59, envMapPanY: 0.6,
+            bedImageEnabled: 1, bedImageIndex: 10, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5,
+            fresnelPower: 0.4,
+            oceanWindSpeed: 6.0, oceanWindAngle: 0.0, oceanWaveScale: 1.0, oceanHeightAmp: 0.015,
+            oceanChop: 0.5, oceanDirectionSpread: 0.5, oceanSmallWaveCut: 0.5
+        }
+    },
+    {
+        name: "Night Night", iteration: 18, values: {
+            rainRate: 82.8, dropFallSpeed: 2.1, waterColorR: 0.505, waterDeepR: 0.182,
+            bgImageIndex: 8, envMapStrength: 0.38, envMapZoom: 0.92, envMapPanX: 0.09, envMapPanY: 0.09,
+            bedImageEnabled: 1, sunAngle: -1.46, specularPower: 0.2, specularStrength: -1.354,
+            fresnelPower: 0.55, skyHorizonR: 0.646, skyZenithR: 0.293,
+            oceanWindSpeed: 5.0, oceanWindAngle: 0.5, oceanWaveScale: 1.1, oceanHeightAmp: 0.02,
+            oceanChop: 0.5, oceanDirectionSpread: 0.5, oceanSmallWaveCut: 0.5
+        }
+    },
+    {
+        name: "Night Night 2", iteration: 19, values: {
+            timeScale: 1.21, rainRate: 10.1, gridResolution: 640, rippleStrengthVariance: 2,
+            dropFallSpeed: 10.3, dropFallHeight: 10, dropSize: 0.0134, dropSplashCount: 3,
+            dropSplashHeightFactor: 0.02, dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29,
+            dropSplashDriftInheritance: 0.51, letterSpacing: 0.35,
+            letterStrength: 0.08, letterSize: 0.5, letterYOffset: 0.15, letterWavelength: 0.0212,
+            letterThickness: 2.7, cameraHeight: 2, surfaceTilt: 0.13, perspectiveStrength: 0.33,
+            waterDepth: 0.515, surfaceDepth: 0.256, refractionStrength: 0.247,
+            waterColorR: 0.707, waterColorG: 0.717, waterColorB: 0.768,
+            waterDeepR: 0.293, waterDeepG: 0.303, waterDeepB: 0.333,
+            bgImageIndex: 9, envMapStrength: 0.92, envMapZoom: 2.09, envMapPanX: 0.03, envMapPanY: 0.49,
+            bedImageEnabled: 1, bedImageIndex: 10, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5,
+            fresnelPower: 0.52,
+            oceanWindSpeed: 6.5, oceanWindAngle: 0.2, oceanWaveScale: 1.0, oceanHeightAmp: 0.016,
+            oceanChop: 0.5, oceanDirectionSpread: 0.55, oceanSmallWaveCut: 0.5
+        }
+    },
+    {
+        name: "Night Night 3", iteration: 19, values: {
+            timeScale: 1.2, rainRate: 32.3, gridResolution: 640, simRainImpulse: 0.12,
+            rippleStrengthVariance: 2, dropFallSpeed: 10.3, dropFallHeight: 10, dropSize: 0.0074,
+            dropSplashCount: 3, dropSplashHeightFactor: 0.02, dropSplashStrengthFactor: 0.07,
+            dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51, letterSpacing: 0.41,
+            letterStrength: 0.258, letterSize: 0.356, letterYOffset: 0.15,
+            letterWavelength: 0.0212, letterThickness: 2.7, cameraHeight: 2, surfaceTilt: 0.13,
+            perspectiveStrength: 0.33, waterDepth: 0.515, surfaceDepth: 0.101, refractionStrength: 0.247,
+            waterColorR: 0.505, waterColorG: 0.556, waterColorB: 0.535,
+            waterDeepR: 0.515, waterDeepG: 0.576, waterDeepB: 0.556,
+            bgImageIndex: 9, envMapStrength: 0.82, envMapZoom: 2.09, envMapPanX: 0.03, envMapPanY: 0.49,
+            bedImageEnabled: 1, bedImageIndex: 10, sunAngle: 1.47, sunHeight: 1.224, specularPower: 2.3,
+            specularStrength: -0.263, fresnelPower: 0.73,
+            oceanWindSpeed: 9.0, oceanWindAngle: 0.3, oceanWaveScale: 1.2, oceanHeightAmp: 0.03,
+            oceanChop: 0.7, oceanDirectionSpread: 0.6, oceanSmallWaveCut: 0.45,
+            oceanFoamThreshold: 0.55, oceanFoamStrength: 0.8
+        }
+    },
+    {
+        name: "Down at the beach", iteration: 18, values: {
+            timeScale: 1.2, rainRate: 20.2, gridResolution: 1024, rippleStrengthVariance: 2,
+            rippleDriftX: -0.2, rippleDriftY: -0.1, dropFallSpeed: 10.3, dropFallHeight: 10,
+            dropSize: 0.0059, dropSplashCount: 3, dropSplashHeightFactor: 0.02,
+            dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51,
+            letterSpacing: 0.37, letterStrength: 0.116, letterSize: 0.257,
+            letterYOffset: 0.15, letterWavelength: 0.0212, cameraHeight: 2.4, surfaceTilt: 0.33,
+            waterDepth: 0, absorption: 0, surfaceDepth: 0.727, refractionStrength: 0.056,
+            waterColorR: 0.626, waterColorG: 0.687, waterColorB: 0.727,
+            waterDeepR: 0.333, waterDeepG: 0.354, waterDeepB: 0.434,
+            bgImageIndex: 6, envMapStrength: 0.55, envMapZoom: 1.3, envMapPanY: 0.6,
+            bedImageEnabled: 1, bedImageIndex: 8, sunAngle: 1.47, sunHeight: 1.224, specularPower: 50,
+            specularStrength: 0.141, fresnelPower: 0.67,
+            skyHorizonR: 0.576, skyHorizonG: 0.424, skyHorizonB: 0.394,
+            skyZenithR: 0.545, skyZenithG: 0.323, skyZenithB: 0.293,
+            oceanWindSpeed: 4.5, oceanWindAngle: -0.2, oceanWaveScale: 0.9, oceanHeightAmp: 0.01,
+            oceanChop: 0.35, oceanDirectionSpread: 0.4, oceanSmallWaveCut: 0.6
+        }
+    },
+    {
+        "name": "Preset 20",
+        "iteration": 20,
+        "values": {
+            "timeScale": 1.2,
+            "rainRate": 20.2,
+            "rippleStrengthVariance": 2,
+            "rippleDriftX": -0.2,
+            "rippleDriftY": -0.1,
+            "dropFallSpeed": 10.3,
+            "dropFallHeight": 10,
+            "dropSize": 0.0059,
+            "dropSplashCount": 3,
+            "dropSplashHeightFactor": 0.02,
+            "dropSplashStrengthFactor": 0.07,
+            "dropSplashSizeFactor": 0.29,
+            "dropSplashDriftInheritance": 0.51,
+            "letterSpacing": 0.37,
+            "letterStrength": 0.116,
+            "letterSize": 0.257,
+            "letterYOffset": 0.15,
+            "letterWavelength": 0.0212,
+            "oceanWindSpeed": 4.5,
+            "oceanWindAngle": -0.2,
+            "oceanWaveScale": 0.89,
+            "oceanHeightAmp": 0.064,
+            "oceanChop": 0.44,
+            "oceanSmallWaveCut": 0.6,
+            "oceanDirectionSpread": 0.69,
+            "oceanDetail": 1.57,
+            "oceanFoamThreshold": 0.67,
+            "oceanFoamStrength": 0.71,
+            "cameraHeight": 2.4,
+            "surfaceTilt": 0.33,
+            "waterDepth": 0.455,
+            "absorption": 0,
+            "surfaceDepth": 0.727,
+            "refractionStrength": 0.101,
+            "waterColorR": 0.556,
+            "waterColorG": 0.566,
+            "waterColorB": 0.646,
+            "waterDeepR": 0.576,
+            "waterDeepG": 0.606,
+            "waterDeepB": 0.697,
+            "bgImageIndex": 6,
+            "envMapStrength": 0.55,
+            "envMapZoom": 1.3,
+            "envMapPanY": 0.6,
+            "bedImageEnabled": 1,
+            "bedImageIndex": 8,
+            "bedImageSeamless": 9,
+            "causticStrength": 0.32,
+            "simCausticStrength": 0.46,
+            "causticRGBScale": 0,
+            "causticRGBAngle": -6.28,
+            "bedDepthScale": 6,
+            "sunAngle": 1.47,
+            "sunHeight": 1.224,
+            "specularPower": 50,
+            "specularStrength": 0.141,
+            "fresnelPower": 0.67,
+            "skyHorizonR": 0.576,
+            "skyHorizonG": 0.424,
+            "skyHorizonB": 0.394,
+            "skyZenithR": 0.545,
+            "skyZenithG": 0.323,
+            "skyZenithB": 0.293
+        }
+    },
+    {
+        "name": "Preset 21",
+        "iteration": 21,
+        "values": {
+            "timeScale": 1.2,
+            "rainRate": 0,
+            "rippleStrengthVariance": 2,
+            "rippleDriftX": -0.2,
+            "rippleDriftY": -0.1,
+            "dropFallSpeed": 10.3,
+            "dropFallHeight": 10,
+            "dropSize": 0.0059,
+            "dropSplashCount": 3,
+            "dropSplashHeightFactor": 0.02,
+            "dropSplashStrengthFactor": 0.07,
+            "dropSplashSizeFactor": 0.29,
+            "dropSplashDriftInheritance": 0.51,
+            "letterSpacing": 0.37,
+            "letterStrength": 0.116,
+            "letterSize": 0.257,
+            "letterYOffset": 0.15,
+            "letterWavelength": 0.0212,
+            "oceanWindSpeed": 4.5,
+            "oceanWindAngle": -0.2,
+            "oceanWaveScale": 1.53,
+            "oceanHeightAmp": 0.03,
+            "oceanChop": -1.5,
+            "oceanSmallWaveCut": 0.6,
+            "oceanDirectionSpread": 0.69,
+            "oceanDetail": 1.57,
+            "oceanFoamThreshold": 0.67,
+            "oceanFoamStrength": 0.71,
+            "cameraHeight": 2.4,
+            "surfaceTilt": 0.33,
+            "waterDepth": 0.333,
+            "absorption": 2.83,
+            "surfaceDepth": 0.727,
+            "refractionStrength": 0.5,
+            "waterColorR": 0.253,
+            "waterColorG": 0.293,
+            "waterColorB": 0.364,
+            "waterDeepR": 0.202,
+            "waterDeepG": 0.242,
+            "waterDeepB": 0.354,
+            "bgImageIndex": 6,
+            "envMapStrength": 0.55,
+            "envMapZoom": 1.3,
+            "envMapPanY": 0.6,
+            "bedImageEnabled": 1,
+            "bedImageIndex": 8,
+            "bedImageSeamless": 9,
+            "causticStrength": 0.32,
+            "simCausticStrength": 0.46,
+            "causticRGBScale": 0,
+            "causticRGBAngle": -6.28,
+            "bedDepthScale": 13.9,
+            "sunAngle": 1.47,
+            "sunHeight": 1.224,
+            "specularPower": 50,
+            "specularStrength": 0.141,
+            "fresnelPower": 0.67,
+            "skyHorizonR": 0.576,
+            "skyHorizonG": 0.424,
+            "skyHorizonB": 0.394,
+            "skyZenithR": 0.545,
+            "skyZenithG": 0.323,
+            "skyZenithB": 0.293
+        }
+    },
+    {
+        "name": "Preset 22",
+        "iteration": 22,
+        "values": {
+            "timeScale": 1.2,
+            "rainRate": 2.0,
+            "rippleStrengthVariance": 2,
+            "rippleDriftX": -0.2,
+            "rippleDriftY": -0.1,
+            "dropFallSpeed": 10.3,
+            "dropFallHeight": 10,
+            "dropSize": 0.0059,
+            "dropSplashCount": 3,
+            "dropSplashHeightFactor": 0.02,
+            "dropSplashStrengthFactor": 0.07,
+            "dropSplashSizeFactor": 0.29,
+            "dropSplashDriftInheritance": 0.51,
+            "letterSpacing": 0.37,
+            "letterStrength": 0.116,
+            "letterSize": 0.257,
+            "letterYOffset": 0.15,
+            "letterWavelength": 0.0212,
+            "oceanWindSpeed": 4.5,
+            "oceanWindAngle": -0.2,
+            "oceanWaveScale": 1.53,
+            "oceanHeightAmp": 0.03,
+            "oceanChop": -1.5,
+            "oceanSmallWaveCut": 0.6,
+            "oceanDirectionSpread": 0.69,
+            "oceanDetail": 1.57,
+            "oceanFoamThreshold": 0.67,
+            "oceanFoamStrength": 0.71,
+            "cameraHeight": 2.4,
+            "surfaceTilt": 0.33,
+            "waterDepth": 0,
+            "absorption": 0,
+            "surfaceDepth": 0.727,
+            "refractionStrength": 0.5,
+            "waterColorR": 0.253,
+            "waterColorG": 0.293,
+            "waterColorB": 0.364,
+            "waterDeepR": 0.202,
+            "waterDeepG": 0.242,
+            "waterDeepB": 0.354,
+            "bgImageIndex": 6,
+            "envMapStrength": 0.55,
+            "envMapZoom": 1.3,
+            "envMapPanY": 0.6,
+            "bedImageEnabled": 1,
+            "bedImageIndex": 8,
+            "bedImageSeamless": 9,
+            "causticStrength": 2,
+            "simCausticStrength": 0.46,
+            "causticRGBScale": 0,
+            "causticRGBAngle": -6.28,
+            "bedDepthScale": 11.1,
+            "sunAngle": 1.47,
+            "sunHeight": 1.224,
+            "specularPower": 50,
+            "specularStrength": 0.141,
+            "fresnelPower": 0.67,
+            "skyHorizonR": 0.576,
+            "skyHorizonG": 0.424,
+            "skyHorizonB": 0.394,
+            "skyZenithR": 0.545,
+            "skyZenithG": 0.323,
+            "skyZenithB": 0.293
+        }
+    },
+    {
+        "name": "Preset 23",
+        "iteration": 23,
+        "values": {
+            "timeScale": 1.2,
+            "rainRate": 2,
+            "rippleStrengthVariance": 2,
+            "rippleDriftX": -0.2,
+            "rippleDriftY": -0.1,
+            "dropFallSpeed": 10.3,
+            "dropFallHeight": 10,
+            "dropSize": 0.0059,
+            "dropSplashCount": 3,
+            "dropSplashHeightFactor": 0.02,
+            "dropSplashStrengthFactor": 0.07,
+            "dropSplashSizeFactor": 0.29,
+            "dropSplashDriftInheritance": 0.51,
+            "letterSpacing": 0.37,
+            "letterStrength": 0.116,
+            "letterSize": 0.257,
+            "letterYOffset": 0.15,
+            "letterWavelength": 0.0212,
+            "oceanWindSpeed": 4.5,
+            "oceanWindAngle": -0.2,
+            "oceanWaveScale": 1.53,
+            "oceanHeightAmp": 0.03,
+            "oceanChop": -1.5,
+            "oceanSmallWaveCut": 0.6,
+            "oceanDirectionSpread": 0.69,
+            "oceanDetail": 1.57,
+            "oceanFoamThreshold": 0.67,
+            "oceanFoamStrength": 0.71,
+            "cameraHeight": 2.4,
+            "surfaceTilt": 0.33,
+            "waterDepth": 0,
+            "absorption": 0,
+            "surfaceDepth": 0.727,
+            "refractionStrength": 0.5,
+            "waterColorR": 0.253,
+            "waterColorG": 0.293,
+            "waterColorB": 0.364,
+            "waterDeepR": 0.202,
+            "waterDeepG": 0.242,
+            "waterDeepB": 0.354,
+            "bgImageIndex": 6,
+            "envMapStrength": 0.55,
+            "envMapZoom": 1.3,
+            "envMapPanY": 0.6,
+            "bedImageEnabled": 1,
+            "bedImageIndex": 8,
+            "bedImageSeamless": 9,
+            "causticStrength": 2,
+            "simCausticStrength": 0.03,
+            "causticRGBScale": 0,
+            "causticRGBAngle": -6.28,
+            "bedDepthScale": 11.1,
+            "sunAngle": 1.47,
+            "sunHeight": 1.224,
+            "specularPower": 50,
+            "specularStrength": 0.141,
+            "fresnelPower": 0.67,
+            "skyHorizonR": 0.576,
+            "skyHorizonG": 0.424,
+            "skyHorizonB": 0.394,
+            "skyZenithR": 0.545,
+            "skyZenithG": 0.323,
+            "skyZenithB": 0.293
+        }
+    },
+    {
+        "name": "Preset 24",
+        "iteration": 24,
+        "values": {
+            "timeScale": 1.2,
+            "rainRate": 0,
+            "rippleStrengthVariance": 2,
+            "rippleDriftX": -0.2,
+            "rippleDriftY": -0.1,
+            "dropFallSpeed": 10.3,
+            "dropFallHeight": 10,
+            "dropSize": 0.0059,
+            "dropSplashCount": 3,
+            "dropSplashHeightFactor": 0.02,
+            "dropSplashStrengthFactor": 0.07,
+            "dropSplashSizeFactor": 0.29,
+            "dropSplashDriftInheritance": 0.51,
+            "letterSpacing": 0.37,
+            "letterStrength": 0.116,
+            "letterSize": 0.257,
+            "letterYOffset": 0.15,
+            "letterWavelength": 0.0212,
+            "oceanWindSpeed": 4.5,
+            "oceanWindAngle": -0.2,
+            "oceanWaveScale": 0.9,
+            "oceanHeightAmp": 0.01,
+            "oceanChop": 0.35,
+            "oceanSmallWaveCut": 0.6,
+            "oceanDirectionSpread": 0.4,
+            "cameraHeight": 2.4,
+            "surfaceTilt": 0.33,
+            "waterDepth": 0,
+            "absorption": 0,
+            "surfaceDepth": 0.727,
+            "refractionStrength": 1.19,
+            "dispersionStrength": 0.0273,
+            "waterColorR": 0.626,
+            "waterColorG": 0.687,
+            "waterColorB": 0.727,
+            "waterDeepR": 0.333,
+            "waterDeepG": 0.354,
+            "waterDeepB": 0.434,
+            "bgImageIndex": 6,
+            "envMapStrength": 0.55,
+            "envMapZoom": 1.3,
+            "envMapPanY": 0.6,
+            "bedImageEnabled": 1,
+            "bedImageIndex": 8,
+            "causticStrength": 0,
+            "sunAngle": 1.47,
+            "sunHeight": 1.224,
+            "specularPower": 50,
+            "specularStrength": 0.141,
+            "fresnelPower": 0.67,
+            "skyHorizonR": 0.576,
+            "skyHorizonG": 0.424,
+            "skyHorizonB": 0.394,
+            "skyZenithR": 0.545,
+            "skyZenithG": 0.323,
+            "skyZenithB": 0.293
+        }
+    },
+    {
+    "name": "Preset 25",
+    "iteration": 25,
+    "values": {
+        "timeScale": 0.2,
+        "rainRate": 2,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": -0.2,
+        "rippleDriftY": -0.1,
+        "dropFallSpeed": 10.3,
+        "dropFallHeight": 10,
+        "dropSize": 0.0059,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "letterSpacing": 0.37,
+        "letterStrength": 0,
+        "letterSize": 0.257,
+        "letterYOffset": 0.15,
+        "letterWavelength": 0.0212,
+        "oceanWindSpeed": 4.5,
+        "oceanWindAngle": -0.2,
+        "oceanWaveScale": 0.9,
+        "oceanHeightAmp": 0.01,
+        "oceanChop": 0.35,
+        "oceanSmallWaveCut": 0.6,
+        "oceanDirectionSpread": 0.4,
+        "cameraHeight": 2.4,
+        "surfaceTilt": 0.33,
+        "waterDepth": 0,
+        "absorption": 0,
+        "surfaceDepth": 0.727,
+        "refractionStrength": -2,
+        "dispersionStrength": 0,
+        "waterColorR": 0.626,
+        "waterColorG": 0.687,
+        "waterColorB": 0.727,
+        "waterDeepR": 0.333,
+        "waterDeepG": 0.354,
+        "waterDeepB": 0.434,
+        "bgImageIndex": 6,
+        "envMapStrength": 0.55,
+        "envMapZoom": 1.3,
+        "envMapPanY": 0.6,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 8,
+        "bedDisplacement": 0.52,
+        "bedHeightScale": 0.364,
+        "bedHeightBlur": 5,
+        "sandScale": 4242,
+        "causticStrength": 0.26,
+        "causticRGBScale": 0.005,
+        "bedDepthScale": 4.6,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 50,
+        "specularStrength": 0.141,
+        "fresnelPower": 0.67,
+        "skyHorizonR": 0.576,
+        "skyHorizonG": 0.424,
+        "skyHorizonB": 0.394,
+        "skyZenithR": 0.545,
+        "skyZenithG": 0.323,
+        "skyZenithB": 0.293
+    }
+},
+{
+    "name": "Close Dark 1",
+    "iteration": 26,
+    "values": {
+        "timeScale": 1,
+        "rainRate": 12.1,
+        "simTension": 0.5,
+        "simRainImpulse": 1.09,
+        "rippleStrengthVariance": 2,
+        "dropFallSpeed": 9.7,
+        "dropFallSpeedVariance": 0.37,
+        "dropFallHeight": 5,
+        "dropSize": 0.0055,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "letterRate": 10.1,
+        "letterSpacing": 0.41,
+        "letterMaxLineWidth": 0.4,
+        "letterStrength": 0.025,
+        "letterSize": 0.28,
+        "letterYOffset": -0.02,
+        "letterYVariance": 0.03,
+        "letterWavelength": 0.02,
+        "letterThickness": 0.1,
+        "oceanWindSpeed": 9,
+        "oceanWindAngle": 0.3,
+        "oceanWaveScale": 1.2,
+        "oceanHeightAmp": 0.03,
+        "oceanChop": 0.7,
+        "oceanSmallWaveCut": 0.45,
+        "oceanDirectionSpread": 0.6,
+        "oceanFoamThreshold": 0.55,
+        "oceanFoamStrength": 0.8,
+        "cameraHeight": 1.8,
+        "surfaceTilt": 0.13,
+        "perspectiveStrength": 0.33,
+        "waterDepth": 0.556,
+        "absorption": 0.51,
+        "surfaceDepth": 0.101,
+        "refractionStrength": -0.14,
+        "dispersionStrength": 0.0051,
+        "waterColorR": 0.505,
+        "waterColorG": 0.556,
+        "waterColorB": 0.535,
+        "waterDeepR": 0.515,
+        "waterDeepG": 0.576,
+        "waterDeepB": 0.556,
+        "bgImageIndex": 9,
+        "envMapStrength": 0.82,
+        "envMapZoom": 2.09,
+        "envMapPanX": 0.03,
+        "envMapPanY": 0.49,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 10,
+        "bedDisplacement": 0.49,
+        "bedHeightScale": 0.111,
+        "bedHeightBlur": 24,
+        "causticStrength": 0.85,
+        "simCausticStrength": 0.39,
+        "causticRGBScale": 0.005,
+        "causticRGBAngle": -6.28,
+        "causticScale": 0.69,
+        "oceanCausticGain": 1.1,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 2.3,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
+    }
+},
+{
+    "name": "Beach Paradise",
+    "iteration": 26,
+    "values": {
+        "timeScale": 1,
+        "rainRate": 22.2,
+        "simTension": 0.421,
+        "simDamping": 0.905,
+        "simQuadraticDrag": 4.24,
+        "simRainImpulse": 1.39,
+        "rippleStrength": 0.4,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": -0.07,
+        "rippleDriftY": -0.07,
+        "dropFallSpeed": 9.7,
+        "dropFallSpeedVariance": 0.37,
+        "dropFallHeight": 5,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "letterRate": 10.1,
+        "letterSpacing": 0.41,
+        "letterMaxLineWidth": 0.4,
+        "letterStrength": -0.227,
+        "letterSize": 0.28,
+        "letterYOffset": -0.21,
+        "letterYVariance": 0.03,
+        "letterWavelength": 0.02,
+        "letterThickness": 0.1,
+        "oceanPatchSize": 14.9,
+        "oceanPropagation": 0.52,
+        "oceanSpeed": 1.55,
+        "oceanWindSpeed": 25.400000000000002,
+        "oceanWindAngle": -5.52,
+        "oceanWaveScale": 1.25,
+        "oceanHeightAmp": 0.017,
+        "oceanChop": 1.2,
+        "oceanSmallWaveCut": 0.52,
+        "oceanDirectionSpread": 0.81,
+        "oceanDetail": 2.88,
+        "oceanFoamThreshold": 0.16,
+        "oceanFoamStrength": 1.19,
+        "oceanFoamScale": 2.89,
+        "oceanFoamContrast": 0.37,
+        "oceanFoamDetail": 0.36,
+        "oceanFoamTint": 0.84,
+        "cameraHeight": 2.4,
+        "surfaceTilt": 0.35,
+        "perspectiveStrength": 0.33,
+        "waterDepth": 0.697,
+        "absorption": 0,
+        "surfaceDepth": 0.242,
+        "refractionStrength": 0.34,
+        "dispersionStrength": 0.0051,
+        "waterColorR": 0.758,
+        "waterColorG": 0.798,
+        "waterColorB": 0.828,
+        "waterDeepR": 0.818,
+        "waterDeepG": 0.838,
+        "waterDeepB": 0.859,
+        "bgImageIndex": 6,
+        "bgImageTileX": 64,
+        "bgImageTileY": 64,
+        "envMapStrength": 0.79,
+        "envMapZoom": 2.09,
+        "envMapPanX": 0.03,
+        "envMapPanY": 0.49,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 8,
+        "bedDisplacement": 0.49,
+        "bedHeightScale": 0.111,
+        "bedHeightBlur": 24,
+        "causticStrength": 0.85,
+        "simCausticStrength": 0.15,
+        "causticRGBScale": 0.005,
+        "causticRGBAngle": -6.28,
+        "causticScale": 0.69,
+        "oceanCausticGain": 1.1,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 2.3,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
+    }
+},
+{
+    "name": "Beach Splosh",
+    "iteration": 27,
+    "values": {
+        "timeScale": 1,
+        "rainRate": 22.2,
+        "cameraHeight": 2,
+        "surfaceTilt": 0.39,
+        "perspectiveStrength": 0.64,
+        "cameraOffsetY": 0.38,
+        "simTension": 0.421,
+        "simDamping": 0.905,
+        "simQuadraticDrag": 4.24,
+        "simRainImpulse": 1.39,
+        "dropFallSpeed": 9.7,
+        "dropFallSpeedVariance": 0.37,
+        "dropFallHeight": 5,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrength": 0.4,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": -0.07,
+        "rippleDriftY": -0.07,
+        "letterRate": 10.1,
+        "letterSpacing": 0.41,
+        "letterMaxLineWidth": 0.4,
+        "letterStrength": -0.227,
+        "letterSize": 0.28,
+        "letterYOffset": -0.21,
+        "letterYVariance": 0.03,
+        "letterWavelength": 0.78,
+        "letterThickness": 0.1,
+        "oceanPatchSize": 14.9,
+        "oceanPropagation": 0.52,
+        "oceanSpeed": 1.55,
+        "oceanWindSpeed": 25.400000000000002,
+        "oceanWindAngle": -5.52,
+        "oceanWaveScale": 1.25,
+        "oceanHeightAmp": 0.017,
+        "oceanChop": 1.2,
+        "oceanSmallWaveCut": 0.52,
+        "oceanDirectionSpread": 0.81,
+        "oceanDetail": 2.88,
+        "oceanFoamThreshold": 0.16,
+        "oceanFoamStrength": 1.19,
+        "oceanFoamScale": 3.32,
+        "oceanFoamContrast": 0.51,
+        "oceanFoamDetail": 0.24,
+        "oceanFoamTint": 0.99,
+        "waterDepth": 0.566,
+        "absorption": 0.1,
+        "surfaceDepth": 0.242,
+        "refractionStrength": 0.34,
+        "waterColorR": 0.758,
+        "waterColorG": 0.798,
+        "waterColorB": 0.828,
+        "waterDeepR": 0.818,
+        "waterDeepG": 0.838,
+        "waterDeepB": 0.859,
+        "bgImageIndex": 6,
+        "bgImageTileX": 64,
+        "bgImageTileY": 64,
+        "envMapStrength": 0.79,
+        "envMapZoom": 2.09,
+        "envMapPanX": 0.03,
+        "envMapPanY": 0.49,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 8,
+        "bedImageSeamless": 10,
+        "bedHeightBlur": 24,
+        "causticStrength": 0.54,
+        "simCausticStrength": 0.15,
+        "causticRGBScale": 0.01,
+        "causticRGBAngle": -6.28,
+        "causticScale": 0.69,
+        "oceanCausticGain": 1.1,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 2.3,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
+    }
+},
+{
+    "name": "Beach Zoomies",
+    "iteration": 27,
+    "values": {
+        "timeScale": 1,
+        "rainRate": 0,
+        "cameraHeight": 0.4,
+        "surfaceTilt": 0,
+        "perspectiveStrength": 0.25,
+        "simTension": 0.02,
+        "simDamping": 0.8606,
+        "simRainImpulse": 1.07,
+        "simSpringiness": 0.439,
+        "dropFallSpeed": 9.7,
+        "dropFallSpeedVariance": 0.37,
+        "dropFallHeight": 5,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrength": 0.4,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": 0,
+        "rippleDriftY": 0,
+        "letterRate": 10.1,
+        "letterSpacing": 0.66,
+        "letterMaxLineWidth": 0.18,
+        "letterStrength": -0.227,
+        "letterSize": 0.19,
+        "letterYOffset": 0,
+        "letterYVariance": 0.03,
+        "letterWavelength": 0.25,
+        "letterThickness": 0.1,
+        "liveTextMaxBacklog": 6,
+        "oceanPatchSize": 14.9,
+        "oceanPropagation": 0.52,
+        "oceanSpeed": 1.55,
+        "oceanWindSpeed": 25.400000000000002,
+        "oceanWindAngle": -5.52,
+        "oceanWaveScale": 1.25,
+        "oceanHeightAmp": 0.017,
+        "oceanChop": 1.2,
+        "oceanSmallWaveCut": 0.52,
+        "oceanDirectionSpread": 0.81,
+        "oceanDetail": 2.88,
+        "oceanFoamThreshold": 0.11,
+        "oceanFoamStrength": 0,
+        "oceanFoamScale": 5.34,
+        "oceanFoamContrast": 0.51,
+        "oceanFoamDetail": 0.24,
+        "oceanFoamTint": 0.99,
+        "waterDepth": 0.566,
+        "absorption": 0.1,
+        "surfaceDepth": 0.242,
+        "refractionStrength": 0.34,
+        "waterColorR": 0.788,
+        "waterColorG": 0.798,
+        "waterColorB": 0.828,
+        "waterDeepR": 0.747,
+        "waterDeepG": 0.798,
+        "waterDeepB": 0.768,
+        "bgImageIndex": 6,
+        "bgImageTileX": 64,
+        "bgImageTileY": 64,
+        "envMapStrength": 0,
+        "envMapZoom": 2.09,
+        "envMapPanX": 0.03,
+        "envMapPanY": 0.49,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 8,
+        "bedImageSeamless": 10,
+        "bedHeightBlur": 24,
+        "causticStrength": 0.62,
+        "simCausticStrength": 0.15,
+        "causticRGBScale": 0.004,
+        "causticRGBAngle": -6.28,
+        "causticScale": 0.42,
+        "oceanCausticGain": 1.1,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 2.3,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
+    }
+},
+{
+    "name": "Beach Zoomies 2",
+    "iteration": 27,
+    "values": {
+        "timeScale": 1,
+        "rainRate": 105.1,
+        "cameraHeight": 1.1,
+        "surfaceTilt": 0,
+        "perspectiveStrength": 0.21,
+        "simTension": 0.198,
+        "simDamping": 0.8707,
+        "simQuadraticDrag": 3.43,
+        "simRainImpulse": 1.07,
+        "simSpringiness": 0.439,
+        "dropFallSpeed": 9.7,
+        "dropFallSpeedVariance": 0.37,
+        "dropFallHeight": 5,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": 0,
+        "rippleDriftY": 0,
+        "letterRate": 10.1,
+        "letterSpacing": 0.56,
+        "letterMaxLineWidth": 0.5,
+        "letterStrength": -0.227,
+        "letterSize": 1,
+        "letterYOffset": 0,
+        "letterYVariance": 0.02,
+        "letterWavelength": 0.25,
+        "letterThickness": 0.1,
+        "liveTextMaxBacklog": 6,
+        "oceanPatchSize": 14.9,
+        "oceanPropagation": 0.52,
+        "oceanSpeed": 1.55,
+        "oceanWindSpeed": 25.400000000000002,
+        "oceanWindAngle": -5.52,
+        "oceanWaveScale": 1.25,
+        "oceanHeightAmp": 0.017,
+        "oceanChop": 1.2,
+        "oceanSmallWaveCut": 0.52,
+        "oceanDirectionSpread": 0.81,
+        "oceanDetail": 2.88,
+        "oceanFoamThreshold": 0.11,
+        "oceanFoamStrength": 0,
+        "oceanFoamScale": 5.34,
+        "oceanFoamContrast": 0.51,
+        "oceanFoamDetail": 0.24,
+        "oceanFoamTint": 0.99,
+        "waterDepth": 0.566,
+        "absorption": 0.1,
+        "surfaceDepth": 0.242,
+        "refractionStrength": 0.34,
+        "waterColorR": 0.788,
+        "waterColorG": 0.798,
+        "waterColorB": 0.828,
+        "waterDeepR": 0.747,
+        "waterDeepG": 0.798,
+        "waterDeepB": 0.768,
+        "bgImageIndex": 6,
+        "bgImageTileX": 64,
+        "bgImageTileY": 64,
+        "envMapStrength": 0,
+        "envMapZoom": 2.09,
+        "envMapPanX": 0.03,
+        "envMapPanY": 0.49,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 8,
+        "bedImageSeamless": 10,
+        "bedHeightBlur": 24,
+        "causticStrength": 0.62,
+        "simCausticStrength": 0.15,
+        "causticRGBScale": 0.004,
+        "causticRGBAngle": -6.28,
+        "causticScale": 0.42,
+        "oceanCausticGain": 1.1,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 2.3,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
+    }
+},
+{
+    "name": "Downstream",
+    "iteration": 27,
+    "values": {
+        "timeScale": 1,
+        "rainRate": 8.1,
+        "cameraHeight": 2.8,
+        "surfaceTilt": 0.37,
+        "perspectiveStrength": 1,
+        "cameraOffsetY": 0.42,
+        "dropFallSpeed": 13,
+        "dropFallHeight": 10,
+        "dropSize": 0.0055,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": 0,
+        "rippleDriftY": -0.2,
+        "letterStrength": 0.08,
+        "letterSize": 0.16,
+        "letterYOffset": -0.24,
+        "letterYVariance": 0.02,
+        "letterWavelength": 0.0212,
+        "letterThickness": 0.1,
+        "oceanPatchSize": 8.3,
+        "oceanWindSpeed": 5,
+        "oceanWindAngle": 1.46,
+        "oceanHeightAmp": 0.077,
+        "oceanChop": 0.4,
+        "oceanSmallWaveCut": 0.55,
+        "oceanDirectionSpread": 0.69,
+        "waterDepth": 0.081,
+        "surfaceDepth": 0.25,
+        "refractionStrength": 0.1,
+        "dispersionStrength": 0.0035,
+        "waterColorR": 0.394,
+        "waterColorG": 0.515,
+        "waterColorB": 0.616,
+        "waterDeepR": 0.263,
+        "waterDeepG": 0.394,
+        "waterDeepB": 0.485,
+        "envMapStrength": 1,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 7,
+        "bedDisplacement": 0.23,
+        "bedHeightScale": 0.323,
+        "causticStrength": 0.14,
+        "oceanCausticGain": 0.6,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 0.5,
+        "fresnelPower": 0.4
+    }
+},
+{
+    "name": "Flash Harry",
+    "iteration": 27,
+    "values": {
+        "timeScale": 1,
+        "vignetteRadius": 1,
+        "cameraHeight": 3.2,
+        "surfaceTilt": 0,
+        "perspectiveStrength": 1,
+        "simTension": 0.297,
+        "simDamping": 0.9656,
+        "simRainImpulse": 0.91,
+        "simSpringiness": 0.293,
+        "dropFallSpeed": 18.1,
+        "dropFallSpeedVariance": 0.81,
+        "dropFallHeight": 7,
+        "dropSize": 0.0045,
+        "dropSizeVariance": 0.4,
+        "sphereQuality": 32,
+        "dropSplashCount": 3,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrength": 0.82,
+        "rippleStrengthVariance": 2,
+        "rippleSpeed": 0.81,
+        "rippleDriftX": 0,
+        "rippleDriftY": -0.2,
+        "letterRate": 11.31,
+        "letterStrength": 0.08,
+        "letterSize": 0.33,
+        "letterYOffset": -0.24,
+        "letterYVariance": 0.02,
+        "letterWavelength": 0.02,
+        "letterThickness": 1.7,
+        "oceanPatchSize": 8.3,
+        "oceanWindSpeed": 5,
+        "oceanWindAngle": 1.46,
+        "oceanHeightAmp": 0.032,
+        "oceanChop": 0.4,
+        "oceanSmallWaveCut": 0.55,
+        "oceanDirectionSpread": 0.9,
+        "waterDepth": 0.051,
+        "surfaceDepth": 0.02,
+        "refractionStrength": 0.22,
+        "dispersionStrength": 0.0015,
+        "rgbSplit": -0.088,
+        "waterColorR": 0.091,
+        "waterColorG": 0.03,
+        "waterColorB": 0.03,
+        "waterDeepR": 0.141,
+        "waterDeepG": 0.071,
+        "waterDeepB": 0.081,
+        "bgImageIndex": 0,
+        "envMapStrength": 0,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 4,
+        "bedImageSeamless": 9,
+        "bedDisplacement": 0.23,
+        "bedHeightScale": 0.323,
+        "causticStrength": 0.14,
+        "oceanCausticGain": 0.6,
+        "sunAngle": -3.24,
+        "sunHeight": -1,
+        "specularPower": 8.1,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.79
+    }
+},
+{
+    "name": "Holes",
+    "iteration": 28,
+    "values": {
+        "timeScale": 1,
+        "vignetteRadius": 1,
+        "cameraHeight": 3.2,
+        "surfaceTilt": 0,
+        "perspectiveStrength": 1,
+        "simTension": 0.322,
+        "simDamping": 0.8828,
+        "simRainImpulse": 1.01,
+        "simSpringiness": 0.005,
+        "dropFallSpeed": 18.1,
+        "dropFallSpeedVariance": 0.81,
+        "dropFallHeight": 7,
+        "dropSize": 0.0045,
+        "dropSizeVariance": 0.4,
+        "sphereQuality": 32,
+        "dropSplashCount": 3,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrength": 0.82,
+        "rippleStrengthVariance": 2,
+        "rippleSpeed": 0.81,
+        "rippleDriftX": 0,
+        "rippleDriftY": -0.2,
+        "letterRate": 11.31,
+        "letterStrength": 0.08,
+        "letterSize": 0.33,
+        "letterYOffset": -0.24,
+        "letterYVariance": 0.02,
+        "letterWavelength": 0.53,
+        "letterThickness": 1.8,
+        "oceanPatchSize": 8.3,
+        "oceanWindSpeed": 5,
+        "oceanWindAngle": 1.46,
+        "oceanHeightAmp": 0.032,
+        "oceanChop": 0.4,
+        "oceanSmallWaveCut": 0.55,
+        "oceanDirectionSpread": 0.9,
+        "waterDepth": 0.051,
+        "refractionStrength": 0.51,
+        "dispersionStrength": 0.002,
+        "rgbSplit": -0.1,
+        "waterColorR": 0.091,
+        "waterColorG": 0.03,
+        "waterColorB": 0.03,
+        "waterDeepR": 0.141,
+        "waterDeepG": 0.071,
+        "waterDeepB": 0.081,
+        "bgImageIndex": 0,
+        "envMapStrength": 0,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 4,
+        "bedImageSeamless": 9,
+        "bedHeightScale": 0,
+        "causticStrength": 0.14,
+        "oceanCausticGain": 0.6,
+        "sunAngle": -3.24,
+        "sunHeight": -1,
+        "specularPower": 8.1,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.79
+    }
+},
+{
+    "name": "Pebbles",
+    "iteration": 28,
+    "values": {
+        "timeScale": 1.2,
+        "rainRate": 18.2,
+        "vignetteRadius": 1,
+        "cameraHeight": 3.2,
+        "surfaceTilt": 0,
+        "perspectiveStrength": 1,
+        "simTension": 0.46,
+        "simDamping": 0.9232,
+        "simRainImpulse": 1.21,
+        "simSpringiness": 0.172,
+        "surfaceDepth": 0.485,
+        "dropFallSpeed": 18.1,
+        "dropFallSpeedVariance": 0.81,
+        "dropFallHeight": 7,
+        "dropSize": 0.0045,
+        "dropSizeVariance": 0.4,
+        "sphereQuality": 32,
+        "dropSplashCount": 3,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrength": 0.82,
+        "rippleStrengthVariance": 2,
+        "rippleSpeed": 0.81,
+        "rippleDriftX": 0,
+        "rippleDriftY": -0.2,
+        "letterRate": 11.31,
+        "letterStrength": 0.025,
+        "letterSize": 0.33,
+        "letterYOffset": -0.24,
+        "letterYVariance": 0.02,
+        "letterWavelength": 0.02,
+        "letterThickness": 0.1,
+        "oceanPatchSize": 8.3,
+        "oceanWindSpeed": 5,
+        "oceanWindAngle": 1.46,
+        "oceanHeightAmp": 0.032,
+        "oceanChop": 0.4,
+        "oceanSmallWaveCut": 0.55,
+        "oceanDirectionSpread": 0.9,
+        "waterDepth": 0.051,
+        "refractionStrength": 0.22,
+        "dispersionStrength": 0.0015,
+        "rgbSplit": -0.088,
+        "waterColorR": 0.091,
+        "waterColorG": 0.03,
+        "waterColorB": 0.03,
+        "waterDeepR": 0.141,
+        "waterDeepG": 0.071,
+        "waterDeepB": 0.081,
+        "bgImageIndex": 0,
+        "envMapStrength": 0.33,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 3,
+        "bedImageSeamless": 9,
+        "bedDisplacement": 0.23,
+        "bedHeightScale": 0.323,
+        "causticStrength": 0.14,
+        "oceanCausticGain": 0.6,
+        "sunAngle": -3.24,
+        "sunHeight": -1,
+        "specularPower": 8.1,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.79
+    }
+},
+{
+    "name": "Ocean Waft",
+    "iteration": 28,
+    "values": {
+        "timeScale": 1.2,
+        "rainRate": 68.7,
+        "vignetteRadius": 1,
+        "cameraHeight": 3.2,
+        "surfaceTilt": 0.37,
+        "perspectiveStrength": 1,
+        "simTension": 0.46,
+        "simDamping": 0.9232,
+        "simRainImpulse": 1.21,
+        "simSpringiness": 0.172,
+        "surfaceDepth": 0.485,
+        "dropFallSpeed": 18.1,
+        "dropFallSpeedVariance": 0.81,
+        "dropFallHeight": 7,
+        "dropSize": 0.0045,
+        "dropSizeVariance": 0.4,
+        "sphereQuality": 32,
+        "dropSplashCount": 3,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrength": 0.82,
+        "rippleStrengthVariance": 2,
+        "rippleSpeed": 0.81,
+        "rippleDriftX": 0,
+        "rippleDriftY": -0.2,
+        "letterRate": 11.31,
+        "letterStrength": 0.015,
+        "letterSize": 0.33,
+        "letterYOffset": -0.24,
+        "letterYVariance": 0.02,
+        "letterWavelength": 0.02,
+        "letterThickness": 0.1,
+        "oceanPatchSize": 12.1,
+        "oceanWindSpeed": 5,
+        "oceanWindAngle": 1.46,
+        "oceanWaveScale": 0.77,
+        "oceanHeightAmp": 0.035,
+        "oceanChop": 0.47,
+        "oceanSmallWaveCut": 0.73,
+        "oceanDirectionSpread": 1,
+        "oceanFoamThreshold": 0.08,
+        "oceanFoamStrength": 0.83,
+        "oceanFoamScale": 56.7,
+        "oceanFoamContrast": 0.61,
+        "oceanFoamDetail": 0.23,
+        "waterDepth": 0.545,
+        "absorption": 0.91,
+        "refractionStrength": 0.22,
+        "dispersionStrength": 0.0015,
+        "rgbSplit": -0.088,
+        "waterColorR": 0.091,
+        "waterColorG": 0.03,
+        "waterColorB": 0.03,
+        "waterDeepR": 0.141,
+        "waterDeepG": 0.071,
+        "waterDeepB": 0.081,
+        "bgImageIndex": 0,
+        "envMapStrength": 0.33,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 2,
+        "bedImageSeamless": 34,
+        "bedImageTileX": 7,
+        "bedImageTileY": 7,
+        "bedDisplacement": 0.23,
+        "causticStrength": 0.12,
+        "causticRGBScale": 0.14,
+        "causticRGBAngle": -5.01,
+        "oceanCausticGain": 0.6,
+        "sunAngle": -3.24,
+        "sunHeight": -1,
+        "specularPower": 8.1,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.79
+    }
+},
+{
+    "name": "Slowly Does It",
+    "iteration": 28,
+    "values": {
+        "timeScale": 0.1,
+        "rainRate": 68.7,
+        "vignetteRadius": 1,
+        "cameraHeight": 3.2,
+        "surfaceTilt": 0.37,
+        "perspectiveStrength": 1,
+        "simTension": 0.46,
+        "simDamping": 0.9232,
+        "simRainImpulse": 1.21,
+        "simSpringiness": 0.172,
+        "surfaceDepth": 0.485,
+        "dropFallSpeed": 18.1,
+        "dropFallSpeedVariance": 0.81,
+        "dropFallHeight": 7,
+        "dropSize": 0.0045,
+        "dropSizeVariance": 0.4,
+        "sphereQuality": 32,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrength": 0.64,
+        "rippleStrengthVariance": 2,
+        "rippleSpeed": 0.81,
+        "rippleDriftX": 0,
+        "rippleDriftY": -0.2,
+        "letterRate": 11.31,
+        "letterStrength": 0.015,
+        "letterSize": 0.33,
+        "letterYOffset": -0.24,
+        "letterYVariance": 0.02,
+        "letterWavelength": 0.02,
+        "letterThickness": 0.1,
+        "oceanPatchSize": 12.1,
+        "oceanWindSpeed": 5,
+        "oceanWindAngle": 1.46,
+        "oceanWaveScale": 0.77,
+        "oceanHeightAmp": 0.035,
+        "oceanChop": 0.05,
+        "oceanSmallWaveCut": 0.73,
+        "oceanDirectionSpread": 1,
+        "oceanFoamThreshold": 0.08,
+        "oceanFoamStrength": 0.83,
+        "oceanFoamScale": 56.7,
+        "oceanFoamContrast": 0.61,
+        "oceanFoamDetail": 0.23,
+        "waterDepth": 0.192,
+        "absorption": 0.91,
+        "refractionStrength": 0.22,
+        "dispersionStrength": 0.003,
+        "waterColorR": 0.091,
+        "waterColorG": 0.03,
+        "waterColorB": 0.03,
+        "waterDeepR": 0.141,
+        "waterDeepG": 0.071,
+        "waterDeepB": 0.081,
+        "bgImageIndex": 2,
+        "envMapStrength": 0.33,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 3,
+        "bedImageSeamless": 34,
+        "bedImageTileX": 3,
+        "bedImageTileY": 3,
+        "bedDisplacement": 0.23,
+        "causticStrength": 0.12,
+        "causticRGBScale": 0.14,
+        "causticRGBAngle": -5.01,
+        "oceanCausticGain": 0.6,
+        "sunAngle": -3.24,
+        "sunHeight": -1,
+        "specularPower": 8.1,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
+    }
+},
+{
+    "name": "Slowly Does It 2",
+    "iteration": 29,
+    "values": {
+        "timeScale": 0.3,
+        "rainRate": 68.7,
+        "vignetteRadius": 1,
+        "cameraHeight": 3.2,
+        "surfaceTilt": 0.37,
+        "perspectiveStrength": 1,
+        "simTension": 0.5,
+        "simDamping": 0.9656,
+        "simQuadraticDrag": 9.7,
+        "simRainImpulse": 1.03,
+        "simSpringiness": 0.172,
+        "surfaceDepth": 0.364,
+        "dropFallSpeed": 18.1,
+        "dropFallSpeedVariance": 0.81,
+        "dropFallHeight": 7,
+        "dropSize": 0.003,
+        "dropSizeVariance": 0.4,
+        "sphereQuality": 32,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "rippleStrength": 0.64,
+        "rippleStrengthVariance": 2,
+        "rippleSpeed": 0.81,
+        "rippleDriftX": 0,
+        "rippleDriftY": -0.2,
+        "simDropRadius": 0.007,
+        "simDropCore": 0.17,
+        "letterRate": 11.31,
+        "letterStrength": 0.015,
+        "letterSize": 0.33,
+        "letterYOffset": -0.24,
+        "letterYVariance": 0.02,
+        "letterWavelength": 0.02,
+        "letterThickness": 0.1,
+        "oceanPatchSize": 12.1,
+        "oceanWindSpeed": 5,
+        "oceanWindAngle": 1.46,
+        "oceanWaveScale": 0.77,
+        "oceanHeightAmp": 0.035,
+        "oceanChop": 0.05,
+        "oceanSmallWaveCut": 0.73,
+        "oceanDirectionSpread": 1,
+        "oceanFoamThreshold": 0.08,
+        "oceanFoamStrength": 0.83,
+        "oceanFoamScale": 56.7,
+        "oceanFoamContrast": 0.61,
+        "oceanFoamDetail": 0.23,
+        "waterDepth": 0.192,
+        "absorption": 0.91,
+        "refractionStrength": 0.22,
+        "dispersionStrength": 0.003,
+        "waterColorR": 0.091,
+        "waterColorG": 0.03,
+        "waterColorB": 0.03,
+        "waterDeepR": 0.141,
+        "waterDeepG": 0.071,
+        "waterDeepB": 0.081,
+        "bgImageIndex": 2,
+        "envMapStrength": 0.33,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 3,
+        "bedImageSeamless": 34,
+        "bedImageTileX": 3,
+        "bedImageTileY": 3,
+        "bedDisplacement": 0.23,
+        "causticStrength": 0.12,
+        "causticRGBScale": 0.14,
+        "causticRGBAngle": -5.01,
+        "oceanCausticGain": 0.6,
+        "sunAngle": -3.24,
+        "sunHeight": -1,
+        "specularPower": 8.1,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
+    }
+}
+];
+
+// =====================================================================
+// GLOBALS
+// =====================================================================
+
+var MAX_DROPS = 128;
+var MAX_LETTERS = 24;
+var MAX_FALLING_DROPS = 128;
+
+var state = Object.assign({}, DEFAULTS);
+var meshRebuildFn = null;
+
+var transitionActive = false;
+var transitionStartTime = 0;
+var transitionDuration = 0;
+var transitionSource = null;
+var transitionTarget = null;
+
+var bgPendingTargetUpload = false;
+var bedPendingTargetUpload = false;
+var loadToken = 0;
+
+// =====================================================================
+// FORMAT HELPERS
+// =====================================================================
+
+function fmtVal(v) {
+    if (v === 0) return "0";
+    var abs = Math.abs(v);
+    if (abs >= 100) return v.toFixed(1);
+    if (abs >= 1) return v.toFixed(3);
+    if (abs >= 0.01) return v.toFixed(4);
+    if (abs >= 0.0001) return v.toFixed(6);
+    return v.toExponential(3);
+}
+
+// =====================================================================
+// SCALE DROPDOWN HELPERS
+// =====================================================================
+
+function setScaleDropdownEnabled(key, enabled) {
+    var sel = document.querySelector('select[data-key="' + key + '"]');
+    if (!sel) return;
+    sel.disabled = !enabled;
+    sel.style.opacity = enabled ? "1" : "0.4";
+    sel.style.cursor = enabled ? "pointer" : "not-allowed";
+    sel.title = enabled
+        ? "Image size not in standard options — dropdown controls the resample target"
+        : "Image is already a standard size — used at native resolution";
+}
+
+function sourceMatchesScaleOption(img) {
+    if (!img) return false;
+    for (var i = 0; i < SCALE_OPTIONS.length; i++) {
+        if (img.naturalWidth === SCALE_OPTIONS[i].w &&
+            img.naturalHeight === SCALE_OPTIONS[i].h) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// =====================================================================
+// IMAGE UTILITIES
+// =====================================================================
+
+var rawImageCache = {};   // key = "baseName.offset" → Promise<HTMLImageElement|null>
+
+var rawImageCacheOrder = [];   // keys, oldest → newest
+var RAW_IMAGE_CACHE_CAP = 4;    // Max 4 images in cache (reduces memory usage)
+
+function evictRawCacheOldest() {
+    while (rawImageCacheOrder.length > RAW_IMAGE_CACHE_CAP) {
+        var evicted = rawImageCacheOrder.shift();
+        delete rawImageCache[evicted];
+    }
+}
+
+function loadImage(baseName, offset, ext) {
+    var cacheKey = baseName + "." + offset + "." + ext;
+
+    if (rawImageCache[cacheKey]) {
+        // Refresh LRU position: move key to the end of the order array.
+        var i = rawImageCacheOrder.indexOf(cacheKey);
+        if (i >= 0) rawImageCacheOrder.splice(i, 1);
+        rawImageCacheOrder.push(cacheKey);
+        return rawImageCache[cacheKey];
+    }
+
+    var promise = new Promise(function (resolve) {
+        var name = baseName + "." + String(offset).padStart(3, "0") + "." + ext;
+        var url = "img/" + name;
+        var img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = function () {
+            console.log("Loaded " + url + " (" + img.naturalWidth + "x" + img.naturalHeight + ")");
+            resolve(img);
+        };
+        img.onerror = function (e) {
+            console.error("Failed to load " + url, e);
+            // Drop the failed entry so a retry actually retries.
+            delete rawImageCache[cacheKey];
+            var j = rawImageCacheOrder.indexOf(cacheKey);
+            if (j >= 0) rawImageCacheOrder.splice(j, 1);
+            resolve(null);
+        };
+        img.src = url;
+    });
+
+    rawImageCache[cacheKey] = promise;
+    rawImageCacheOrder.push(cacheKey);
+    evictRawCacheOldest();
+
+    return promise;
+}
+
+function processImage(img, targetW, targetH, seamlessX, seamlessY) {
+    var srcW = img.naturalWidth;
+    var srcH = img.naturalHeight;
+
+    var useW = targetW;
+    var useH = targetH;
+    var matched = false;
+    for (var i = 0; i < SCALE_OPTIONS.length; i++) {
+        if (srcW === SCALE_OPTIONS[i].w && srcH === SCALE_OPTIONS[i].h) {
+            useW = srcW;
+            useH = srcH;
+            matched = true;
+            break;
+        }
+    }
+
+    var canvas = document.createElement("canvas");
+    canvas.width = useW;
+    canvas.height = useH;
+    var ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+    if (matched) {
+        ctx.drawImage(img, 0, 0);
+    } else {
+        var isDownscale = srcW > useW || srcH > useH;
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = isDownscale ? "high" : "low";
+        ctx.drawImage(img, 0, 0, useW, useH);
+    }
+
+    if (seamlessX === 0 && seamlessY === 0) {
+        return canvas;
+    }
+
+    if (seamlessX > 0) {
+        var Sx = Math.max(1, Math.floor((seamlessX / 100) * useW * 0.5));
+        var originalLeft = ctx.getImageData(0, 0, Sx, useH);
+        var originalRight = ctx.getImageData(useW - Sx, 0, Sx, useH);
+        var newLeft = ctx.createImageData(Sx, useH);
+        var newRight = ctx.createImageData(Sx, useH);
+
+        for (var y = 0; y < useH; y++) {
+            for (var x = 0; x < Sx; x++) {
+                var idx = (y * Sx + x) * 4;
+                var opp = Sx - 1 - x;
+                var oppIdx = (y * Sx + opp) * 4;
+
+                var t = x / Math.max(1, Sx - 1);
+                var weightNative = 0.5 + 0.5 * t;
+                var weightOpposite = 1.0 - weightNative;
+
+                newLeft.data[idx] = originalLeft.data[idx] * weightNative + originalRight.data[oppIdx] * weightOpposite;
+                newLeft.data[idx + 1] = originalLeft.data[idx + 1] * weightNative + originalRight.data[oppIdx + 1] * weightOpposite;
+                newLeft.data[idx + 2] = originalLeft.data[idx + 2] * weightNative + originalRight.data[oppIdx + 2] * weightOpposite;
+                newLeft.data[idx + 3] = 255;
+
+                var tRight = (Sx - 1 - x) / Math.max(1, Sx - 1);
+                var weightNativeRight = 0.5 + 0.5 * tRight;
+                var weightOppositeRight = 1.0 - weightNativeRight;
+
+                newRight.data[idx] = originalRight.data[idx] * weightNativeRight + originalLeft.data[oppIdx] * weightOppositeRight;
+                newRight.data[idx + 1] = originalRight.data[idx + 1] * weightNativeRight + originalLeft.data[oppIdx + 1] * weightOppositeRight;
+                newRight.data[idx + 2] = originalRight.data[idx + 2] * weightNativeRight + originalLeft.data[oppIdx + 2] * weightOppositeRight;
+                newRight.data[idx + 3] = 255;
+            }
+        }
+        ctx.putImageData(newLeft, 0, 0);
+        ctx.putImageData(newRight, useW - Sx, 0);
+    }
+
+    if (seamlessY > 0) {
+        var Sy = Math.max(1, Math.floor((seamlessY / 100) * useH * 0.5));
+        var originalTop = ctx.getImageData(0, 0, useW, Sy);
+        var originalBottom = ctx.getImageData(0, useH - Sy, useW, Sy);
+        var newTop = ctx.createImageData(useW, Sy);
+        var newBottom = ctx.createImageData(useW, Sy);
+
+        for (var yy = 0; yy < Sy; yy++) {
+            var oppY = Sy - 1 - yy;
+
+            var ty = yy / Math.max(1, Sy - 1);
+            var weightNativeY = 0.5 + 0.5 * ty;
+            var weightOppositeY = 1.0 - weightNativeY;
+
+            var tBottom = (Sy - 1 - yy) / Math.max(1, Sy - 1);
+            var weightNativeBottom = 0.5 + 0.5 * tBottom;
+            var weightOppositeBottom = 1.0 - weightNativeBottom;
+
+            for (var xx = 0; xx < useW; xx++) {
+                var ixx = (yy * useW + xx) * 4;
+                var oppIxx = (oppY * useW + xx) * 4;
+
+                newTop.data[ixx] = originalTop.data[ixx] * weightNativeY + originalBottom.data[oppIxx] * weightOppositeY;
+                newTop.data[ixx + 1] = originalTop.data[ixx + 1] * weightNativeY + originalBottom.data[oppIxx + 1] * weightOppositeY;
+                newTop.data[ixx + 2] = originalTop.data[ixx + 2] * weightNativeY + originalBottom.data[oppIxx + 2] * weightOppositeY;
+                newTop.data[ixx + 3] = 255;
+
+                newBottom.data[ixx] = originalBottom.data[ixx] * weightNativeBottom + originalTop.data[oppIxx] * weightOppositeBottom;
+                newBottom.data[ixx + 1] = originalBottom.data[ixx + 1] * weightNativeBottom + originalTop.data[oppIxx + 1] * weightOppositeBottom;
+                newBottom.data[ixx + 2] = originalBottom.data[ixx + 2] * weightNativeBottom + originalTop.data[oppIxx + 2] * weightOppositeBottom;
+                newBottom.data[ixx + 3] = 255;
+            }
+        }
+        ctx.putImageData(newTop, 0, 0);
+        ctx.putImageData(newBottom, 0, useH - Sy);
+    }
+
+    return canvas;
+}
+
+    function updateThumbnailFromBitmap(slot, bitmap, suffix) {
+        var previewId = (slot === "bg" ? "bg-thumb" : "bed-thumb") + (suffix || "");
+        var el = document.getElementById(previewId);
+        if (!el || !bitmap) return;
+        try {
+            var c = document.createElement("canvas");
+            // Cap the thumbnail size — a 1024×1024 JPEG is not going into a 300px-wide <img>.
+            var maxDim = 320;
+            var sw = bitmap.width, sh = bitmap.height;
+            var s = Math.min(1, maxDim / Math.max(sw, sh));
+            c.width = Math.round(sw * s);
+            c.height = Math.round(sh * s);
+            var cx = c.getContext("2d");
+            cx.drawImage(bitmap, 0, 0, c.width, c.height);
+            el.src = c.toDataURL("image/jpeg", 0.85);
+        } catch (e) {
+            console.warn("Thumbnail encode failed for " + slot + (suffix || ""), e);
+        }
+    }
+
+// =====================================================================
+// CONTROL PANEL
+// =====================================================================
+
+function buildControlsUI() {
+    var list = document.getElementById("controls-list");
+    list.innerHTML = "";
+
+    function makeHeading(text, isFirst, group) {
+        var head = document.createElement("div");
+        head.className = "ctrl-row";
+        head.style.gridColumn = "1 / -1";
+        head.style.flex = "0 0 100%";
+        head.style.width = "100%";
+        head.style.display = "flex";
+        head.style.alignItems = "center";
+        head.style.justifyContent = "flex-start";
+        head.style.margin = "16px 0 6px 0";
+        head.style.paddingTop = "12px";
+        head.style.fontWeight = "bold";
+        head.style.fontSize = "1.1em";
+        head.style.color = "#ddd";
+        if (!isFirst) head.style.borderTop = "1px solid #555";
+
+        var label = document.createElement("span");
+        label.textContent = text;
+        head.appendChild(label);
+
+        var showExtras = (group.showExtras !== false);
+
+        var btnBox = document.createElement("span");
+        btnBox.style.display = showExtras ? "flex" : "none";
+        btnBox.style.gap = "4px";
+        btnBox.style.marginLeft = "auto";
+
+        if (showExtras) {
+            var randBtn = document.createElement("button");
+            randBtn.className = "reset-btn";
+            randBtn.textContent = "R";
+            randBtn.title = "Randomise this group's values";
+            randBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                randomiseGroup(group, randBtn);
+            });
+
+            var copyBtn = document.createElement("button");
+            copyBtn.className = "reset-btn";
+            copyBtn.textContent = "C";
+            copyBtn.title = "Copy this group's values";
+            copyBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                copyGroup(group, copyBtn);
+            });
+
+            var pasteBtn = document.createElement("button");
+            pasteBtn.className = "reset-btn";
+            pasteBtn.textContent = "P";
+            pasteBtn.title = "Paste values into this group";
+            pasteBtn.addEventListener("click", function (e) {
+                e.stopPropagation();
+                pasteGroup(group, pasteBtn);
+            });
+
+            btnBox.appendChild(randBtn);
+            btnBox.appendChild(copyBtn);
+            btnBox.appendChild(pasteBtn);
+        }
+
+        head.appendChild(btnBox);
+        return head;
+    }
+
+    function makeThumbnail(slot, container, suffix) {
+        var thumbRow = document.createElement("div");
+        thumbRow.className = "ctrl-row";
+        thumbRow.style.gridColumn = "1 / -1";
+        thumbRow.style.flex = "0 0 100%";
+        thumbRow.style.width = "100%";
+        thumbRow.style.display = "block";
+        thumbRow.style.margin = "4px 0 8px 0";
+        var img = document.createElement("img");
+        img.id = slot + "-thumb" + (suffix || "");
+        img.style.width = "100%";
+        img.style.display = "block";
+        img.style.border = "1px solid #333";
+        img.style.boxSizing = "border-box";
+        img.alt = "";
+        thumbRow.appendChild(img);
+        container.appendChild(thumbRow);
+    }
+
+    function makeControl(c, container) {
+        var key = c.key;
+        var current = state[key];
+        var isInt = !!c.int;
+        var row = document.createElement("div");
+        row.className = "ctrl-row";
+        var label = document.createElement("label");
+        label.title = "[" + key + "] " + (c.details || "");   // tooltip
+
+        var iconSpan = document.createElement("span");
+        iconSpan.style.display = "inline-block";
+        iconSpan.style.width = "1.6em";
+        iconSpan.style.textAlign = "center";
+        iconSpan.style.flexShrink = "0";
+        iconSpan.style.marginRight = "2px";
+        iconSpan.textContent = c.icon || "";
+        label.appendChild(iconSpan);
+
+        label.appendChild(document.createTextNode(c.label || key));   // uses label, falls back to key
+
+        if (c.special === "scale") {
+            var scaleSel = document.createElement("select");
+            scaleSel.dataset.key = key;
+            SCALE_OPTIONS.forEach(function (opt, i) {
+                var o = document.createElement("option");
+                o.value = i;
+                o.textContent = opt.label;
+                scaleSel.appendChild(o);
+            });
+            scaleSel.value = String(current);
+            scaleSel.disabled = true;
+            scaleSel.style.opacity = "0.4";
+            scaleSel.style.cursor = "not-allowed";
+            scaleSel.title = "Loading image…";
+            scaleSel.addEventListener("change", function () {
+                state[key] = parseInt(scaleSel.value, 10);
+                if (key === "bgImageScale" && window.__applyBg) window.__applyBg();
+                if (key === "bedImageScale" && window.__applyBed) window.__applyBed();
+            });
+            var resetBtnS = document.createElement("button");
+            resetBtnS.className = "reset-btn";
+            resetBtnS.textContent = "↺";
+            resetBtnS.addEventListener("click", function () {
+                state[key] = c.def;
+                scaleSel.value = String(c.def);
+                if (key === "bgImageScale" && window.__applyBg) window.__applyBg();
+                if (key === "bedImageScale" && window.__applyBed) window.__applyBed();
+            });
+            row.appendChild(label);
+            row.appendChild(scaleSel);
+            row.appendChild(resetBtnS);
+            container.appendChild(row);
+            return;
+        }
+
+        var slider = document.createElement("input");
+        slider.type = "range";
+        slider.min = c.min; slider.max = c.max; slider.step = c.step;
+        slider.value = current;
+        slider.dataset.key = key;
+        var number = document.createElement("input");
+        number.type = "number";
+        number.step = c.step;
+        number.value = isInt ? String(Math.round(current)) : fmtVal(current);
+        number.dataset.key = key;
+        var resetBtn = document.createElement("button");
+        resetBtn.className = "reset-btn";
+        resetBtn.textContent = "↺";
+
+        var isMeshRebuild = (key === "gridResolution");
+        var onBgChange = (key === "bgImageIndex" || key === "bgImageSeamless");
+        var onBedChange = (key === "bedImageIndex" || key === "bedImageSeamless" || key === "bedHeightBlur");
+
+        slider.addEventListener("input", function () {
+            var v = parseFloat(slider.value);
+            if (isInt) v = Math.round(v);
+            state[key] = v;
+            number.value = isInt ? String(v) : fmtVal(v);
+        });
+        slider.addEventListener("change", function () {
+            if (isMeshRebuild && typeof meshRebuildFn === "function") meshRebuildFn(Math.round(state.gridResolution));
+            if (onBgChange && window.__applyBg) window.__applyBg();
+            if (onBedChange && window.__applyBed) window.__applyBed();
+            if (key === "liveText" && window.__applyLiveText) window.__applyLiveText(state.liveText === 1);
+        });
+        number.addEventListener("change", function () {
+            var v = parseFloat(number.value);
+            if (isNaN(v)) { number.value = fmtVal(state[key]); return; }
+            if (isInt) v = Math.max(c.min, Math.min(c.max, Math.round(v)));
+            state[key] = v;
+            slider.value = v;
+            number.value = isInt ? String(v) : fmtVal(v);
+            if (isMeshRebuild && typeof meshRebuildFn === "function") meshRebuildFn(Math.round(v));
+            if (onBgChange && window.__applyBg) window.__applyBg();
+            if (onBedChange && window.__applyBed) window.__applyBed();
+            if (key === "liveText" && window.__applyLiveText) window.__applyLiveText(state.liveText === 1);
+        });
+        resetBtn.addEventListener("click", function () {
+            state[key] = c.def;
+            slider.value = c.def;
+            number.value = isInt ? String(Math.round(c.def)) : fmtVal(c.def);
+            if (isMeshRebuild && typeof meshRebuildFn === "function") meshRebuildFn(Math.round(c.def));
+            if (onBgChange && window.__applyBg) window.__applyBg();
+            if (onBedChange && window.__applyBed) window.__applyBed();
+            if (key === "liveText" && window.__applyLiveText) window.__applyLiveText(state.liveText === 1);
+        });
+
+        row.appendChild(label);
+        row.appendChild(slider);
+        row.appendChild(number);
+        row.appendChild(resetBtn);
+        container.appendChild(row);
+
+        if (key === "bgImageEnabled") makeThumbnail("bg", container);
+         if (key === "bedImageEnabled") {
+            makeThumbnail("bed", container);            // colour thumbnail (id="bed-thumb")
+            makeThumbnail("bed", container, "-depth");  // depth thumbnail (id="bed-thumb-depth")
+        }
+    }
+
+    CONTROLS.forEach(function (group, gi) {
+        var head = makeHeading(group.heading, gi === 0, group);
+
+        var body = document.createElement("div");
+        body.className = "ctrl-group-body";
+        
+        // Initial state: JSON default, unless the user has toggled this
+        // group before (localStorage), in which case honour their last choice.
+        var initialCollapsed = !group.openByDefault;
+        try {
+            var savedMap = JSON.parse(localStorage.getItem("ctrlGroupsCollapsed") || "{}");
+            if (group.heading in savedMap) initialCollapsed = !!savedMap[group.heading];
+        } catch (_) {}
+        if (initialCollapsed) body.classList.add("collapsed");
+
+        group.controls.forEach(function (c) { makeControl(c, body); });
+
+        // Small ▾ / ▸ indicator so it's obvious the heading is clickable.
+        var indicator = document.createElement("span");
+        indicator.className = "ctrl-group-indicator";
+        indicator.textContent = "▶";
+        indicator.style.marginRight = "6px";
+        indicator.style.opacity = "0.6";
+        indicator.style.fontSize = "0.9em";
+        // Insert before the label (which is head's first child).
+        head.insertBefore(indicator, head.firstChild);
+
+
+        head.style.cursor = "pointer";
+        head.style.userSelect = "none";
+
+        function syncIndicator() {
+            indicator.textContent = body.classList.contains("collapsed") ? "▶" : "▼";
+        }
+
+        head.addEventListener("click", function (e) {
+            if (e.target.closest("button")) return;
+            body.classList.toggle("collapsed");
+            syncIndicator();
+            try {
+                var map = JSON.parse(localStorage.getItem("ctrlGroupsCollapsed") || "{}");
+                map[group.heading] = body.classList.contains("collapsed");
+                localStorage.setItem("ctrlGroupsCollapsed", JSON.stringify(map));
+            } catch (_) {}
+        });
+
+        list.appendChild(head);
+        list.appendChild(body);
+    });
+}
+
+function isControlRandomisable(c) {
+    if (c.canRandomise === false) return false;   // explicit opt-out wins
+    if (c.canRandomise === true) return true;    // explicit opt-in
+    // Default: only plain numeric sliders are randomisable.
+    if (c.special) return false;
+    if (typeof c.min !== "number" || typeof c.max !== "number") return false;
+    return true;
+}
+
+function randomiseGroup(group, btn) {
+    if (!group || !group.controls) return;
+
+    var prevGrid = Math.round(state.gridResolution);
+    var needBg = false;
+    var needBed = false;
+    var needLiveText = false;
+
+    group.controls.forEach(function (c) {
+        if (!isControlRandomisable(c)) return;
+        var k = c.key;
+        var v;
+        if (c.int) {
+            var lo = Math.ceil(c.min);
+            var hi = Math.floor(c.max);
+            v = lo + Math.floor(Math.random() * (hi - lo + 1));
+        } else {
+            v = c.min + Math.random() * (c.max - c.min);
+            // Snap to step
+            if (c.step > 0) {
+                v = c.min + Math.round((v - c.min) / c.step) * c.step;
+                // Guard against float drift past max
+                if (v > c.max) v = c.max;
+                if (v < c.min) v = c.min;
+            }
+        }
+        state[k] = v;
+
+        if (k === "bgImageIndex" || k === "bgImageScale" || k === "bgImageSeamless") needBg = true;
+        if (k === "bedImageIndex" || k === "bedImageScale" || k === "bedImageSeamless") needBed = true;
+        if (k === "liveText") needLiveText = true;
+    });
+
+    if (transitionActive) {
+        transitionActive = false;
+        bgBlend = 0;
+        bedBlend = 0;
+    }
+
+    refreshControlsUI();
+
+    if (state.gridResolution !== prevGrid && typeof meshRebuildFn === "function") {
+        meshRebuildFn(Math.round(state.gridResolution));
+    }
+    if (needBg && window.__applyBg) window.__applyBg();
+    if (needBed && window.__applyBed) window.__applyBed();
+    if (needLiveText && window.__applyLiveText) window.__applyLiveText(state.liveText === 1);
+
+    if (btn) {
+        var oldTxt = btn.textContent;
+        btn.textContent = "✓";
+        setTimeout(function () { btn.textContent = oldTxt; }, 400);
+    }
+}
+
+function refreshControlsUI() {
+    Object.keys(DEFAULTS).forEach(function (key) {
+        var v = state[key];
+        var isInt = !!INT_KEYS[key];
+        if (isInt) v = Math.round(v);
+        var sliders = document.querySelectorAll('input[type=range][data-key="' + key + '"]');
+        var numbers = document.querySelectorAll('input[type=number][data-key="' + key + '"]');
+        var sels = document.querySelectorAll('select[data-key="' + key + '"]');
+        var c = CONTROL_BY_KEY[key];
+        if (!c) return;
+        sliders.forEach(function (s) { s.min = c.min; s.max = c.max; s.step = c.step; s.value = v; });
+        numbers.forEach(function (n) { n.step = c.step; n.value = isInt ? String(v) : fmtVal(v); });
+        sels.forEach(function (s) { s.value = String(v); });
+    });
+}
+
+function buildPresetDropdown() {
+    var sel = document.getElementById("preset-select");
+    sel.innerHTML = "";
+    PRESETS.forEach(function (p, idx) {
+        var opt = document.createElement("option");
+        opt.value = idx;
+        opt.textContent = (p.name || "Unnamed") + " (iter " + (p.iteration || "?") + ")";
+        sel.appendChild(opt);
+    });
+}
+
+function loadPreset(idx) {
+    var p = PRESETS[idx];
+    if (!p) return;
+    var prevGrid = Math.round(state.gridResolution);
+
+    var target = {};
+    Object.keys(DEFAULTS).forEach(function (key) {
+        if (STANDALONE_KEYS[key]) {
+            target[key] = state[key];
+        } else if (p.values && key in p.values) {
+            target[key] = p.values[key];
+        } else {
+            target[key] = DEFAULTS[key];
+        }
+    });
+    Object.keys(INT_KEYS).forEach(function (k) { target[k] = Math.round(target[k]); });
+
+    var transitionTime = state.presetTransitionTime;
+    if (transitionTime > 0) {
+        transitionSource = Object.assign({}, state);
+        transitionTarget = target;
+
+        var myToken = ++loadToken;
+
+        bgPendingTargetUpload = true;
+        bedPendingTargetUpload = true;
+        var bgLoad = window.__applyBgTarget ? window.__applyBgTarget() : Promise.resolve();
+        var bedLoad = window.__applyBedTarget ? window.__applyBedTarget() : Promise.resolve();
+        bgPendingTargetUpload = false;
+        bedPendingTargetUpload = false;
+
+        Promise.all([bgLoad, bedLoad]).then(function () {
+            if (myToken !== loadToken) return;
+
+            transitionActive = true;
+            transitionStartTime = performance.now();
+            transitionDuration = transitionTime * 1000;
+
+            ["bgImageIndex", "bgImageScale", "bgImageSeamless",
+             "bedImageIndex", "bedImageScale", "bedImageSeamless",
+             "liveText"].forEach(function (k) {
+                if (k in target && !STANDALONE_KEYS[k]) state[k] = target[k];
+            });
+            refreshControlsUI();
+
+            if (target.gridResolution !== prevGrid && typeof meshRebuildFn === "function") {
+                meshRebuildFn(target.gridResolution);
+            }
+            if (window.__applyLiveText) window.__applyLiveText(target.liveText === 1);
+        });
+    } else {
+        // Instant path — unchanged from current code.
+        transitionActive = false;
+        Object.keys(DEFAULTS).forEach(function (key) {
+            if (STANDALONE_KEYS[key]) return;
+            state[key] = target[key];
+        });
+        refreshControlsUI();
+        if (state.gridResolution !== prevGrid && typeof meshRebuildFn === "function") {
+            meshRebuildFn(state.gridResolution);
+        }
+        if (window.__applyBg) window.__applyBg();
+        if (window.__applyBed) window.__applyBed();
+        if (window.__applyLiveText) window.__applyLiveText(state.liveText === 1);
+    }
+}
+
+function currentValuesAsJSON() {
+    var vals = {};
+    Object.keys(DEFAULTS).forEach(function (key) {
+        if (STANDALONE_KEYS[key]) return;
+        var v = INT_KEYS[key] ? Math.round(state[key]) : state[key];
+        if (v !== DEFAULTS[key]) vals[key] = v;
+    });
+    return vals;
+}
+
+// =====================================================================
+// GROUP CLIPBOARD (copy/paste per control group)
+// =====================================================================
+
+var groupClipboard = {};
+
+function copyGroup(group, btn) {
+    var vals = {};
+    group.controls.forEach(function (c) {
+        vals[c.key] = state[c.key];
+    });
+    groupClipboard[group.heading] = vals;
+    if (btn) btn.textContent = "✓";
+}
+
+function pasteGroup(group, btn) {
+    var vals = groupClipboard[group.heading];
+    if (!vals) {
+        if (btn) {
+            var oldTxt = btn.textContent;
+            btn.textContent = "—";
+            setTimeout(function () { btn.textContent = oldTxt; }, 400);
+        }
+        return;
+    }
+
+    var prevGrid = Math.round(state.gridResolution);
+    var needBg = false;
+    var needBed = false;
+    var needLiveText = false;
+
+    group.controls.forEach(function (c) {
+        var k = c.key;
+        if (!(k in vals)) return;
+        var v = vals[k];
+        if (INT_KEYS[k]) v = Math.round(v);
+        state[k] = v;
+
+        if (k === "bgImageIndex" || k === "bgImageScale" || k === "bgImageSeamless") needBg = true;
+        if (k === "bedImageIndex" || k === "bedImageScale" || k === "bedImageSeamless") needBed = true;
+        if (k === "liveText") needLiveText = true;
+    });
+
+    if (transitionActive) {
+        transitionActive = false;
+        bgBlend = 0;
+        bedBlend = 0;
+    }
+
+    refreshControlsUI();
+
+    if (state.gridResolution !== prevGrid && typeof meshRebuildFn === "function") {
+        meshRebuildFn(Math.round(state.gridResolution));
+    }
+    if (needBg && window.__applyBg) window.__applyBg();
+    if (needBed && window.__applyBed) window.__applyBed();
+    if (needLiveText && window.__applyLiveText) window.__applyLiveText(state.liveText === 1);
+}
+
+function setupControlHandlers() {
+    document.getElementById("toggle-panel").addEventListener("click", function () {
+        document.getElementById("controls-body").classList.toggle("collapsed");
+    });
+    document.getElementById("btn-load-preset").addEventListener("click", function () {
+        loadPreset(parseInt(document.getElementById("preset-select").value, 10));
+    });
+    document.getElementById("btn-reset-all").addEventListener("click", function () {
+        var prevGrid = Math.round(state.gridResolution);
+        transitionActive = false;
+        Object.keys(DEFAULTS).forEach(function (k) {
+            if (STANDALONE_KEYS[k]) return;
+            state[k] = DEFAULTS[k];
+        });
+        Object.keys(INT_KEYS).forEach(function (k) { state[k] = Math.round(state[k]); });
+        refreshControlsUI();
+        if (state.gridResolution !== prevGrid && typeof meshRebuildFn === "function") {
+            meshRebuildFn(state.gridResolution);
+        }
+        if (window.__applyBg) window.__applyBg();
+        if (window.__applyBed) window.__applyBed();
+        if (window.__applyLiveText) window.__applyLiveText(state.liveText === 1);
+    });
+    document.getElementById("btn-json").addEventListener("click", function () {
+        var maxIter = 0;
+        PRESETS.forEach(function (p) { if (p.iteration > maxIter) maxIter = p.iteration; });
+        var nextIter = maxIter + 1;
+        var preset = { name: "Preset " + nextIter, iteration: nextIter, values: currentValuesAsJSON() };
+        console.log(JSON.stringify(preset, null, 4));
+    });
+}
+
+// =====================================================================
+// SDF ATLAS
+// =====================================================================
+
+function buildSDFAtlas(gl, fontName) {
+    var CHARSET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.,!?:;'\"-()&/+*%#@<>_=";
+    var CELL = 256, PAD = 4, SPREAD = 16, COLS = 8;
+    var ROWS = Math.ceil(CHARSET.length / COLS);
+    var ATLAS_W = (CELL + PAD * 2) * COLS;
+    var ATLAS_H = (CELL + PAD * 2) * ROWS;
+
+    var masks = {};
+    var renderCanvas = document.createElement("canvas");
+    renderCanvas.width = CELL; renderCanvas.height = CELL;
+    var rctx = renderCanvas.getContext("2d", { willReadFrequently: true });
+
+    for (var ci = 0; ci < CHARSET.length; ci++) {
+        var ch = CHARSET[ci];
+        rctx.clearRect(0, 0, CELL, CELL);
+        var fontSize = Math.round(CELL * 0.65);
+        var chosenFont = fontName || "monospace";
+        rctx.font = "bold " + fontSize + "px '" + chosenFont + "', monospace";
+        var metrics = rctx.measureText(ch);
+        var ascent = metrics.actualBoundingBoxAscent || (fontSize * 0.72);
+        var descent = metrics.actualBoundingBoxDescent || (fontSize * 0.05);
+        var drawX = CELL / 2;
+        var drawY = CELL / 2 + (ascent - descent) / 2;
+        rctx.fillStyle = "#000";
+        rctx.textAlign = "center";
+        rctx.textBaseline = "alphabetic";
+        rctx.fillText(ch, drawX, drawY);
+        var img = rctx.getImageData(0, 0, CELL, CELL);
+        var mask = new Uint8Array(CELL * CELL);
+        for (var i = 0; i < CELL * CELL; i++) mask[i] = img.data[i * 4 + 3];
+        masks[ch] = mask;
+    }
+
+    function edt1D(f, n, d, v, z) {
+        var k = 0; v[0] = 0; z[0] = -1e20; z[1] = 1e20;
+        for (var q = 1; q < n; q++) {
+            var s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]);
+            while (s <= z[k]) { k--; s = ((f[q] + q * q) - (f[v[k]] + v[k] * v[k])) / (2 * q - 2 * v[k]); }
+            k++; v[k] = q; z[k] = s; z[k + 1] = 1e20;
+        }
+        k = 0;
+        for (var q2 = 0; q2 < n; q2++) { while (z[k + 1] < q2) k++; d[q2] = (q2 - v[k]) * (q2 - v[k]) + f[v[k]]; }
+    }
+    function edt2D(mask, W, H, wantInside) {
+        var INF = 1e20;
+        var f = new Float64Array(Math.max(W, H)), d = new Float64Array(Math.max(W, H)), v = new Int32Array(Math.max(W, H)), z = new Float64Array(Math.max(W, H) + 1);
+        var grid = new Float64Array(W * H);
+        for (var y = 0; y < H; y++) for (var x = 0; x < W; x++) {
+            var bit = mask[y * W + x] > 127 ? 1 : 0;
+            grid[y * W + x] = (bit === (wantInside ? 1 : 0)) ? INF : 0;
+        }
+        for (var x = 0; x < W; x++) {
+            for (var y = 0; y < H; y++) f[y] = grid[y * W + x];
+            edt1D(f, H, d, v, z);
+            for (var y = 0; y < H; y++) grid[y * W + x] = d[y];
+        }
+        for (var y = 0; y < H; y++) {
+            for (var x = 0; x < W; x++) f[x] = grid[y * W + x];
+            edt1D(f, W, d, v, z);
+            for (var x = 0; x < W; x++) grid[y * W + x] = d[x];
+        }
+        for (var i = 0; i < W * H; i++) grid[i] = Math.sqrt(grid[i]);
+        return grid;
+    }
+
+    var atlasBytes = new Uint8Array(ATLAS_W * ATLAS_H);
+    var letterUVs = {};
+    for (var ci2 = 0; ci2 < CHARSET.length; ci2++) {
+        var ch2 = CHARSET[ci2];
+        var mask2 = masks[ch2];
+        var distOut = edt2D(mask2, CELL, CELL, false);
+        var distIn = edt2D(mask2, CELL, CELL, true);
+        var cellX = (ci2 % COLS) * (CELL + PAD * 2) + PAD;
+        var cellY = Math.floor(ci2 / COLS) * (CELL + PAD * 2) + PAD;
+        for (var py = 0; py < CELL; py++) for (var px = 0; px < CELL; px++) {
+            var inside = mask2[py * CELL + px] > 127;
+            var sd = inside ? -distIn[py * CELL + px] : distOut[py * CELL + px];
+            var clamped = Math.max(0, Math.min(SPREAD, sd));
+            var normalised = 1.0 - (clamped / SPREAD);
+            if (px < 2 || px >= CELL - 2 || py < 2 || py >= CELL - 2) normalised = 0.0;
+            atlasBytes[(cellY + py) * ATLAS_W + (cellX + px)] = Math.round(normalised * 255);
+        }
+        letterUVs[ch2] = {
+            u0: cellX / ATLAS_W, v0: cellY / ATLAS_H,
+            u1: (cellX + CELL) / ATLAS_W, v1: (cellY + CELL) / ATLAS_H
+        };
+    }
+
+    var rgba = new Uint8Array(ATLAS_W * ATLAS_H * 4);
+    for (var k = 0; k < ATLAS_W * ATLAS_H; k++) {
+        var val = atlasBytes[k];
+        rgba[k * 4 + 0] = val; rgba[k * 4 + 1] = val; rgba[k * 4 + 2] = val; rgba[k * 4 + 3] = 255;
+    }
+
+    var tex = gl.createTexture();
+    gl.bindTexture(gl.TEXTURE_2D, tex);
+    gl.pixelStorei(gl.UNPACK_ALIGNMENT, 1);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, ATLAS_W, ATLAS_H, 0, gl.RGBA, gl.UNSIGNED_BYTE, rgba);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+    gl.bindTexture(gl.TEXTURE_2D, null);
+
+    return {
+        texture: tex, letterUVs: letterUVs, cellSize: CELL, spread: SPREAD,
+        atlasWidth: ATLAS_W, atlasHeight: ATLAS_H, charset: CHARSET
+    };
+}
+
+// =====================================================================
+// SPHERE MESH
+// =====================================================================
+
+function buildSphereMesh(gl, segments) {
+    segments = Math.max(4, Math.min(64, segments | 0));
+    var vcount = (segments + 1) * (segments + 1);
+    var positions = new Float32Array(vcount * 3);
+    var normals = new Float32Array(vcount * 3);
+    var indices = new Uint16Array(segments * segments * 6);
+    var p = 0, n = 0, k = 0;
+    for (var lat = 0; lat <= segments; lat++) {
+        var theta = lat * Math.PI / segments;
+        var sinT = Math.sin(theta), cosT = Math.cos(theta);
+        for (var lon = 0; lon <= segments; lon++) {
+            var phi = lon * 2 * Math.PI / segments;
+            var sinP = Math.sin(phi), cosP = Math.cos(phi);
+            var x = cosP * sinT;
+            var y = sinT * sinP;
+            var z = cosT;
+            positions[p++] = x; positions[p++] = y; positions[p++] = z;
+            normals[n++] = x; normals[n++] = y; normals[n++] = z;
+        }
+    }
+    for (var lt = 0; lt < segments; lt++) {
+        for (var ln = 0; ln < segments; ln++) {
+            var a = lt * (segments + 1) + ln;
+            var b = a + segments + 1;
+            indices[k++] = a; indices[k++] = b; indices[k++] = a + 1;
+            indices[k++] = b; indices[k++] = b + 1; indices[k++] = a + 1;
+        }
+    }
+    var posBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    var normBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, normBuf);
+    gl.bufferData(gl.ARRAY_BUFFER, normals, gl.STATIC_DRAW);
+    var idxBuf = gl.createBuffer();
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idxBuf);
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+    return { posBuf: posBuf, normBuf: normBuf, idxBuf: idxBuf, indexCount: indices.length, segments: segments };
+}
+
+// =====================================================================
+// SHADERS
+// =====================================================================
+
+var FFT_SIZE = 1024; //512;
+var FFT_LOG2_SIZE = 10;
+
+var VERTEX_SHADER = `#version 300 es
+    precision highp float;
+    in vec2 gridPos;
+    out vec2 v_uv;
+    out vec3 v_normal_r, v_normal_g, v_normal_b;
+    out float v_height;
+    out float v_foam;
+    out vec3 v_worldPos;
+
+    uniform float time;
+    uniform sampler2D simTexture;
+    uniform vec2  simDrift;
+
+    uniform sampler2D oceanTex;
+    uniform vec2  oceanTexSize;
+    uniform float oceanPatchSize;
+uniform sampler2D oceanLaplacianTex; // packed laplacian
+
+    uniform vec2  rippleDrift;
+
+    uniform float rgbSplit, rgbAngle, surfaceDepth, surfaceTilt, perspectiveStrength, cameraHeight;
+    uniform vec2  cameraOffset;
+
+    vec2 oceanUV(vec2 worldXZ) {
+        return fract(worldXZ / oceanPatchSize);
+    }
+
+    float fftHeight(vec2 worldXZ) {
+        return texture(oceanTex, oceanUV(worldXZ)).r;
+    }
+    vec2 fftChop(vec2 worldXZ) {
+        return texture(oceanTex, oceanUV(worldXZ)).gb;
+    }
+    float fftFoam(vec2 worldXZ) {
+        return texture(oceanTex, oceanUV(worldXZ)).a;
+    }
+    vec2 fftSlope(vec2 worldXZ) {
+        float texel = 1.0 / oceanTexSize.x;
+        float hL = texture(oceanTex, oceanUV(worldXZ - vec2(texel * oceanPatchSize, 0.0))).r;
+        float hR = texture(oceanTex, oceanUV(worldXZ + vec2(texel * oceanPatchSize, 0.0))).r;
+        float hD = texture(oceanTex, oceanUV(worldXZ - vec2(0.0, texel * oceanPatchSize))).r;
+        float hU = texture(oceanTex, oceanUV(worldXZ + vec2(0.0, texel * oceanPatchSize))).r;
+        float dx = (hR - hL) / (2.0 * texel * oceanPatchSize);
+        float dy = (hU - hD) / (2.0 * texel * oceanPatchSize);
+        return vec2(dx, dy);
+    }
+
+    vec2 simGrad(vec2 p) {
+        float eps = 1.0 / 512.0;
+        vec2 simUV = p + simDrift;
+        return vec2(
+            (texture(simTexture, simUV + vec2(eps, 0.0)).r - 0.5) * 3.0 - (texture(simTexture, simUV - vec2(eps, 0.0)).r - 0.5) * 3.0,
+            (texture(simTexture, simUV + vec2(0.0, eps)).r - 0.5) * 3.0 - (texture(simTexture, simUV - vec2(0.0, eps)).r - 0.5) * 3.0
+        ) / (2.0 * eps);
+    }
+    vec3 gradToNormal(vec2 grad, float scale) {
+        return normalize(vec3(-grad.x * scale, -grad.y * scale, 1.0));
+    }
+
+    void main() {
+        vec2 uv = gridPos;
+        v_uv = uv;
+
+        float planeX = (uv.x - 0.5) * 4.0;
+        float planeY = (uv.y - 0.5) * 4.0;
+        vec2 worldXZ = vec2(planeX, planeY);
+
+        float t = time;
+        float oceanH = fftHeight(worldXZ);
+        vec2 simUV = uv + simDrift;
+        float simH = (texture(simTexture, simUV).r - 0.5) * 3.0;
+        float h = oceanH + simH * 0.15;
+        v_height = h;
+        v_foam = fftFoam(worldXZ);
+
+        vec2 channelDir = vec2(cos(rgbAngle), sin(rgbAngle)) * rgbSplit;
+        vec2 slopeC = fftSlope(worldXZ);
+        vec2 slopeL = fftSlope(worldXZ + channelDir);
+        vec2 slopeR = fftSlope(worldXZ - channelDir);
+        vec2 simG = simGrad(uv);
+
+        vec2 gradR = slopeL + simG * 0.15;
+        vec2 gradG = slopeC + simG * 0.15;
+        vec2 gradB = slopeR + simG * 0.15;
+
+        v_normal_r = gradToNormal(gradR, surfaceDepth);
+        v_normal_g = gradToNormal(gradG, surfaceDepth);
+        v_normal_b = gradToNormal(gradB, surfaceDepth);
+
+        float heightZ = h * surfaceDepth * 6.0;
+
+        // Tessendorf chop: displace the vertex horizontally by the chop vector
+        // sampled from the ocean texture. This sharpens crests/troughs.
+        vec2 chop = fftChop(worldXZ);
+        float dispX = planeX + chop.x;
+        float dispY = planeY + chop.y;
+
+        v_worldPos = vec3(dispX, dispY, heightZ);
+
+        float pitchAngle = surfaceTilt * 1.35;
+        float cp = cos(pitchAngle);
+        float sp = sin(pitchAngle);
+        vec3 rotPos = vec3(dispX, dispY * cp - heightZ * sp, dispY * sp + heightZ * cp);
+
+        rotPos.z -= cameraHeight;
+        float depth = max(-rotPos.z, 0.1);
+        vec2 orthoXY = rotPos.xy * 0.35;
+        vec2 perspXY = (rotPos.xy / depth) * 1.8;
+        vec2 screenXY = mix(orthoXY, perspXY, perspectiveStrength);
+        screenXY.y = -screenXY.y;
+        screenXY += cameraOffset;
+        gl_Position = vec4(screenXY, 0.0, 1.0);
+    }
+`;
+
+var SIM_VERTEX_SHADER = `#version 300 es
+    precision highp float;
+    in vec2 position;
+    out vec2 v_uv;
+    void main() {
+        v_uv = position * 0.5 + 0.5;
+        gl_Position = vec4(position, 0.0, 1.0);
+    }
+`;
+
+function buildSimFragmentSource() {
+    return `#version 300 es
+        precision highp float;
+        in vec2 v_uv;
+        out vec4 fragColor;
+        uniform sampler2D currState;
+        uniform float tension, damping, springiness, impulseStrength, resolution;
+        uniform float quadraticDrag;
+        uniform float simDt;
+        uniform int   simDropCount;
+        uniform vec4  simDrops[${MAX_DROPS}];
+        uniform float simDropRadius, simDropCore;
+
+        void main() {
+            vec2 texel = 1.0 / vec2(resolution);
+            vec4 curr = texture(currState, v_uv);
+            float h = curr.r - 0.5;
+            float v = curr.g - 0.5;
+            float hL = texture(currState, v_uv - vec2(texel.x, 0.0)).r - 0.5;
+            float hR = texture(currState, v_uv + vec2(texel.x, 0.0)).r - 0.5;
+            float hD = texture(currState, v_uv - vec2(0.0, texel.y)).r - 0.5;
+            float hU = texture(currState, v_uv + vec2(0.0, texel.y)).r - 0.5;
+            float laplacian = (hL + hR + hD + hU) - 4.0 * h;
+            float dt = simDt;
+            v += laplacian * tension * dt;
+            v -= h * springiness * dt;
+            v *= pow(damping, dt);
+            v -= v * abs(v) * quadraticDrag * dt;
+            // clamp again to be safe
+            v = clamp(v, -0.45, 0.45);
+
+            h += v * dt;
+            for (int i = 0; i < ${MAX_DROPS}; i++) {
+                if (i >= simDropCount) break;
+                vec4 drop = simDrops[i];
+                vec2 delta = abs(v_uv - drop.xy);
+                delta = min(delta, 1.0 - delta);
+                float d = length(delta);
+                float falloff = smoothstep(simDropRadius, simDropRadius * simDropCore, d);
+                v -= impulseStrength * falloff * drop.z;
+            }
+            h = clamp(h, -0.45, 0.45);
+            v = clamp(v, -0.45, 0.45);
+            fragColor = vec4(h + 0.5, v + 0.5, 0.0, 1.0);
+        }
+    `;
+}
+
+function buildFragmentSource() {
+    return `#version 300 es
+        precision highp float;
+        in vec2 v_uv;
+        in vec3 v_normal_r, v_normal_g, v_normal_b;
+        in float v_height;
+        in float v_foam;
+        in vec3 v_worldPos;
+        out vec4 fragColor;
+
+        uniform vec3 waterColor, waterDeep, skyHorizon, skyZenith, sunDir, sandColor;
+        uniform float specularPower, specularStrength, fresnelPower, vignetteRadius, vignetteSoftness;
+        uniform float cameraHeight, waterDepth, absorption, sandScale, sandContrast, refractionStrength, envMapStrength;
+        uniform float surfaceDepth;
+        uniform float dispersionStrength;
+        uniform float envMapZoom;
+        uniform vec2  envMapPan;
+        uniform sampler2D envMapA, envMapB;
+        uniform float envMapBlend;
+        uniform sampler2D simDebugTex;
+        uniform float debugSim;
+        uniform float foamThreshold, foamStrength;
+        uniform float oceanFoamScale, oceanFoamContrast, oceanFoamDetail, oceanFoamTint;
+
+        uniform sampler2D simTexture;
+        uniform vec2 simDrift;
+        uniform float simRes;
+        uniform float causticStrength;
+        uniform float simCausticStrength;
+        uniform float causticScale;
+        uniform float oceanCausticGain;
+        uniform sampler2D oceanLaplacianTex;
+        uniform float causticRGBScale;
+        uniform float causticRGBAngle;
+        uniform float causticRGBAffectedBySurface;
+        uniform float rgbSplit;
+        uniform float rgbAngle;
+
+        uniform float bedDepthScale;
+        uniform float oceanPatchSize;
+        uniform sampler2D oceanTex;
+
+        uniform sampler2D bedTextureA, bedTextureB;
+        uniform float bedBlend;
+        uniform float bedImageEnabled;
+        uniform vec2 bedImageTile;
+
+        uniform sampler2D bedHeightA, bedHeightB;
+        uniform float bedHeightBlend;
+        uniform float bedDisplacement;
+        uniform float bedHeightScale;
+
+        float hash(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+        float noise2(vec2 p) {
+            vec2 i = floor(p), f = fract(p), u = f * f * (3.0 - 2.0 * f);
+            return mix(mix(hash(i), hash(i + vec2(1, 0)), u.x), mix(hash(i + vec2(0, 1)), hash(i + vec2(1, 1)), u.x), u.y);
+        }
+        vec3 sampleBlended(sampler2D a, sampler2D b, vec2 uv, float blend) {
+            if (blend <= 0.001) return texture(a, uv).rgb;
+            if (blend >= 0.999) return texture(b, uv).rgb;
+            return mix(texture(a, uv).rgb, texture(b, uv).rgb, blend);
+        }
+        float sampleBedHeight(vec2 uv) {
+            if (bedHeightBlend <= 0.001) return texture(bedHeightA, uv).r;
+            if (bedHeightBlend >= 0.999) return texture(bedHeightB, uv).r;
+            return mix(texture(bedHeightA, uv).r, texture(bedHeightB, uv).r, bedHeightBlend);
+        }
+        vec3 sandAt(vec2 sp) {
+            if (bedImageEnabled > 0.5) {
+                return sampleBlended(bedTextureA, bedTextureB, sp * bedImageTile, bedBlend);
+            }
+            float grain = noise2(sp * sandScale), clump = noise2(sp * sandScale * 0.23);
+            float lod = smoothstep(300.0, 800.0, sandScale);
+            grain = mix(grain, 0.5, lod);
+            return sandColor * (0.5 + (grain * 0.75 + clump * 0.25 - 0.5) * (0.5 + sandContrast));
+        }
+        vec2 sampleEnvMap(vec3 R) {
+            return vec2(
+                atan(R.z, R.x) / (2.0 * 3.14159265) + 0.5,
+                acos(clamp(R.y, -1.0, 1.0)) / 3.14159265
+            );
+        }
+        vec2 envSampleUV(vec3 R) {
+            vec2 uv = sampleEnvMap(R);
+            uv = (uv - envMapPan) * envMapZoom + envMapPan;
+            return uv;
+        }
+        vec3 skyReflection(vec3 R) {
+            float up = clamp(R.y, -1.0, 1.0);
+            vec2 uv = envSampleUV(R);
+            vec3 envCol = sampleBlended(envMapA, envMapB, uv, envMapBlend);
+            vec3 proc = mix(
+                mix(waterDeep * 0.5,
+                    mix(skyHorizon, skyZenith, smoothstep(0.0, 0.7, up)),
+                    smoothstep(-0.3, 0.05, up)),
+                envCol,
+                envMapStrength
+            );
+            return proc * 3.0;
+        }
+
+        // Sample the sim texture's Laplacian at a UV (used only for the debug sim view).
+        float simLaplacianAt(vec2 uv) {
+            vec2 texel = (1.0 / vec2(simRes)) * 2.0;
+            float l = texture(simTexture, uv - vec2(texel.x, 0.0)).r;
+            float r = texture(simTexture, uv + vec2(texel.x, 0.0)).r;
+            float d = texture(simTexture, uv - vec2(0.0, texel.y)).r;
+            float u = texture(simTexture, uv + vec2(0.0, texel.y)).r;
+            float c = texture(simTexture, uv).r;
+            return ((l + r + d + u) - 4.0 * c) / 4.0;
+        }
+
+        // Jacobian-based caustic brightness for the rain ripples.
+        // Approximates the light focusing onto the bed by the height field:
+        //   brightness ~ 1 / |det J|
+        // where J is the Jacobian of the ray projection from surface -> bed.
+        // Depends on the sun direction so caustic lines follow the sun.
+        float simJacobianCaustic(vec2 uv, vec3 L) {
+            vec2 texel = (1.0 / vec2(simRes)) * 2.0;
+            float hC = texture(simTexture, uv).r;
+            float hL = texture(simTexture, uv - vec2(texel.x, 0.0)).r;
+            float hR = texture(simTexture, uv + vec2(texel.x, 0.0)).r;
+            float hD = texture(simTexture, uv - vec2(0.0, texel.y)).r;
+            float hU = texture(simTexture, uv + vec2(0.0, texel.y)).r;
+
+            // World-space scale of one sim texel (sim texture spans [-2, 2] world units over 512 texels).
+            float worldScale = 4.0 / float(simRes);
+            float invScale = 1.0 / worldScale;
+
+            // Surface gradient (per world unit)
+            float dhdx = (hR - hL) * 0.5 * invScale;
+            float dhdy = (hU - hD) * 0.5 * invScale;
+
+            // Second derivatives (curvature of the height field)
+            float d2hdx2 = (hR - 2.0 * hC + hL) * invScale * invScale;
+            float d2hdy2 = (hU - 2.0 * hC + hD) * invScale * invScale;
+
+            // Approximate the surface normal for the sun refraction.
+            vec3 N = normalize(vec3(-dhdx, -dhdy, 1.0));
+
+            // Refracted ray (sun -> water -> bed). Use a per-channel eta for RGB dispersion
+            // would be ideal, but a single eta is fine for the shape; RGB split is applied
+            // via the caustic offset UVs upstream.
+            vec3 R = refract(-L, N, 1.0 / 1.333);
+            if (dot(R, R) < 0.001) R = -L;
+
+            // Distance from this water point to the bed along the refracted ray,
+            // assuming the bed sits at depth ~= 1 world unit for caustic purpose.
+            float bedDistance = 1.0;
+            float t = bedDistance / max(-R.z, 0.05);
+
+            // Jacobian of the ray projection: J ≈ I + t * (some factor of the curvature).
+            // The factor here is empirical; ~0.3 gives caustic strengths in a useful range.
+            float k = 0.3;
+            float jxx = 1.0 + t * d2hdx2 * k;
+            float jyy = 1.0 + t * d2hdy2 * k;
+            float detJ = jxx * jyy;
+
+            // brightness = 1 / |det J|, clamped and normalised so 1.0 = flat water baseline.
+            float caustic = 1.0 / max(abs(detJ), 0.2) - 1.0;
+
+            // Sharpen: push peaks up, shoulders down.
+            caustic = sign(caustic) * pow(abs(caustic), 2.5);
+            return clamp(caustic, -1.0, 2.0);
+        }
+
+        // Caustic on the riverbed only. Bed UV comes from the parallax + refraction pipeline;
+        // caustic contribution is computed per-channel by combining a Jacobian-based rain
+        // caustic with a sampled ocean Laplacian term.
+        // Also includes refraction dispersion.
+vec3 shadeChannel(vec3 N, vec3 L, vec3 V, vec3 H,
+                  vec3 waterBody, vec2 bedUV, float caustic, float ior) {
+    // Existing slope-based refraction.
+    vec2 slopeOffset = N.xy * refractionStrength;
+
+    // Per-channel dispersion.
+    float iorDelta = ior - 1.333;
+    vec2 viewDir = normalize(V.xy + vec2(1e-6));
+    vec2 dispersionOffset = viewDir * iorDelta * bedDepthScale * 0.1 * 2.0;
+
+    // Tier-1 parallax displacement from the inferred heightmap.
+    // The (h - 0.5) recentres around the flat plane so bedDisplacement = 0
+    // gives back the original flat-bed look exactly.
+    float hSample = sampleBedHeight(bedUV * bedImageTile);
+    vec2 parallaxOffset = viewDir * (hSample - 0.5)
+                        * bedDisplacement * bedHeightScale * bedDepthScale * 0.1;
+
+    vec2 totalOffset = slopeOffset + dispersionOffset + parallaxOffset;
+    vec3 sand = sandAt(bedUV + totalOffset);
+
+            float denom = max(1.0 - causticStrength * caustic, 0.12);
+            sand /= denom;
+            
+
+float baseAbsorb = exp(-absorption * 0.5);
+
+// Wave modulation: crests raise visibility, troughs lower it.
+// v_height * 30 makes the ±0.05 typical amplitude map to ±1.5,
+// which after the * 0.3 factor gives ±0.45 exponent swing — visible.
+float waveMod = exp(-absorption * 0.3 * (v_height * 30.0));
+
+float depthWeight = (1.0 - clamp(waterDepth, 0.0, 1.0)) * baseAbsorb * waveMod;
+
+
+            vec3 underCol = mix(waterBody, sand, depthWeight);
+            float cosV = clamp(dot(N, V), 0.02, 1.0);
+            float F = clamp(0.02 + 0.98 * pow(1.0 - cosV, fresnelPower), 0.0, 1.0);
+            F = F * F * (3.0 - 2.0 * F);
+            vec3 col = mix(underCol, skyReflection(reflect(-V, N)), F);
+            return col + vec3(pow(max(dot(N, H), 0.0), specularPower)) * specularStrength;
+        }
+
+        void main() {
+            if (debugSim > 0.5) {
+                vec2 s = texture(simDebugTex, v_uv).rg;
+                fragColor = vec4(max(-(s.r - 0.5) * 2.0, 0.0), max((s.r - 0.5) * 2.0, 0.0), abs(s.g - 0.5) * 2.0, 1.0);
+                return;
+            }
+            vec3 L = normalize(sunDir);
+            vec3 V = normalize(vec3(0.0, 0.0, cameraHeight) - v_worldPos);
+            vec3 H = normalize(L + V);
+            vec3 waterBody = mix(waterDeep, waterColor, smoothstep(-0.015, 0.015, v_height));
+
+            // Bed: parallax only (retains relative size), refraction applied per-channel in shadeChannel.
+            vec2 parallax = -V.xy * bedDepthScale * 0.1;
+            vec2 bedUV = v_uv + parallax;
+
+            // Sample the heightmap at the same UV we'd use for the bed, and
+            // push the caustic anchor along the view direction by the same
+            // amount the bed itself is displaced. This makes the caustics
+            // track the displaced surface rather than the flat plane.
+            float hSampleC = sampleBedHeight(bedUV * bedImageTile);
+            vec2 causticParallax = normalize(V.xy + vec2(1e-6)) * (hSampleC - 0.5)
+                                 * bedDisplacement * bedHeightScale * bedDepthScale * 0.1;
+            vec2 causticBedUV = bedUV + causticParallax;
+
+            // Caustic: same bed anchor, plus green-channel refraction, then scaled by causticScale.
+            vec2 refractedBedUV = causticBedUV + normalize(v_normal_g).xy * refractionStrength;
+            vec2 causticUV = (refractedBedUV - 0.5) * causticScale + 0.5 + simDrift;
+
+            vec2 causticDir = vec2(cos(causticRGBAngle), sin(causticRGBAngle)) * causticRGBScale;
+            vec2 surfDir = vec2(cos(rgbAngle), sin(rgbAngle)) * rgbSplit;
+            vec2 combinedDir = causticRGBAffectedBySurface > 0.5
+                ? surfDir + causticDir
+                : causticDir;
+
+            vec2 offR =  combinedDir;
+            vec2 offG =  vec2(0.0);
+            vec2 offB = -combinedDir;
+
+            float causticR = 0.0, causticG = 0.0, causticB = 0.0;
+
+            if (causticStrength > 0.001) {
+                // Ocean caustic: sampled from the precomputed FFT Laplacian, packed into [0,1].
+                vec2 oceanWorldXZ = (causticUV - simDrift - 0.5) * 4.0;
+                vec2 oceanUV = fract(oceanWorldXZ / oceanPatchSize);
+                float oceanPacked = texture(oceanLaplacianTex, oceanUV).r;
+                float oceanCaustic = clamp((oceanPacked - 0.5) * 2.0 * oceanCausticGain, -1.0, 1.0);
+                oceanCaustic = sign(oceanCaustic) * pow(abs(oceanCaustic), 3.0);
+
+
+float causticBaseAbsorb = exp(-absorption * waterDepth * 2.0);
+float causticWaveMod = exp(-absorption * 0.3 * (v_height * 30.0));
+float depthFactor = causticBaseAbsorb * causticWaveMod;
+
+                // Rain caustic: Jacobian-based (1/|det J|) per channel with RGB dispersion.
+                float rainR = simJacobianCaustic(causticUV + offR, L);
+                float rainG = simJacobianCaustic(causticUV + offG, L);
+                float rainB = simJacobianCaustic(causticUV + offB, L);
+
+                causticR = (oceanCaustic + rainR * simCausticStrength) * depthFactor;
+                causticG = (oceanCaustic + rainG * simCausticStrength) * depthFactor;
+                causticB = (oceanCaustic + rainB * simCausticStrength) * depthFactor;
+            }
+
+            float iorR = 1.333 - dispersionStrength;
+            float iorG = 1.333;
+            float iorB = 1.333 + dispersionStrength;
+
+            vec3 color = vec3(
+                shadeChannel(normalize(v_normal_r), L, V, H, waterBody, bedUV, causticR, iorR).r,
+                shadeChannel(normalize(v_normal_g), L, V, H, waterBody, bedUV, causticG, iorG).g,
+                shadeChannel(normalize(v_normal_b), L, V, H, waterBody, bedUV, causticB, iorB).b
+            );
+
+            float d = distance(v_uv, vec2(0.5));
+            float vig = smoothstep(vignetteRadius, vignetteRadius + vignetteSoftness, d);
+            color = mix(color, vec3(0.0), vig);
+
+          // --- Foam shading ---
+            // Combine the FFT-derived foam signal with a two-octave procedural
+            // noise pattern so the coverage has fine structure (bubbles/gaps)
+            // instead of being large smooth blobs. Sampling in world space
+            // (v_worldPos.xy) so the pattern is stable under camera motion
+            // and scales correctly with the wave scale.
+            vec2 foamUV = v_worldPos.xy * oceanFoamScale;
+            float foamNoise1 = noise2(foamUV * 6.0);
+            float foamNoise2 = noise2(foamUV * 23.0);
+            // Weighted mix: low-freq dominates overall shape, high-freq adds
+            // the bubble web. Thresholding after mixing gives islands + holes.
+            float foamPattern = foamNoise1 * 0.6 + foamNoise2 * oceanFoamDetail;
+
+            // Combine with the Jacobian signal. Multiplying means foam only
+            // appears where the FFT says there IS foam, but the noise
+            // modulates how much of it is "holes" vs "solid".
+            float foamRaw = v_foam * foamPattern;
+
+            // Soft threshold. Wider band + lower threshold than before so the
+            // edges fade gradually. The +0.15 and +0.4 push the fade-out
+            // further so the noise texture survives the thresholding.
+            float fadeWidth = mix(1.0, 0.1, oceanFoamContrast);
+            float foamStart = foamThreshold * 0.7;
+            float foamMask = smoothstep(foamStart,
+                                        foamStart + fadeWidth,
+                                        foamRaw) * foamStrength;
+
+            // Slight off-white tint, and a touch of water-colour bleed so the
+            // foam doesn't look pasted on. The mix keeps it 95% white but
+            // lets a little of the underlying surface colour through.
+            vec3 foamColour = mix(vec3(0.92, 0.94, 0.96),
+                                  waterColor * 1.05,
+                                  oceanFoamTint);
+
+            color = mix(color, foamColour, clamp(foamMask, 0.0, 1.0));
+
+            fragColor = vec4(color, 1.0);
+        }
+    `;
+}
+
+var COPY_VERTEX_SHADER = `#version 300 es
+    precision highp float;
+    in vec2 position;
+    out vec2 v_uv;
+    void main() {
+        v_uv = position * 0.5 + 0.5;
+        gl_Position = vec4(position, 0.0, 1.0);
+    }
+`;
+
+var COPY_FRAGMENT_SHADER = `#version 300 es
+    precision highp float;
+    in vec2 v_uv;
+    out vec4 fragColor;
+    uniform sampler2D tex;
+    uniform vec2  invRes;
+    uniform float fxaaStrength;
+    uniform float causticScale;
+
+    float luma(vec3 c) { return dot(c, vec3(0.299, 0.587, 0.114)); }
+
+    vec3 fxaa(sampler2D t, vec2 uv, vec2 res) {
+        vec3 rgbNW = texture(t, uv + vec2(-1.0, -1.0) * res).rgb;
+        vec3 rgbNE = texture(t, uv + vec2( 1.0, -1.0) * res).rgb;
+        vec3 rgbSW = texture(t, uv + vec2(-1.0,  1.0) * res).rgb;
+        vec3 rgbSE = texture(t, uv + vec2( 1.0,  1.0) * res).rgb;
+        vec3 rgbM  = texture(t, uv).rgb;
+
+        float lNW = luma(rgbNW);
+        float lNE = luma(rgbNE);
+        float lSW = luma(rgbSW);
+        float lSE = luma(rgbSE);
+        float lM  = luma(rgbM);
+
+        float lMin = min(lM, min(min(lNW, lNE), min(lSW, lSE)));
+        float lMax = max(lM, max(max(lNW, lNE), max(lSW, lSE)));
+
+        if (lMax - lMin < 0.03125) return rgbM;
+
+        vec2 dir = vec2(
+            -((lNW + lNE) - (lSW + lSE)),
+             ((lNW + lSW) - (lNE + lSE))
+        );
+
+        float dirReduce = max((lNW + lNE + lSW + lSE) * 0.25 * 0.03125, 1.0 / 128.0);
+        float rcpDirMin = 1.0 / (min(abs(dir.x), abs(dir.y)) + dirReduce);
+        dir = clamp(dir * rcpDirMin, -8.0, 8.0) * res;
+
+        vec3 rgbA = 0.5 * (
+            texture(t, uv + dir * (1.0 / 3.0 - 0.5)).rgb +
+            texture(t, uv + dir * (2.0 / 3.0 - 0.5)).rgb
+        );
+        vec3 rgbB = rgbA * 0.5 + 0.25 * (
+            texture(t, uv + dir * -0.5).rgb +
+            texture(t, uv + dir *  0.5).rgb
+        );
+
+        float lB = luma(rgbB);
+        return (lB < lMin || lB > lMax) ? rgbA : rgbB;
+    }
+
+    void main() {
+        vec3 raw = texture(tex, v_uv).rgb;
+        if (fxaaStrength < 0.001) {
+            fragColor = vec4(raw, 1.0);
+            return;
+        }
+        vec3 smoothed = fxaa(tex, v_uv, invRes);
+        fragColor = vec4(mix(raw, smoothed, fxaaStrength), 1.0);
+    }
+`;
+
+var SKY_VERTEX_SHADER = `#version 300 es
+    precision highp float;
+    in vec3 spherePos;
+
+    uniform float surfaceTilt;
+    uniform float perspectiveStrength;
+    uniform float cameraHeight;
+    uniform float skyRadius;
+    uniform vec2  cameraOffset;
+
+    out vec3 v_dir;
+
+    void main() {
+        v_dir = spherePos;
+
+        vec3 worldPos = spherePos * skyRadius;
+        worldPos.z += cameraHeight;
+
+        float pitchAngle = surfaceTilt * 1.35;
+        float cp = cos(pitchAngle);
+        float sp = sin(pitchAngle);
+        vec3 rotPos = vec3(
+            worldPos.x,
+            worldPos.y * cp - worldPos.z * sp,
+            worldPos.y * sp + worldPos.z * cp
+        );
+        rotPos.z -= cameraHeight;
+        float depth = max(-rotPos.z, 0.1);
+        vec2 ortho = rotPos.xy * 0.35;
+        vec2 persp = (rotPos.xy / depth) * 1.8;
+        vec2 sc = mix(ortho, persp, perspectiveStrength);
+        sc.y = -sc.y;
+        sc += cameraOffset;
+        gl_Position = vec4(sc, 0.999, 1.0);
+    }
+`;
+
+var SKY_FRAGMENT_SHADER = `#version 300 es
+    precision highp float;
+    in vec3 v_dir;
+    out vec4 fragColor;
+
+    uniform sampler2D bgTextureA, bgTextureB;
+    uniform float bgBlend;
+    uniform vec2 bgTile;
+
+    vec2 sampleEnvMap(vec3 R) {
+        return vec2(
+            atan(R.z, R.x) / (2.0 * 3.14159265) + 0.5,
+            acos(clamp(R.y, -1.0, 1.0)) / 3.14159265
+        );
+    }
+
+    void main() {
+        vec3 dir = normalize(vec3(v_dir.x, v_dir.z, v_dir.y));
+        vec2 uv = sampleEnvMap(dir) * bgTile;
+        vec3 col;
+        if (bgBlend <= 0.001)       col = texture(bgTextureA, uv).rgb;
+        else if (bgBlend >= 0.999)  col = texture(bgTextureB, uv).rgb;
+        else                        col = mix(texture(bgTextureA, uv).rgb,
+                                             texture(bgTextureB, uv).rgb, bgBlend);
+        fragColor = vec4(col, 1.0);
+    }
+`;
+
+var DROP_VERTEX_SHADER = `#version 300 es
+    precision highp float;
+    in vec3 spherePos;
+    in vec3 sphereNormal;
+    in vec3 instanceCenter;
+    in float instanceRadius;
+
+    uniform float surfaceTilt;
+    uniform float perspectiveStrength;
+    uniform float cameraHeight;
+    uniform vec2  cameraOffset;
+
+    out vec3  v_worldPos;
+    out vec3  v_worldNormal;
+    out vec3  v_center;
+    out float v_radius;
+
+    void main() {
+        vec3 worldPos = instanceCenter + spherePos * instanceRadius;
+
+        float pitchAngle = surfaceTilt * 1.35;
+        float cp = cos(pitchAngle);
+        float sp = sin(pitchAngle);
+        vec3 rotPos = vec3(
+            worldPos.x,
+            worldPos.y * cp - worldPos.z * sp,
+            worldPos.y * sp + worldPos.z * cp
+        );
+        rotPos.z -= cameraHeight;
+
+        if (rotPos.z > -0.05) {
+            gl_Position = vec4(0.0, 0.0, 2.0, 1.0);
+            return;
+        }
+
+        float depth = max(-rotPos.z, 0.1);
+        vec2 ortho = rotPos.xy * 0.35;
+        vec2 persp = (rotPos.xy / depth) * 1.8;
+        vec2 sc = mix(ortho, persp, perspectiveStrength);
+        sc.y = -sc.y;
+
+        sc += cameraOffset;
+        float ndcZ = clamp(depth / 20.0, 0.0, 1.0);
+        gl_Position = vec4(sc, ndcZ, 1.0);
+
+        v_worldPos    = worldPos;
+        v_worldNormal = sphereNormal;
+        v_center      = instanceCenter;
+        v_radius      = instanceRadius;
+    }
+`;
+
+var STAMP_VERTEX_SHADER = `#version 300 es
+    precision highp float;
+    in vec2 position;              // unit quad [-1,1]^2
+    uniform vec2  stampCenter;     // sim-space centre (0..1)
+    uniform vec2  stampHalfSize;   // sim-space half-extent
+    out vec2 v_local;              // -1..1
+    void main() {
+        v_local = position;
+        vec2 simUV = stampCenter + position * stampHalfSize;
+        vec2 ndc = simUV * 2.0 - 1.0;
+        gl_Position = vec4(ndc, 0.0, 1.0);
+    }
+`;
+
+var STAMP_FRAGMENT_SHADER = `#version 300 es
+    precision highp float;
+    in vec2 v_local;
+    out vec4 fragColor;
+
+    uniform sampler2D letterAtlas;
+    uniform vec4  stampUV;         // u0, v0, u1, v1 into the atlas
+    uniform float stampRotation;   // radians
+    uniform float stampStrength;   // impulse amplitude
+    uniform float stampCore;       // 0..1, how much the glyph bulges (vs outline)
+    uniform float stampEdgeSoft;   // softness of the SDF falloff
+
+    void main() {
+        // Rotate the local quad so the glyph spins about its centre.
+        float c = cos(stampRotation), s = sin(stampRotation);
+        vec2 p = vec2(v_local.x * c - v_local.y * s,
+                      v_local.x * s + v_local.y * c);
+        // p is in [-1,1]; map to glyph UV space.
+        vec2 g = p * 0.5 + 0.5;
+        if (g.x < 0.0 || g.x > 1.0 || g.y < 0.0 || g.y > 1.0) {
+            fragColor = vec4(0.0);
+            return;
+        }
+        vec2 uv = mix(stampUV.xy, stampUV.zw, g);
+        float sdf = texture(letterAtlas, uv).r;
+
+        // Glyph-shaped height bulge. sdf in [0,1]; 1 = deep inside.
+        // stampCore controls whether it's the outline (0) or the solid glyph (1)
+        // that dominates. Use a smoothstep so the edge is a clean ring.
+        float body   = smoothstep(0.0, stampEdgeSoft, sdf);
+        float ring   = smoothstep(0.0, 0.25, sdf) * (1.0 - smoothstep(0.55, 1.0, sdf));
+        float shape  = mix(ring, body, stampCore);
+
+float impulse = shape * stampStrength;
+fragColor = vec4(-impulse * 0.1, -impulse, 0.0, 0.0);
+
+    }
+`;
+
+function buildDropFragmentSource() {
+    return `#version 300 es
+        precision highp float;
+        in vec3  v_worldPos;
+        in vec3  v_worldNormal;
+        in vec3  v_center;
+        in float v_radius;
+        out vec4 fragColor;
+
+        uniform vec3  waterColor, waterDeep, skyHorizon, skyZenith, sunDir;
+        uniform float specularPower, specularStrength, fresnelPower;
+        uniform float surfaceTilt, perspectiveStrength, cameraHeight;
+        uniform vec2  cameraOffset;
+        uniform float absorption, envMapStrength;
+        uniform float envMapZoom;
+        uniform vec2  envMapPan;
+        uniform float vignetteRadius, vignetteSoftness;
+        uniform sampler2D envMapA, envMapB;
+        uniform float envMapBlend;
+        uniform sampler2D waterTexture;
+        uniform vec2  screenResolution;
+
+        vec2 projectToUV(vec3 worldPos) {
+            float pitchAngle = surfaceTilt * 1.35;
+            float cp = cos(pitchAngle);
+            float sp = sin(pitchAngle);
+            vec3 rotPos = vec3(
+                worldPos.x,
+                worldPos.y * cp - worldPos.z * sp,
+                worldPos.y * sp + worldPos.z * cp
+            );
+            rotPos.z -= cameraHeight;
+            float d = max(-rotPos.z, 0.1);
+            vec2 ortho = rotPos.xy * 0.35;
+            vec2 persp = (rotPos.xy / d) * 1.8;
+            vec2 sc = mix(ortho, persp, perspectiveStrength);
+            sc.y = -sc.y;
+            sc += cameraOffset;
+            return sc * 0.5 + 0.5;
+        }
+
+        vec3 getCameraWorldPos() {
+            float pitchAngle = surfaceTilt * 1.35;
+            float cp = cos(pitchAngle);
+            float sp = sin(pitchAngle);
+            return vec3(0.0, cameraHeight * sp, cameraHeight * cp);
+        }
+
+        vec2 sampleEnvMap(vec3 R) {
+            return vec2(
+                atan(R.z, R.x) / (2.0 * 3.14159265) + 0.5,
+                acos(clamp(R.y, -1.0, 1.0)) / 3.14159265
+            );
+        }
+
+        vec2 envSampleUV(vec3 R) {
+            vec2 uv = sampleEnvMap(R);
+            uv = (uv - envMapPan) * envMapZoom + envMapPan;
+            return uv;
+        }
+
+        vec3 sampleBlendedEnv(vec2 uv) {
+            if (envMapBlend <= 0.001) return texture(envMapA, uv).rgb;
+            if (envMapBlend >= 0.999) return texture(envMapB, uv).rgb;
+            return mix(texture(envMapA, uv).rgb, texture(envMapB, uv).rgb, envMapBlend);
+        }
+
+        vec3 skyReflection(vec3 R) {
+            float up = clamp(R.y, -1.0, 1.0);
+            vec2 uv = envSampleUV(R);
+            vec3 envCol = sampleBlendedEnv(uv);
+            vec3 proc = mix(
+                mix(waterDeep * 0.5,
+                    mix(skyHorizon, skyZenith, smoothstep(0.0, 0.7, up)),
+                    smoothstep(-0.3, 0.05, up)),
+                envCol,
+                envMapStrength
+            );
+            return proc * 3.0;
+        }
+
+        void main() {
+            vec3 N = normalize(v_worldNormal);
+            vec3 camPos = getCameraWorldPos();
+            vec3 V = normalize(camPos - v_worldPos);
+
+            float cosV = clamp(dot(N, V), 0.02, 1.0);
+            float F = clamp(0.02 + 0.98 * pow(1.0 - cosV, fresnelPower), 0.0, 1.0);
+            F = F * F * (3.0 - 2.0 * F);
+
+            float etaIn = 1.0 / 1.333;
+            vec3 R = refract(-V, N, etaIn);
+            if (dot(R, R) < 0.0001) R = -V;
+
+            vec3 oc  = v_worldPos - v_center;
+            float tca = dot(oc, R);
+            float d2  = dot(oc, oc) - tca * tca;
+            float thc = sqrt(max(v_radius * v_radius - d2, 0.0));
+            float t   = -tca + thc;
+            vec3 exitPos = v_worldPos + R * t;
+            vec3 exitN   = normalize(exitPos - v_center);
+
+            vec3 R2 = refract(R, -exitN, 1.333);
+            if (dot(R2, R2) < 0.0001) R2 = reflect(R, -exitN);
+
+            vec3 samplePoint = exitPos + R2 * v_radius * 4.0;
+            vec2 refrUV = projectToUV(samplePoint);
+            float inBounds =
+                step(0.0, refrUV.x) * step(refrUV.x, 1.0) *
+                step(0.0, refrUV.y) * step(refrUV.y, 1.0);
+            vec3 refracted = texture(waterTexture, clamp(refrUV, 0.0, 1.0)).rgb;
+            refracted = mix(skyReflection(R2), refracted, inBounds);
+
+            float chord = 2.0 * v_radius * sqrt(max(1.0 - cosV * cosV, 0.0));
+            vec3 transmittance = exp(-absorption * chord * 12.0 * (1.0 - waterColor));
+            refracted *= transmittance;
+
+            vec3 reflDir = reflect(-V, N);
+            vec3 reflection = skyReflection(reflDir);
+
+            vec3 color = mix(refracted, reflection, F);
+            vec3 L = normalize(sunDir);
+            vec3 H = normalize(L + V);
+            color += vec3(pow(max(dot(N, H), 0.0), specularPower)) * specularStrength;
+
+            vec2 screenUV = gl_FragCoord.xy / screenResolution;
+            float dv = distance(screenUV, vec2(0.5));
+            float vig = smoothstep(vignetteRadius, vignetteRadius + vignetteSoftness, dv);
+            color = mix(color, vec3(0.0), vig);
+
+            fragColor = vec4(color, 1.0);
+        }
+    `;
+}
+
+// =====================================================================
+// FFT OCEAN SHADERS
+// =====================================================================
+
+var SPECTRUM_FRAGMENT_SHADER = `#version 300 es
+    precision highp float;
+    out vec4 fragColor;
+
+    uniform int   N;
+    uniform float windSpeed;
+    uniform float windAngle;
+    uniform float smallWaveCutoff;
+    uniform float directionSpread;
+    uniform float waveScale;
+    uniform float heightAmp;
+    uniform float patchSize;
+
+    const float G = 9.81;
+    const float PI = 3.14159265359;
+
+    float phillips(vec2 k) {
+        float kLen = length(k);
+        if (kLen < 1e-4) return 0.0;
+        float k2 = kLen * kLen;
+
+        float L = windSpeed * windSpeed / G * waveScale;
+
+        vec2 khat = k / kLen;
+        vec2 what = vec2(cos(windAngle), sin(windAngle));
+
+        float w = dot(khat, what);
+        float expo = mix(16.0, 1.0, directionSpread);
+        float directional = pow(max(w, 0.0), expo);
+
+        // Classic 1/k^4, with a gentle artistic tilt from waveScale
+        float power = 4.0 + (waveScale - 1.0) * 2.0;
+        power = clamp(power, 1.5, 7.0);
+        float base = heightAmp * heightAmp * pow(kLen, -power);
+
+        float kL = kLen * L;
+        float lowCut  = exp(-1.0 / max(kL * kL, 1e-6));
+        float l = smallWaveCutoff * 0.08;
+        float highCut = exp(-k2 * l * l);
+
+        return base * directional * lowCut * highCut;
+    }
+
+    // Deterministic hash → two independent uniforms in [0,1)
+    vec2 hash22(vec2 p) {
+        vec3 p3 = fract(vec3(p.xyx) * vec3(0.1031, 0.1030, 0.0973));
+        p3 += dot(p3, p3.yzx + 33.33);
+        return fract((p3.xx + p3.yz) * p3.zy);
+    }
+
+    void main() {
+        ivec2 pix = ivec2(gl_FragCoord.xy);
+        int Nhalf = N / 2;
+
+        // Signed frequency indices
+        int ix = (pix.x < Nhalf) ? pix.x : pix.x - N;
+        int iy = (pix.y < Nhalf) ? pix.y : pix.y - N;
+        vec2 k = vec2(float(ix), float(iy)) * (2.0 * PI / patchSize);
+
+        float P = phillips(k);
+
+        // ----- Hermitian construction -----
+        // Canonical representative of the pair {k, -k}:
+        // the one with larger iy, or same iy and larger ix.
+        bool isNegativeHalf = (iy < 0) || (iy == 0 && ix < 0);
+        int cx = isNegativeHalf ? -ix : ix;
+        int cy = isNegativeHalf ? -iy : iy;
+
+        // Special bins that must be purely real
+        bool isNyquistX = (cx == Nhalf) || (cx == -Nhalf);
+        bool isNyquistY = (cy == Nhalf) || (cy == -Nhalf);
+        bool forceReal  = (cx == 0 && cy == 0) || isNyquistX || isNyquistY;
+
+        // Two independent uniforms from the canonical index
+        vec2 uv = hash22(vec2(float(cx), float(cy)));
+
+        float u1 = max(uv.x, 1e-6);
+        float u2 = uv.y;
+
+        // Box-Muller → two independent standard normals
+        float r     = sqrt(-2.0 * log(u1));
+        float theta = 2.0 * PI * u2;
+        vec2  xi    = r * vec2(cos(theta), sin(theta));
+
+        float amp = sqrt(P * 0.5);
+        vec2 h0 = xi * amp;
+
+         if (forceReal) {
+             h0.y = 0.0;                     // imag = 0
+         } else if (isNegativeHalf) {
+             h0 = vec2(h0.x, -h0.y);         // conjugate of the positive side
+         }
+
+         fragColor = vec4(h0, 0.0, 1.0);
+    }
+`;
+
+var SPECTRUM_ANIMATE_SHADER = `#version 300 es
+    precision highp float;
+    out vec4 fragColor;
+
+    uniform sampler2D spectrum0;
+    uniform int   N;
+    uniform float time;
+    uniform float patchSize;
+    uniform float speed;
+    uniform float propagation;   // 0 = stationary, 1 = full travel
+
+    const float G = 9.81;
+    const float PI = 3.14159265359;
+
+    void main() {
+        ivec2 pix = ivec2(gl_FragCoord.xy);
+        int Nhalf = N / 2;
+        int ix = (pix.x < Nhalf) ? pix.x : pix.x - N;
+        int iy = (pix.y < Nhalf) ? pix.y : pix.y - N;
+
+        ivec2 mirrorPix = ivec2((N - pix.x) % N, (N - pix.y) % N);
+
+        vec2 h0        = texture(spectrum0, (vec2(pix)       + 0.5) / float(N)).xy;
+        vec2 h0_mirror = texture(spectrum0, (vec2(mirrorPix) + 0.5) / float(N)).xy;
+
+        vec2 k = vec2(float(ix), float(iy)) * (2.0 * PI / patchSize);
+        float kLen  = length(k);
+        float omega = sqrt(G * kLen);
+
+        float animTime = time * speed;
+        float phase    = omega * animTime * propagation;
+        float c = cos(phase);
+        float s = sin(phase);
+
+        // h(k,t) = h0(k)·e^{iθ} + conj(h0(-k))·e^{-iθ}
+        vec2 h0rot = vec2(h0.x * c - h0.y * s, h0.x * s + h0.y * c);
+        vec2 hm    = vec2(h0_mirror.x, -h0_mirror.y);
+        vec2 hmRot = vec2(hm.x * c + hm.y * s, -hm.x * s + hm.y * c);
+        vec2 h     = h0rot + hmRot;
+
+        fragColor = vec4(h, 0.0, 1.0);
+    }
+`;
+
+var FFT_HORIZONTAL_SHADER = `#version 300 es
+    precision highp float;
+    out vec4 fragColor;
+
+    uniform sampler2D inputTex;
+    uniform int   N;
+    uniform int   passIndex;
+
+    const float PI = 3.14159265359;
+
+    void main() {
+        ivec2 pix = ivec2(gl_FragCoord.xy);
+
+        int span = N >> passIndex;
+        int halfspan = span >> 1;
+
+        int groupBase = (pix.x / span) * span;
+        int k = pix.x - groupBase;
+        int j = k % halfspan;
+        int i1 = groupBase + j;
+        int i2 = i1 + halfspan;
+
+        vec4 a = texelFetch(inputTex, ivec2(i1, pix.y), 0);
+        vec4 b = texelFetch(inputTex, ivec2(i2, pix.y), 0);
+
+        vec2 sum = a.xy + b.xy;
+        vec2 diff = a.xy - b.xy;
+
+        float angle = 2.0 * PI * float(j) / float(span);
+        float cs = cos(angle);
+        float sn = sin(angle);
+        vec2 diff_w = vec2(diff.x * cs - diff.y * sn, diff.x * sn + diff.y * cs);
+
+        vec2 result = (k < halfspan) ? sum : diff_w;
+
+        fragColor = vec4(result, 0.0, 1.0);
+    }
+`;
+
+var FFT_VERTICAL_SHADER = `#version 300 es
+    precision highp float;
+    out vec4 fragColor;
+
+    uniform sampler2D inputTex;
+    uniform int   N;
+    uniform int   passIndex;
+
+    const float PI = 3.14159265359;
+
+    void main() {
+        ivec2 pix = ivec2(gl_FragCoord.xy);
+
+        int span = N >> passIndex;
+        int halfspan = span >> 1;
+
+        int groupBase = (pix.y / span) * span;
+        int k = pix.y - groupBase;
+        int j = k % halfspan;
+        int i1 = groupBase + j;
+        int i2 = i1 + halfspan;
+
+        vec4 a = texelFetch(inputTex, ivec2(pix.x, i1), 0);
+        vec4 b = texelFetch(inputTex, ivec2(pix.x, i2), 0);
+
+        vec2 sum = a.xy + b.xy;
+        vec2 diff = a.xy - b.xy;
+
+        float angle = 2.0 * PI * float(j) / float(span);
+        float cs = cos(angle);
+        float sn = sin(angle);
+        vec2 diff_w = vec2(diff.x * cs - diff.y * sn, diff.x * sn + diff.y * cs);
+
+        vec2 result = (k < halfspan) ? sum : diff_w;
+
+        fragColor = vec4(result, 0.0, 1.0);
+    }
+`;
+
+var FFT_OUTPUT_SHADER = `#version 300 es
+    precision highp float;
+    layout(location = 0) out vec4 fragColor;   // h, chop.x, chop.y, foam
+    layout(location = 1) out vec4 fragLap;     // laplacian (in .r), rest unused
+
+    uniform sampler2D fftResult;
+    uniform int   N;
+    uniform float choppiness;
+    uniform float heightScale;
+    uniform float patchSize;
+
+    int bitReverse(int x, int bits) {
+        int r = 0;
+        for (int i = 0; i < 16; i++) {
+            if (i >= bits) break;
+            r = (r << 1) | ((x >> i) & 1);
+        }
+        return r;
+    }
+
+    void main() {
+        ivec2 pix = ivec2(gl_FragCoord.xy);
+
+        int bits = 0;
+        int tmp = N;
+        while (tmp > 1) { bits++; tmp >>= 1; }
+
+        int pxL = (pix.x > 0)     ? pix.x - 1 : N - 1;
+        int pxR = (pix.x < N - 1) ? pix.x + 1 : 0;
+        int pyD = (pix.y > 0)     ? pix.y - 1 : N - 1;
+        int pyU = (pix.y < N - 1) ? pix.y + 1 : 0;
+
+        int pxLD = pxL, pyLD = pyD;
+        int pxLU = pxL, pyLU = pyU;
+        int pxRD = pxR, pyRD = pyD;
+        int pxRU = pxR, pyRU = pyU;
+
+        vec2 uvC  = (vec2(bitReverse(pix.x, bits), bitReverse(pix.y, bits)) + 0.5) / float(N);
+        vec2 uvL  = (vec2(bitReverse(pxL, bits),  bitReverse(pix.y, bits)) + 0.5) / float(N);
+        vec2 uvR  = (vec2(bitReverse(pxR, bits),  bitReverse(pix.y, bits)) + 0.5) / float(N);
+        vec2 uvD  = (vec2(bitReverse(pix.x, bits), bitReverse(pyD, bits))   + 0.5) / float(N);
+        vec2 uvU  = (vec2(bitReverse(pix.x, bits), bitReverse(pyU, bits))   + 0.5) / float(N);
+        vec2 uvLD = (vec2(bitReverse(pxLD, bits), bitReverse(pyLD, bits))  + 0.5) / float(N);
+        vec2 uvLU = (vec2(bitReverse(pxLU, bits), bitReverse(pyLU, bits))  + 0.5) / float(N);
+        vec2 uvRD = (vec2(bitReverse(pxRD, bits), bitReverse(pyRD, bits))  + 0.5) / float(N);
+        vec2 uvRU = (vec2(bitReverse(pxRU, bits), bitReverse(pyRU, bits))  + 0.5) / float(N);
+
+        float invN = 1.0 / float(N);
+        float h   = texture(fftResult, uvC ).x * invN * heightScale;
+        float hL  = texture(fftResult, uvL ).x * invN * heightScale;
+        float hR  = texture(fftResult, uvR ).x * invN * heightScale;
+        float hD  = texture(fftResult, uvD ).x * invN * heightScale;
+        float hU  = texture(fftResult, uvU ).x * invN * heightScale;
+        float hLD = texture(fftResult, uvLD).x * invN * heightScale;
+        float hLU = texture(fftResult, uvLU).x * invN * heightScale;
+        float hRD = texture(fftResult, uvRD).x * invN * heightScale;
+        float hRU = texture(fftResult, uvRU).x * invN * heightScale;
+
+        float texelWorld = patchSize / float(N);
+        float invTexel   = 1.0 / texelWorld;
+
+        float dHdx = (hR - hL) * 0.5 * invTexel;
+        float dHdy = (hU - hD) * 0.5 * invTexel;
+
+        float d2Hdx2 = (hR - 2.0*h + hL) * invTexel * invTexel;
+        float d2Hdy2 = (hU - 2.0*h + hD) * invTexel * invTexel;
+        float d2Hdxdy = (hRU - hRD - hLU + hLD) * 0.25 * invTexel * invTexel;
+
+        vec2 chop = vec2(dHdx, dHdy) * choppiness;
+
+        float jxx = 1.0 + choppiness * d2Hdx2;
+        float jyy = 1.0 + choppiness * d2Hdy2;
+        float jxy =     + choppiness * d2Hdxdy;
+        float jacobian = jxx * jyy - jxy * jxy;
+
+        float foam = clamp(1.0 - jacobian, 0.0, 1.0);
+        fragColor = vec4(h, chop.x, chop.y, foam);
+
+        // Laplacian of the height field. Signed: negative = concave = converging = bright.
+        // Pack signed value into [0,1] so it survives RGBA8/16F/32F quantisation.
+        float laplacian = d2Hdx2 + d2Hdy2;
+        float packed = clamp(-laplacian * 0.5 + 0.5, 0.0, 1.0);
+        fragLap = vec4(packed, 0.0, 0.0, 1.0);
+    }
+`;
+
+// =====================================================================
+// MAIN
+// =====================================================================
+
+function advanceSpawnClock(tNow, lastTime, interval, maxCatchUp, spawnFn) {
+    if (!(interval > 0)) return tNow;
+    if (lastTime === null) lastTime = tNow;
+    if (lastTime > tNow + interval) lastTime = tNow + interval;
+    var catchUp = 0;
+    while (tNow - lastTime >= interval && catchUp < maxCatchUp) {
+        spawnFn(lastTime);
+        lastTime += interval;
+        catchUp++;
+    }
+    if (tNow - lastTime > interval * maxCatchUp) lastTime = tNow;
+    return lastTime;
+}
+
+function mod1(v) { return v - Math.floor(v); }
+
+var sdfAtlas = null;
+var animationFrameId = 0;
+
+function main() {
+    var canvas = document.createElement("canvas");
+    var content = document.getElementById("content");
+    canvas.style.position = 'fixed';
+    canvas.style.zIndex = -1;
+    canvas.style.top = 0;
+    canvas.style.left = 0;
+    content.appendChild(canvas);
+
+    var gl = canvas.getContext('webgl2', {
+        preserveDrawingBuffer: false, alpha: false, antialias: true, depth: true
+    });
+    if (!gl) {
+        console.error("WebGL2 not supported — this build requires WebGL2.");
+        return;
+    }
+
+    window.previousGl = gl;
+
+    var imageWorker = new Worker("image-worker.js");
+    var pendingWorkerResults = {};   // id → resolve fn
+    var nextWorkerId = 1;
+
+    imageWorker.onmessage = function (e) {
+        var msg = e.data;
+        var resolve = pendingWorkerResults[msg.id];
+        if (!resolve) return;
+        delete pendingWorkerResults[msg.id];
+        if (msg.type === "error") resolve(null);
+        else resolve({ albedo: msg.albedo, heightmap: msg.heightmap });
+    };
+
+    // Send an already-loaded Image to the worker for processing.
+    // Resolves to {albedo:ImageBitmap, heightmap:ImageBitmap|null} or null.
+    function processInWorker(img, targetW, targetH, seamlessX, seamlessY,
+                             blurRadius, wantHeightmap) {
+        return createImageBitmap(img).then(function (bitmap) {
+            return new Promise(function (resolve) {
+                var id = nextWorkerId++;
+                pendingWorkerResults[id] = resolve;
+                imageWorker.postMessage({
+                    type: "process",
+                    id: id,
+                    bitmap: bitmap,
+                    targetW: targetW,
+                    targetH: targetH,
+                    seamlessX: seamlessX,
+                    seamlessY: seamlessY,
+                    blurRadius: blurRadius,
+                    wantHeightmap: wantHeightmap
+                }, [bitmap]);
+            });
+        });
+    }
+
+    function updateThumbnailFromBitmap(slot, bitmap, suffix) {
+        var previewId = (slot === "bg" ? "bg-thumb" : "bed-thumb") + (suffix || "");
+        var el = document.getElementById(previewId);
+        if (!el || !bitmap) return;
+        try {
+            var c = document.createElement("canvas");
+            var maxDim = 320;
+            var sw = bitmap.width, sh = bitmap.height;
+            var s = Math.min(1, maxDim / Math.max(sw, sh));
+            c.width = Math.round(sw * s);
+            c.height = Math.round(sh * s);
+            var cx = c.getContext("2d");
+            cx.drawImage(bitmap, 0, 0, c.width, c.height);
+            el.src = c.toDataURL("image/jpeg", 0.85);
+        } catch (e) {
+            console.warn("Thumbnail encode failed for " + slot + (suffix || ""), e);
+        }
+    }
+
+    var floatLinear = gl.getExtension('OES_texture_float_linear');
+
+    var colorBufferFloat = gl.getExtension('EXT_color_buffer_float');
+    var colorBufferHalfFloat = gl.getExtension('EXT_color_buffer_half_float');
+
+    var simInternalFormat = gl.RGBA8;
+    var simType = gl.UNSIGNED_BYTE;
+    var filterMode = gl.LINEAR;
+
+    if (colorBufferFloat && floatLinear) {
+        simInternalFormat = gl.RGBA32F;
+        simType = gl.FLOAT;
+        filterMode = gl.LINEAR;
+    } else if (colorBufferHalfFloat && floatLinear) {
+        simInternalFormat = gl.RGBA16F;
+        simType = gl.HALF_FLOAT;
+        filterMode = gl.LINEAR;
+    } else {
+        console.warn("Float render targets unavailable — simulation running at reduced precision (RGBA8).");
+    }
+
+    var program = null, simProgram = null, dropProgram = null, copyProgram = null, skyProgram = null;
+    var positionLocation = null, timeLocation = null;
+    var gridBuffer = null, indexBuffer = null;
+    var indexCount = 0;
+    var u = {};
+
+    var simRes = 512;
+    var simFBOs = [null, null], simTextures = [null, null];
+    var simCurrent = 0, simQuadBuffer = null;
+    var simDriftPhaseX = 0, simDriftPhaseY = 0;
+
+    var simDrops = [];
+    var pendingSimDrops = [];
+    var nextSimDropTime = null;
+    var fallingDrops = [];
+
+    var waterFBO = null, waterTexture = null;
+    var waterFBOW = 0, waterFBOH = 0;
+
+    function createWaterFBO(w, h) {
+        if (waterFBO) gl.deleteFramebuffer(waterFBO);
+        if (waterTexture) gl.deleteTexture(waterTexture);
+        waterFBOW = w; waterFBOH = h;
+        waterTexture = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, waterTexture);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, w, h, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        waterFBO = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, waterFBO);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, waterTexture, 0);
+        var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        if (status !== gl.FRAMEBUFFER_COMPLETE) console.error("Water FBO incomplete:", status);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+    var bgTextureA = gl.createTexture();
+    var bgTextureB = gl.createTexture();
+    var bedTextureA = gl.createTexture();
+    var bedTextureB = gl.createTexture();
+    var bedHeightTextureA = gl.createTexture();
+    var bedHeightTextureB = gl.createTexture();
+
+    function initImageTexture(tex) {
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, 1, 1, 0, gl.RGBA,
+            gl.UNSIGNED_BYTE, new Uint8Array([255, 255, 255, 255]));
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+    }
+
+    initImageTexture(bgTextureA);
+    initImageTexture(bgTextureB);
+    initImageTexture(bedTextureA);
+    initImageTexture(bedTextureB);
+    initImageTexture(bedHeightTextureA);
+    initImageTexture(bedHeightTextureB);
+
+    var bgBlend = 0;
+    var bedBlend = 0;
+
+    function getImageParams(prefix, useTarget) {
+        var src = (useTarget && transitionTarget) ? transitionTarget : state;
+        return {
+            index: Math.round(src[prefix + "Index"]),
+            scale: Math.round(src[prefix + "Scale"]),
+            seamless: Math.round(src[prefix + "Seamless"])
+        };
+    }
+
+    // Given a processed RGB canvas (already resampled + seamless-blended),
+    // produce a grayscale heightmap canvas of the same dimensions.
+    function inferHeightmap(sourceCanvas, blurRadius) {
+        var w = sourceCanvas.width;
+        var h = sourceCanvas.height;
+
+        var srcCtx = sourceCanvas.getContext("2d", { willReadFrequently: true });
+        var srcData = srcCtx.getImageData(0, 0, w, h).data;
+
+        // 1. Luminance into a Float32Array (0..1).
+        var lum = new Float32Array(w * h);
+        for (var i = 0; i < w * h; i++) {
+            lum[i] = (srcData[i * 4] * 0.299 +
+                      srcData[i * 4 + 1] * 0.587 +
+                      srcData[i * 4 + 2] * 0.114) / 255;
+        }
+
+        // 2. Separable box blur with wrap-around so the heightmap stays seamless
+        //    whenever the albedo is. O(w*h) regardless of radius.
+        var r = Math.max(0, Math.floor(blurRadius));
+        if (r > 0) {
+            var tmp = new Float32Array(w * h);
+            var windowCount = 2 * r + 1;
+
+            // Horizontal pass.
+            for (var y0 = 0; y0 < h; y0++) {
+                var rowStart = y0 * w;
+                var sum = 0;
+                for (var kx = -r; kx <= r; kx++) {
+                    sum += lum[rowStart + (((kx % w) + w) % w)];
+                }
+                for (var x = 0; x < w; x++) {
+                    tmp[rowStart + x] = sum / windowCount;
+                    var outX = (((x - r) % w) + w) % w;
+                    var inX  = (((x + r + 1) % w) + w) % w;
+                    sum += lum[rowStart + inX] - lum[rowStart + outX];
+                }
+            }
+
+            // Vertical pass.
+            for (var x1 = 0; x1 < w; x1++) {
+                var vsum = 0;
+                for (var ky = -r; ky <= r; ky++) {
+                    vsum += tmp[((((ky % h) + h) % h)) * w + x1];
+                }
+                for (var y = 0; y < h; y++) {
+                    lum[y * w + x1] = vsum / windowCount;
+                    var outY = (((y - r) % h) + h) % h;
+                    var inY  = (((y + r + 1) % h) + h) % h;
+                    vsum += tmp[inY * w + x1] - tmp[outY * w + x1];
+                }
+            }
+        }
+
+        // 3. Normalise to full 0..255 so any input uses the range.
+        var minV = Infinity, maxV = -Infinity;
+        for (var j = 0; j < lum.length; j++) {
+            if (lum[j] < minV) minV = lum[j];
+            if (lum[j] > maxV) maxV = lum[j];
+        }
+        var span = Math.max(1e-4, maxV - minV);
+
+        // 4. Write back to a grayscale canvas.
+        var outCanvas = document.createElement("canvas");
+        outCanvas.width = w;
+        outCanvas.height = h;
+        var outCtx = outCanvas.getContext("2d", { willReadFrequently: true });
+        var outImg = outCtx.createImageData(w, h);
+        var od = outImg.data;
+        for (var m = 0; m < lum.length; m++) {
+            var v = Math.round(((lum[m] - minV) / span) * 255);
+            od[m * 4] = v;
+            od[m * 4 + 1] = v;
+            od[m * 4 + 2] = v;
+            od[m * 4 + 3] = 255;
+        }
+        outCtx.putImageData(outImg, 0, 0);
+        return outCanvas;
+    }
+
+    function applyImage(slot, prefix, baseName, texA, texB, thumbSlot, heightTexA, heightTexB) {
+        var isTarget = (slot === "b");
+        var params = getImageParams(prefix, isTarget);
+        var targetTex = isTarget ? texB : texA;
+        var targetHeightTex = isTarget ? heightTexB : heightTexA;
+        var scale = SCALE_OPTIONS[params.scale] || SCALE_OPTIONS[1];
+        var wantHeightmap = !!targetHeightTex;
+
+        // Return a promise so the caller (loadPreset, etc.) can await completion.
+        return loadImage(baseName, params.index, "jpg").then(function (img) {
+            if (!img) {
+                setScaleDropdownEnabled(prefix + "Scale", false);
+                return null;
+            }
+            var matches = sourceMatchesScaleOption(img);
+            setScaleDropdownEnabled(prefix + "Scale", !matches);
+
+            return processInWorker(img, scale.w, scale.h,
+                                   params.seamless, params.seamless,
+                                   wantHeightmap ? state.bedHeightBlur : 0,
+                                   wantHeightmap).then(function (result) {
+                if (!result) return null;
+
+                gl.bindTexture(gl.TEXTURE_2D, targetTex);
+                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, result.albedo);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+
+                if (targetHeightTex && result.heightmap) {
+                    gl.bindTexture(gl.TEXTURE_2D, targetHeightTex);
+                    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, result.heightmap);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+                }
+
+                // Thumbnails: draw the ImageBitmaps into a temporary 2D canvas
+                // to get a data URL. This IS on the main thread, but it's
+                // tiny (thumbnails are downscaled) and one-shot per load.
+                //if (!isTarget) {
+                    updateThumbnailFromBitmap(thumbSlot, result.albedo, "");
+                    if (result.heightmap) updateThumbnailFromBitmap(thumbSlot, result.heightmap, "-depth");
+                //}
+
+                return result;
+            });
+        });
+    }
+
+    function applyBackgroundImage() {
+        if (transitionActive && !bgPendingTargetUpload) {
+            transitionActive = false;
+            bgBlend = 0; bedBlend = 0;
+        }
+        return applyImage("a", "bgImage", "treeline", bgTextureA, bgTextureB, "bg", null, null);
+    }
+
+    function applyBackgroundImageTarget() {
+        return applyImage("b", "bgImage", "treeline", bgTextureA, bgTextureB, "bg", null, null);
+    }
+
+    function applyRiverbedImage() {
+        if (transitionActive && !bedPendingTargetUpload) {
+            transitionActive = false;
+            bgBlend = 0; bedBlend = 0;
+        }
+        return applyImage("a", "bedImage", "riverbed", bedTextureA, bedTextureB, "bed",
+                   bedHeightTextureA, bedHeightTextureB);
+    }
+
+    function applyRiverbedImageTarget() {
+        return applyImage("b", "bedImage", "riverbed", bedTextureA, bedTextureB, "bed",
+                   bedHeightTextureA, bedHeightTextureB);
+    }
+
+    window.__applyBg = applyBackgroundImage;
+    window.__applyBed = applyRiverbedImage;
+    window.__applyBgTarget = applyBackgroundImageTarget;
+    window.__applyBedTarget = applyRiverbedImageTarget;
+
+    window.__promoteTransitionEnd = function () {
+        var tmp = bgTextureA; bgTextureA = bgTextureB; bgTextureB = tmp;
+        tmp = bedTextureA; bedTextureA = bedTextureB; bedTextureB = tmp;
+        tmp = bedHeightTextureA; bedHeightTextureA = bedHeightTextureB; bedHeightTextureB = tmp;
+        bgBlend = 0;
+        bedBlend = 0;
+
+        // Refresh thumbnails to reflect the newly-promoted slot-A textures.
+        // Re-loads the current index into slot A, which also updates the
+        // colour + depth thumbnails. Bed height map is inferred fresh.
+        // applyImage("a", "bgImage", "treeline", bgTextureA, bgTextureB, "bg",
+        //            null, null);
+        // applyImage("a", "bedImage", "riverbed", bedTextureA, bedTextureB, "bed",
+        //            bedHeightTextureA, bedHeightTextureB);
+    };
+
+    function setLiveTextToggleUI(on) {
+        var sliders = document.querySelectorAll('input[type=range][data-key="liveText"]');
+        var numbers = document.querySelectorAll('input[type=number][data-key="liveText"]');
+        sliders.forEach(function (s) { s.value = on ? 1 : 0; });
+        numbers.forEach(function (n) { n.value = on ? "1" : "0"; });
+    }
+
+    function stopLiveTextRecognition() {
+        if (liveTextRecognition) {
+            try { liveTextRecognition.stop(); } catch (e) { /* ignore */ }
+            liveTextRecognition = null;
+        }
+        liveTextQueue.length = 0;
+        liveTextCurrentWord = null;
+        liveTextCharIdx = 0;
+    }
+
+    function startLiveTextRecognition() {
+        var SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechRecognition) {
+            console.warn("SpeechRecognition not supported in this browser");
+            state.liveText = 0;
+            setLiveTextToggleUI(false);
+            return;
+        }
+        if (liveTextRecognition) return;
+
+        var recog = new SpeechRecognition();
+        recog.continuous = true;
+        recog.interimResults = true;
+        recog.lang = navigator.language || "en-US";
+
+        recog.onresult = function (event) {
+            for (var i = event.resultIndex; i < event.results.length; i++) {
+                if (!event.results[i].isFinal) continue;
+                var words = event.results[i][0].transcript.trim().split(/\s+/).filter(Boolean);
+                for (var k = 0; k < words.length; k++) {
+                    if (liveTextQueue.length < state.liveTextMaxBacklog) {
+                        liveTextQueue.push(words[k]);
+                    }
+                }
+            }
+        };
+
+        recog.onerror = function (e) {
+            console.warn("SpeechRecognition error:", e.error);
+            if (e.error === "not-allowed" || e.error === "service-not-allowed") {
+                state.liveText = 0;
+                setLiveTextToggleUI(false);
+                stopLiveTextRecognition();
+            }
+        };
+
+        recog.onend = function () {
+            if (state.liveText === 1 && liveTextRecognition === recog) {
+                setTimeout(function () {
+                    if (state.liveText === 1 && liveTextRecognition === recog) {
+                        try { recog.start(); } catch (e) { /* already starting */ }
+                    }
+                }, 250);
+            }
+        };
+
+        liveTextRecognition = recog;
+        try {
+            recog.start();
+        } catch (e) {
+            console.warn("Failed to start SpeechRecognition:", e);
+        }
+    }
+
+    function handleLiveTextToggle(enabled) {
+        if (enabled) startLiveTextRecognition();
+        else stopLiveTextRecognition();
+    }
+
+    window.__applyLiveText = handleLiveTextToggle;
+
+    var letterRipples = [], nextLetterTime = null;
+    var currentLinePlan = [];   // pre-rolled per-letter properties for the current line
+    var liveTextCurrentWordPlan = [];  // same, for live-text words
+    var liveTextRecognition = null;
+    var liveTextQueue = [];
+    var liveTextCurrentWord = null;
+    var liveTextCharIdx = 0;
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        if (canvas.width !== waterFBOW || canvas.height !== waterFBOH) {
+            createWaterFBO(canvas.width, canvas.height);
+        }
+    }
+
+    function createShader(type, source) {
+        var s = gl.createShader(type);
+        gl.shaderSource(s, source);
+        gl.compileShader(s);
+        if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+            console.error(gl.getShaderInfoLog(s));
+            return null;
+        }
+        return s;
+    }
+
+    function createSimTargets() {
+        for (var i = 0; i < 2; i++) {
+            if (simFBOs[i]) gl.deleteFramebuffer(simFBOs[i]);
+            if (simTextures[i]) gl.deleteTexture(simTextures[i]);
+            var tex = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, tex);
+            gl.texImage2D(gl.TEXTURE_2D, 0, simInternalFormat, simRes, simRes, 0, gl.RGBA, simType, null);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filterMode);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filterMode);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+            var fbo = gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+            gl.clearColor(0.5, 0.5, 0.0, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            simFBOs[i] = fbo; simTextures[i] = tex;
+        }
+        if (!simQuadBuffer) {
+            simQuadBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, simQuadBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+        }
+    }
+
+    function buildMesh(res) {
+        res = Math.max(40, Math.min(1024, res | 0));
+        var n = res;
+        var verts = new Float32Array(n * n * 2);
+        for (var y = 0; y < n; y++) for (var x = 0; x < n; x++) {
+            var idx = (y * n + x) * 2;
+            verts[idx] = x / (n - 1); verts[idx + 1] = y / (n - 1);
+        }
+        if (gridBuffer) gl.deleteBuffer(gridBuffer);
+        gridBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, gridBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+
+        var idxArr = new Uint32Array((n - 1) * (n - 1) * 6);
+        var k = 0;
+        for (var yy = 0; yy < n - 1; yy++) for (var xx = 0; xx < n - 1; xx++) {
+            var a = yy * n + xx, b = a + 1, c = a + n, d = c + 1;
+            idxArr[k++] = a; idxArr[k++] = b; idxArr[k++] = c;
+            idxArr[k++] = b; idxArr[k++] = d; idxArr[k++] = c;
+        }
+        if (indexBuffer) gl.deleteBuffer(indexBuffer);
+        indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, idxArr, gl.STATIC_DRAW);
+        indexCount = idxArr.length;
+
+        rebuildWaterVAO();
+    }
+    meshRebuildFn = buildMesh;
+
+    function cacheUniforms() {
+        timeLocation = gl.getUniformLocation(program, "time");
+        var names = [
+            "simTexture", "simDrift",
+            "oceanTex", "oceanTexSize", "oceanPatchSize",
+            "rgbSplit", "rgbAngle", "surfaceDepth", "surfaceTilt", "perspectiveStrength", "cameraHeight", "cameraOffset",
+            "waterColor", "waterDeep", "skyHorizon", "skyZenith", "sunDir",
+            "specularPower", "specularStrength", "fresnelPower",
+            "vignetteRadius", "vignetteSoftness",
+            "waterDepth", "absorption", "sandScale", "sandContrast", "sandColor", "refractionStrength", "dispersionStrength",
+            "envMapA", "envMapB", "envMapBlend",
+            "envMapStrength", "envMapZoom", "envMapPan", "simDebugTex", "debugSim",
+            "bedTextureA", "bedTextureB", "bedBlend", "bedImageEnabled", "bedImageTile",
+            "bedHeightA", "bedHeightB", "bedHeightBlend", "bedDisplacement", "bedHeightScale",
+            "foamThreshold", "foamStrength", "oceanFoamScale", "oceanFoamContrast", "oceanFoamDetail", "oceanFoamTint",
+            "simRes",
+            "causticStrength", "simCausticStrength", "causticScale", "oceanLaplacianTex", "oceanCausticGain",
+            "causticRGBScale", "causticRGBAngle", "causticRGBAffectedBySurface", "bedDepthScale"
+        ];
+        names.forEach(function (n) {
+            var key = n.replace(/\[0\]$/, "");
+            u[key] = gl.getUniformLocation(program, n);
+        });
+    }
+
+    sdfAtlas = buildSDFAtlas(gl);
+
+    var vs = createShader(gl.VERTEX_SHADER, VERTEX_SHADER);
+    var fs = createShader(gl.FRAGMENT_SHADER, buildFragmentSource());
+    program = gl.createProgram();
+    gl.attachShader(program, vs); gl.attachShader(program, fs); gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { console.error(gl.getProgramInfoLog(program)); return; }
+    gl.useProgram(program);
+    cacheUniforms();
+    positionLocation = gl.getAttribLocation(program, "gridPos");
+
+    var simVs = createShader(gl.VERTEX_SHADER, SIM_VERTEX_SHADER);
+    var simFs = createShader(gl.FRAGMENT_SHADER, buildSimFragmentSource());
+    simProgram = gl.createProgram();
+    gl.attachShader(simProgram, simVs); gl.attachShader(simProgram, simFs); gl.linkProgram(simProgram);
+    if (!gl.getProgramParameter(simProgram, gl.LINK_STATUS)) {
+        console.error("Sim program link failed:", gl.getProgramInfoLog(simProgram));
+    }
+
+    var simU = {
+        tension: gl.getUniformLocation(simProgram, "tension"),
+        damping: gl.getUniformLocation(simProgram, "damping"),
+        springiness: gl.getUniformLocation(simProgram, "springiness"),
+        impulseStrength: gl.getUniformLocation(simProgram, "impulseStrength"),
+        resolution: gl.getUniformLocation(simProgram, "resolution"),
+        currState: gl.getUniformLocation(simProgram, "currState"),
+        dropCount: gl.getUniformLocation(simProgram, "simDropCount"),
+        drops: gl.getUniformLocation(simProgram, "simDrops[0]"),
+        dropRadius: gl.getUniformLocation(simProgram, "simDropRadius"),
+        dropCore: gl.getUniformLocation(simProgram, "simDropCore"),
+        simDt: gl.getUniformLocation(simProgram, "simDt"),
+        quadraticDrag: gl.getUniformLocation(simProgram, "quadraticDrag")
+    };
+    var simPosLoc = gl.getAttribLocation(simProgram, "position");
+
+    var copyVs = createShader(gl.VERTEX_SHADER, COPY_VERTEX_SHADER);
+    var copyFs = createShader(gl.FRAGMENT_SHADER, COPY_FRAGMENT_SHADER);
+    copyProgram = gl.createProgram();
+    gl.attachShader(copyProgram, copyVs); gl.attachShader(copyProgram, copyFs); gl.linkProgram(copyProgram);
+    var copyPosLoc = gl.getAttribLocation(copyProgram, "position");
+    var copyTexLoc = gl.getUniformLocation(copyProgram, "tex");
+    var copyInvResLoc = gl.getUniformLocation(copyProgram, "invRes");
+    var copyFxaaStrengthLoc = gl.getUniformLocation(copyProgram, "fxaaStrength");
+
+    var skyVs = createShader(gl.VERTEX_SHADER, SKY_VERTEX_SHADER);
+    var skyFs = createShader(gl.FRAGMENT_SHADER, SKY_FRAGMENT_SHADER);
+    skyProgram = gl.createProgram();
+    gl.attachShader(skyProgram, skyVs); gl.attachShader(skyProgram, skyFs);
+    gl.linkProgram(skyProgram);
+    if (!gl.getProgramParameter(skyProgram, gl.LINK_STATUS)) {
+        console.error("Sky program link failed:", gl.getProgramInfoLog(skyProgram));
+    }
+    var skySpherePosLoc = gl.getAttribLocation(skyProgram, "spherePos");
+    var skySurfaceTiltLoc = gl.getUniformLocation(skyProgram, "surfaceTilt");
+    var skyPerspStrengthLoc = gl.getUniformLocation(skyProgram, "perspectiveStrength");
+    var skyCameraHeightLoc = gl.getUniformLocation(skyProgram, "cameraHeight");
+    var skyCameraOffsetLoc = gl.getUniformLocation(skyProgram, "cameraOffset");
+    var skyRadiusLoc = gl.getUniformLocation(skyProgram, "skyRadius");
+    var skyBgTexALoc = gl.getUniformLocation(skyProgram, "bgTextureA");
+    var skyBgTexBLoc = gl.getUniformLocation(skyProgram, "bgTextureB");
+    var skyBgBlendLoc = gl.getUniformLocation(skyProgram, "bgBlend");
+    var skyBgTileLoc = gl.getUniformLocation(skyProgram, "bgTile");
+
+    var dropVs = createShader(gl.VERTEX_SHADER, DROP_VERTEX_SHADER);
+    var dropFs = createShader(gl.FRAGMENT_SHADER, buildDropFragmentSource());
+    dropProgram = gl.createProgram();
+    gl.attachShader(dropProgram, dropVs); gl.attachShader(dropProgram, dropFs);
+    gl.linkProgram(dropProgram);
+    if (!gl.getProgramParameter(dropProgram, gl.LINK_STATUS))
+        console.error("Drop program link failed:", gl.getProgramInfoLog(dropProgram));
+
+    var dropSpherePosLoc = gl.getAttribLocation(dropProgram, "spherePos");
+    var dropSphereNormLoc = gl.getAttribLocation(dropProgram, "sphereNormal");
+    var dropInstCenterLoc = gl.getAttribLocation(dropProgram, "instanceCenter");
+    var dropInstRadiusLoc = gl.getAttribLocation(dropProgram, "instanceRadius");
+
+    var dropU = {
+        surfaceTilt: gl.getUniformLocation(dropProgram, "surfaceTilt"),
+        perspectiveStrength: gl.getUniformLocation(dropProgram, "perspectiveStrength"),
+        cameraHeight: gl.getUniformLocation(dropProgram, "cameraHeight"),
+        cameraOffset: gl.getUniformLocation(dropProgram, "cameraOffset"),
+        waterColor: gl.getUniformLocation(dropProgram, "waterColor"),
+        waterDeep: gl.getUniformLocation(dropProgram, "waterDeep"),
+        skyHorizon: gl.getUniformLocation(dropProgram, "skyHorizon"),
+        skyZenith: gl.getUniformLocation(dropProgram, "skyZenith"),
+        sunDir: gl.getUniformLocation(dropProgram, "sunDir"),
+        specularPower: gl.getUniformLocation(dropProgram, "specularPower"),
+        specularStrength: gl.getUniformLocation(dropProgram, "specularStrength"),
+        fresnelPower: gl.getUniformLocation(dropProgram, "fresnelPower"),
+        absorption: gl.getUniformLocation(dropProgram, "absorption"),
+        envMapA: gl.getUniformLocation(dropProgram, "envMapA"),
+        envMapB: gl.getUniformLocation(dropProgram, "envMapB"),
+        envMapBlend: gl.getUniformLocation(dropProgram, "envMapBlend"),
+        envMapStrength: gl.getUniformLocation(dropProgram, "envMapStrength"),
+        envMapZoom: gl.getUniformLocation(dropProgram, "envMapZoom"),
+        envMapPan: gl.getUniformLocation(dropProgram, "envMapPan"),
+        vignetteRadius: gl.getUniformLocation(dropProgram, "vignetteRadius"),
+        vignetteSoftness: gl.getUniformLocation(dropProgram, "vignetteSoftness"),
+        waterTexture: gl.getUniformLocation(dropProgram, "waterTexture"),
+        screenResolution: gl.getUniformLocation(dropProgram, "screenResolution")
+    };
+
+    var dropInstanceBuffer = gl.createBuffer();
+
+    // --- Letter stamp program -------------------------------------------
+    var stampProgram = gl.createProgram();
+    (function () {
+        var v = createShader(gl.VERTEX_SHADER, STAMP_VERTEX_SHADER);
+        var f = createShader(gl.FRAGMENT_SHADER, STAMP_FRAGMENT_SHADER);
+        gl.attachShader(stampProgram, v);
+        gl.attachShader(stampProgram, f);
+        gl.linkProgram(stampProgram);
+        if (!gl.getProgramParameter(stampProgram, gl.LINK_STATUS)) {
+            console.error("Stamp program link failed:", gl.getProgramInfoLog(stampProgram));
+            stampProgram = null;
+        }
+    })();
+
+    var stampPosLoc = -1;
+    var stampU = {};
+    var stampVAO = null;
+    if (stampProgram) {
+        stampPosLoc = gl.getAttribLocation(stampProgram, "position");
+        stampU = {
+            center: gl.getUniformLocation(stampProgram, "stampCenter"),
+            halfSize: gl.getUniformLocation(stampProgram, "stampHalfSize"),
+            uv: gl.getUniformLocation(stampProgram, "stampUV"),
+            rotation: gl.getUniformLocation(stampProgram, "stampRotation"),
+            strength: gl.getUniformLocation(stampProgram, "stampStrength"),
+            core: gl.getUniformLocation(stampProgram, "stampCore"),
+            edgeSoft: gl.getUniformLocation(stampProgram, "stampEdgeSoft"),
+            atlas: gl.getUniformLocation(stampProgram, "letterAtlas")
+        };
+        // stampVAO will be created AFTER createSimTargets() so simQuadBuffer exists
+    }
+
+    var sphereMesh = null;
+    var currentSphereQuality = -1;
+    function ensureSphereMesh(q) {
+        q = Math.max(4, Math.min(64, q | 0));
+        if (q === currentSphereQuality && sphereMesh) return;
+        if (sphereMesh) {
+            gl.deleteBuffer(sphereMesh.posBuf);
+            gl.deleteBuffer(sphereMesh.normBuf);
+            gl.deleteBuffer(sphereMesh.idxBuf);
+        }
+        sphereMesh = buildSphereMesh(gl, q);
+        currentSphereQuality = q;
+
+        // Rebuild the drop VAO with the new sphere buffers. The drop program
+        // must be active so its attribute locations are valid at the time
+        // vertexAttribPointer records them into the VAO.
+        gl.useProgram(dropProgram);       // ← ADD
+        rebuildDropVAO();                 // ← ADD
+    }
+
+    var skyMesh = buildSphereMesh(gl, 64);
+    ensureSphereMesh(state.sphereQuality);
+
+    createSimTargets();              // ← simQuadBuffer created here
+    buildMesh(state.gridResolution);
+
+    // ← NOW build stampVAO, with a real buffer
+    if (stampProgram) {
+        stampVAO = gl.createVertexArray();
+        gl.bindVertexArray(stampVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, simQuadBuffer);   // ← real buffer now
+        gl.enableVertexAttribArray(stampPosLoc);
+        gl.vertexAttribPointer(stampPosLoc, 2, gl.FLOAT, false, 0, 0);
+        gl.bindVertexArray(null);
+    }
+    // =====================================================================
+    // FFT OCEAN SETUP
+    // =====================================================================
+
+    var fftSize = FFT_SIZE;
+
+    function makeFFTTexture(iformat, format, type, useLinear) {
+        var tex = gl.createTexture();
+        gl.bindTexture(gl.TEXTURE_2D, tex);
+        gl.texImage2D(gl.TEXTURE_2D, 0, iformat, fftSize, fftSize, 0, format, type, null);
+        var filter = useLinear ? gl.LINEAR : gl.NEAREST;
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, filter);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+        return tex;
+    }
+    function makeFFTFBO(tex) {
+        var fbo = gl.createFramebuffer();
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fbo);
+        gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, tex, 0);
+        var status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+        if (status !== gl.FRAMEBUFFER_COMPLETE) {
+            console.error("FFT FBO incomplete:", status);
+        }
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+        return fbo;
+    }
+
+    var fftInternalFormat = simInternalFormat;
+    var fftType = simType;
+    if (fftInternalFormat === gl.RGBA8) {
+        console.warn("FFT running at RGBA8 — waves will be quantized and may look wrong");
+    }
+
+    var fftSpectrum0Tex = makeFFTTexture(fftInternalFormat, gl.RGBA, fftType, false);
+    var fftSpectrum0FBO = makeFFTFBO(fftSpectrum0Tex);
+
+    var fftPingTex = [
+        makeFFTTexture(fftInternalFormat, gl.RGBA, fftType, false),
+        makeFFTTexture(fftInternalFormat, gl.RGBA, fftType, false)
+    ];
+    var fftPingFBO = [makeFFTFBO(fftPingTex[0]), makeFFTFBO(fftPingTex[1])];
+
+    var fftOutputTex = makeFFTTexture(fftInternalFormat, gl.RGBA, fftType, true);
+    var fftLaplacianTex = makeFFTTexture(fftInternalFormat, gl.RGBA, fftType, true);
+
+    var fftOutputFBO = gl.createFramebuffer();
+    gl.bindFramebuffer(gl.FRAMEBUFFER, fftOutputFBO);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, fftOutputTex, 0);
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT1, gl.TEXTURE_2D, fftLaplacianTex, 0);
+    gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
+    var fboStatus = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+    if (fboStatus !== gl.FRAMEBUFFER_COMPLETE) {
+        console.error("FFT output MRT FBO incomplete:", fboStatus);
+    }
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+    function buildFFTProgram(fragSource) {
+        var prog = gl.createProgram();
+        var v = createShader(gl.VERTEX_SHADER, COPY_VERTEX_SHADER);
+        var f = createShader(gl.FRAGMENT_SHADER, fragSource);
+        gl.attachShader(prog, v);
+        gl.attachShader(prog, f);
+        gl.bindAttribLocation(prog, 0, "position");
+        gl.linkProgram(prog);
+        if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) {
+            console.error("FFT program link failed:", gl.getProgramInfoLog(prog));
+        }
+        return prog;
+    }
+
+    var spectrumProgram = buildFFTProgram(SPECTRUM_FRAGMENT_SHADER);
+    var animProgram = buildFFTProgram(SPECTRUM_ANIMATE_SHADER);
+    var fftHProgram = buildFFTProgram(FFT_HORIZONTAL_SHADER);
+    var fftVProgram = buildFFTProgram(FFT_VERTICAL_SHADER);
+    var fftOutProgram = buildFFTProgram(FFT_OUTPUT_SHADER);
+
+    var fftU = {
+        spec_N: gl.getUniformLocation(spectrumProgram, "N"),
+        spec_windSpeed: gl.getUniformLocation(spectrumProgram, "windSpeed"),
+        spec_windAngle: gl.getUniformLocation(spectrumProgram, "windAngle"),
+        spec_smallWaveCutoff: gl.getUniformLocation(spectrumProgram, "smallWaveCutoff"),
+        spec_directionSpread: gl.getUniformLocation(spectrumProgram, "directionSpread"),
+        spec_waveScale: gl.getUniformLocation(spectrumProgram, "waveScale"),
+        spec_heightAmp: gl.getUniformLocation(spectrumProgram, "heightAmp"),
+        spec_patchSize: gl.getUniformLocation(spectrumProgram, "patchSize"),
+
+        anim_spectrum0: gl.getUniformLocation(animProgram, "spectrum0"),
+        anim_N: gl.getUniformLocation(animProgram, "N"),
+        anim_time: gl.getUniformLocation(animProgram, "time"),
+        anim_patchSize: gl.getUniformLocation(animProgram, "patchSize"),
+        anim_speed: gl.getUniformLocation(animProgram, "speed"),
+        anim_propagation: gl.getUniformLocation(animProgram, "propagation"),
+
+        fftH_inputTex: gl.getUniformLocation(fftHProgram, "inputTex"),
+        fftH_N: gl.getUniformLocation(fftHProgram, "N"),
+        fftH_passIndex: gl.getUniformLocation(fftHProgram, "passIndex"),
+
+        fftV_inputTex: gl.getUniformLocation(fftVProgram, "inputTex"),
+        fftV_N: gl.getUniformLocation(fftVProgram, "N"),
+        fftV_passIndex: gl.getUniformLocation(fftVProgram, "passIndex"),
+
+        out_fftResult: gl.getUniformLocation(fftOutProgram, "fftResult"),
+        out_N: gl.getUniformLocation(fftOutProgram, "N"),
+        out_choppiness: gl.getUniformLocation(fftOutProgram, "choppiness"),
+        out_heightScale: gl.getUniformLocation(fftOutProgram, "heightScale"),
+        out_patchSize: gl.getUniformLocation(fftOutProgram, "patchSize")
+    };
+
+    var fftVAO = gl.createVertexArray();
+    gl.bindVertexArray(fftVAO);
+    gl.bindBuffer(gl.ARRAY_BUFFER, simQuadBuffer);
+    gl.enableVertexAttribArray(0);
+    gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+
+    var lastSpecParams = {
+        windSpeed: -1, windAngle: -1, waveScale: -1,
+        smallWaveCutoff: -1, directionSpread: -1, heightAmp: -1,
+        patchSize: -1
+    };
+
+    function regenerateSpectrum() {
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fftSpectrum0FBO);
+        gl.viewport(0, 0, fftSize, fftSize);
+        gl.useProgram(spectrumProgram);
+        gl.uniform1i(fftU.spec_N, fftSize);
+        gl.uniform1f(fftU.spec_windSpeed, state.oceanWindSpeed);
+        gl.uniform1f(fftU.spec_windAngle, state.oceanWindAngle);
+        gl.uniform1f(fftU.spec_smallWaveCutoff, state.oceanSmallWaveCut);
+        gl.uniform1f(fftU.spec_directionSpread, state.oceanDirectionSpread);
+        gl.uniform1f(fftU.spec_waveScale, state.oceanWaveScale);
+        gl.uniform1f(fftU.spec_heightAmp, state.oceanHeightAmp);
+        gl.uniform1f(fftU.spec_patchSize, state.oceanPatchSize);
+        gl.bindVertexArray(fftVAO);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        gl.bindVertexArray(null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+        lastSpecParams.windSpeed = state.oceanWindSpeed;
+        lastSpecParams.windAngle = state.oceanWindAngle;
+        lastSpecParams.waveScale = state.oceanWaveScale;
+        lastSpecParams.smallWaveCutoff = state.oceanSmallWaveCut;
+        lastSpecParams.directionSpread = state.oceanDirectionSpread;
+        lastSpecParams.heightAmp = state.oceanHeightAmp;
+        lastSpecParams.patchSize = state.oceanPatchSize;
+    }
+
+    function spectrumNeedsRegen() {
+        return (
+            Math.abs(lastSpecParams.windSpeed - state.oceanWindSpeed) > 1e-4 ||
+            Math.abs(lastSpecParams.windAngle - state.oceanWindAngle) > 1e-4 ||
+            Math.abs(lastSpecParams.waveScale - state.oceanWaveScale) > 1e-4 ||
+            Math.abs(lastSpecParams.smallWaveCutoff - state.oceanSmallWaveCut) > 1e-4 ||
+            Math.abs(lastSpecParams.directionSpread - state.oceanDirectionSpread) > 1e-4 ||
+            Math.abs(lastSpecParams.heightAmp - state.oceanHeightAmp) > 1e-4 ||
+            Math.abs(lastSpecParams.patchSize - state.oceanPatchSize) > 1e-4
+        );
+    }
+
+    function runFFTOcean(tSec) {
+        if (spectrumNeedsRegen()) regenerateSpectrum();
+
+        gl.disable(gl.DEPTH_TEST);
+        gl.depthMask(false);
+        gl.disable(gl.BLEND);
+
+        // Pass 1: animate h0 → h(k,t) into fftPingTex[0]
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fftPingFBO[0]);
+        gl.viewport(0, 0, fftSize, fftSize);
+        gl.useProgram(animProgram);
+        gl.uniform1i(fftU.anim_N, fftSize);
+        gl.uniform1f(fftU.anim_time, tSec);
+        gl.uniform1f(fftU.anim_patchSize, state.oceanPatchSize);
+        gl.uniform1f(fftU.anim_speed, state.oceanSpeed);
+        gl.uniform1f(fftU.anim_propagation, state.oceanPropagation);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, fftSpectrum0Tex);
+        gl.uniform1i(fftU.anim_spectrum0, 0);
+        gl.bindVertexArray(fftVAO);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        // Pass 2: forward FFT horizontal (8 sub-passes)
+        gl.useProgram(fftHProgram);
+        gl.uniform1i(fftU.fftH_N, fftSize);
+        var srcIdx = 0;
+        for (var i = 0; i < FFT_LOG2_SIZE; i++) {
+            var dstIdx = 1 - srcIdx;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fftPingFBO[dstIdx]);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, fftPingTex[srcIdx]);
+            gl.uniform1i(fftU.fftH_inputTex, 0);
+            gl.uniform1i(fftU.fftH_passIndex, i);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            srcIdx = dstIdx;
+        }
+
+        // Pass 3: forward FFT vertical (8 sub-passes)
+        gl.useProgram(fftVProgram);
+        gl.uniform1i(fftU.fftV_N, fftSize);
+        for (var j = 0; j < FFT_LOG2_SIZE; j++) {
+            var dstIdx2 = 1 - srcIdx;
+            gl.bindFramebuffer(gl.FRAMEBUFFER, fftPingFBO[dstIdx2]);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, fftPingTex[srcIdx]);
+            gl.uniform1i(fftU.fftV_inputTex, 0);
+            gl.uniform1i(fftU.fftV_passIndex, j);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            srcIdx = dstIdx2;
+        }
+
+        // Pass 4: output — derive height, chop, foam from FFT result
+        gl.bindFramebuffer(gl.FRAMEBUFFER, fftOutputFBO);
+        gl.drawBuffers([gl.COLOR_ATTACHMENT0, gl.COLOR_ATTACHMENT1]);
+        gl.useProgram(fftOutProgram);
+        gl.uniform1i(fftU.out_N, fftSize);
+        gl.uniform1f(fftU.out_choppiness, state.oceanChop);
+        gl.uniform1f(fftU.out_heightScale, 100.0 + state.oceanDetail * 100.0);
+        gl.uniform1f(fftU.out_patchSize, state.oceanPatchSize);
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, fftPingTex[srcIdx]);
+        gl.uniform1i(fftU.out_fftResult, 0);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+        gl.bindVertexArray(null);
+        gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    }
+
+    // Initial spectrum bake
+    regenerateSpectrum();
+
+    // =====================================================================
+    // VAOS
+    // =====================================================================
+
+    var waterVAO = gl.createVertexArray();
+    var simVAO = gl.createVertexArray();
+    var skyVAO = gl.createVertexArray();
+    var copyVAO = gl.createVertexArray();
+    var dropVAO = gl.createVertexArray();
+
+    function rebuildWaterVAO() {
+        gl.bindVertexArray(waterVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, gridBuffer);
+        gl.enableVertexAttribArray(positionLocation);
+        gl.vertexAttribPointer(positionLocation, 2, gl.FLOAT, false, 0, 0);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bindVertexArray(null);
+    }
+
+    rebuildWaterVAO();
+
+    function rebuildDropVAO() {
+        gl.bindVertexArray(dropVAO);
+        gl.bindBuffer(gl.ARRAY_BUFFER, sphereMesh.posBuf);
+        gl.enableVertexAttribArray(dropSpherePosLoc);
+        gl.vertexAttribPointer(dropSpherePosLoc, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, sphereMesh.normBuf);
+        gl.enableVertexAttribArray(dropSphereNormLoc);
+        gl.vertexAttribPointer(dropSphereNormLoc, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, dropInstanceBuffer);
+        gl.enableVertexAttribArray(dropInstCenterLoc);
+        gl.vertexAttribPointer(dropInstCenterLoc, 3, gl.FLOAT, false, 16, 0);
+        gl.vertexAttribDivisor(dropInstCenterLoc, 1);
+        gl.enableVertexAttribArray(dropInstRadiusLoc);
+        gl.vertexAttribPointer(dropInstRadiusLoc, 1, gl.FLOAT, false, 16, 12);
+        gl.vertexAttribDivisor(dropInstRadiusLoc, 1);
+
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereMesh.idxBuf);
+        gl.bindVertexArray(null);
+    }
+
+    rebuildWaterVAO();
+
+    gl.bindVertexArray(skyVAO);
+    gl.bindBuffer(gl.ARRAY_BUFFER, skyMesh.posBuf);
+    gl.enableVertexAttribArray(skySpherePosLoc);
+    gl.vertexAttribPointer(skySpherePosLoc, 3, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, skyMesh.idxBuf);
+    gl.bindVertexArray(null);
+
+    gl.bindVertexArray(simVAO);
+    gl.bindBuffer(gl.ARRAY_BUFFER, simQuadBuffer);
+    gl.enableVertexAttribArray(simPosLoc);
+    gl.vertexAttribPointer(simPosLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+
+    gl.bindVertexArray(copyVAO);
+    gl.bindBuffer(gl.ARRAY_BUFFER, simQuadBuffer);
+    gl.enableVertexAttribArray(copyPosLoc);
+    gl.vertexAttribPointer(copyPosLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.bindVertexArray(null);
+
+    rebuildDropVAO();
+
+    resizeCanvas();
+    ResizeManager.attach(resizeCanvas);
+
+    applyBackgroundImage();
+    applyRiverbedImage();
+
+    function spawnSimDrop(tNow) {
+        if (fallingDrops.length >= MAX_FALLING_DROPS) return;
+        if (pendingSimDrops.length >= MAX_DROPS) return;
+
+        var sx = 0.1 + Math.random() * 0.96;
+        var sy = 0.1 + Math.random() * 0.96;
+
+        var sAmpBase = state.rippleStrength;
+        var sAmp = sAmpBase * (1.0 + (Math.random() * 2.0 - 1.0) * state.rippleStrengthVariance);
+
+        var speedVar = 1.0 + (Math.random() * 2.0 - 1.0) * state.dropFallSpeedVariance;
+        var vImpact = state.dropFallSpeed * speedVar;
+        var fallTime = (2 * state.dropFallHeight) / vImpact;
+
+        pendingSimDrops.push({
+            x: sx, y: sy, z: sAmp,
+            impactTime: tNow + fallTime,
+            isChild: false,
+            parentHeight: state.dropFallHeight
+        });
+
+        var sVar = 1.0 + Math.random() * state.dropSizeVariance;
+        fallingDrops.push({
+            x: sx, y: sy,
+            spawnTime: tNow,
+            duration: fallTime,
+            size: state.dropSize * sVar,
+            startZ: state.dropFallHeight,
+            endZ: 0,
+            isChild: false
+        });
+        if (fallingDrops.length > MAX_FALLING_DROPS) fallingDrops.shift();
+    }
+
+    var currentLineIdx = 0, currentCharIdx = 0;
+    var currentCursorX = 0.05, lineY = 0.5, lastTypeTime = 0;
+
+    var STORY_LINES = [
+        "Badger", "packed", "his", "tiny", "bag,", "Stripy", "towel", "and", "sun-hat", "swag,",
+        "Waddled", "down", "the", "sandy", "track,", "Dreaming", "of", "a", "seaside", "snack.",
+        "But", "on", "the", "shore", "he", "heard", "a", "Yarr!", "Saw", "an", "eyepatch", "gleaming", "far", "-",
+        "A", "pirate", "starfish", "struck", "a", "pose,", "Saltwater", "dripping", "off", "his", "toes.",
+        "Oh,", "the", "badger", "and", "the", "starfish", "on", "a", "sunny", "holiday,", "One", "wants",
+        "treasure", "buried", "deep,", "the", "other", "loves", "to", "play.", "Digging", "through",
+        "the", "golden", "sand,", "a", "perfect", "little", "team,", "If", "there's", "a", "jam", "sandwich",
+        "waiting,", "life", "is", "truly", "supreme.", "Starfish", "waved", "his", "tiny", "arm,", "Matey,",
+        "help", "me!", "No", "alarm", "-", "I've", "got", "treasure,", "shiny", "bright,", "But", "I",
+        "can't", "dig", "-", "it's", "quite", "a", "sight.", "Badger", "grinned,", "Well", "that's", "my",
+        "thing,", "I'll", "dig", "a", "hole", "fit", "for", "a", "king.", "But", "I'll", "need", "payment",
+        "for", "my", "toil", "How", "'bout", "a", "jam", "sandwich", "for", "the", "spoil?",
+        "Oh,", "the", "badger", "and", "the", "starfish", "on", "a", "sunny", "holiday,", "One", "wants",
+        "treasure", "buried", "deep,", "the", "other", "loves", "to", "play.", "Digging", "through",
+        "the", "golden", "sand,", "a", "perfect", "little", "team,", "If", "there's", "a", "jam", "sandwich",
+        "waiting,", "life", "is", "truly", "supreme.", "So", "they", "dug", "and", "dug", "until", "the",
+        "sun,", "Turned", "the", "waves", "to", "liquid", "gold.", "Starfish", "placed", "his", "chest",
+        "inside,", "Secrets", "safe", "and", "stories", "told.", "Badger", "munched", "his",
+        "sandwich", "sweet,", "Jam", "dripping", "on", "his", "sandy", "feet", "-", "Two", "new",
+        "friends", "upon", "the", "shore,", "Pirate", "tales", "forever", "more.", "Yeah,", "the",
+        "badger", "and", "the", "starfish", "on", "a", "sunny", "holiday,", "Treasure", "buried,",
+        "sandwich", "eaten,", "perfect", "seaside", "day.", "If", "you", "stroll", "along", "that",
+        "beach,", "you", "might", "just", "hear", "them", "sing", "-", "A", "pirate's", "laugh,", "a",
+        "badger's", "cheer,", "in", "harmony", "they", "ring."
+    ];
+
+    function spawnLiveTextLetter(tNow) {
+        if (!liveTextCurrentWord) {
+            if (liveTextQueue.length === 0) return;
+            if (tNow - lastTypeTime < state.letterLineDelay) return;
+            liveTextCurrentWord = liveTextQueue.shift();
+            liveTextCharIdx = 0;
+
+            liveTextCurrentWordPlan = [];
+            var totalWidth = 0;
+            for (var i = 0; i < liveTextCurrentWord.length; i++) {
+                var c = liveTextCurrentWord[i];
+                var isSpace = (c === ' ');
+                var sv = isSpace ? 1.0 : (1.0 + (Math.random() * 2.0 - 1.0) * state.letterSizeVariance);
+                var sz = state.letterSize * sv;
+                var advance = sz * state.letterSpacing;
+                var rot = (Math.random() * 2.0 - 1.0) * state.letterAngleVariance;
+                var yVar = (Math.random() * 2.0 - 1.0) * state.letterYVariance;
+                liveTextCurrentWordPlan.push({ size: sz, advance: advance, rot: rot, yVar: yVar });
+                totalWidth += advance;
+            }
+
+            // Auto-shrink if the recognised word is very long.
+            var fit = computeLineFitScale(totalWidth, state.letterMaxLineWidth);
+            if (fit < 1.0) {
+                for (var j = 0; j < liveTextCurrentWordPlan.length; j++) {
+                    liveTextCurrentWordPlan[j].size *= fit;
+                    liveTextCurrentWordPlan[j].advance *= fit;
+                }
+                totalWidth *= fit;
+            }
+
+            currentCursorX = 0.5 - (totalWidth * 0.5);
+        }
+        if (liveTextCharIdx >= liveTextCurrentWord.length) {
+            liveTextCurrentWord = null;
+            liveTextCurrentWordPlan = [];
+            lastTypeTime = tNow;
+            return;
+        }
+        var ch = liveTextCurrentWord[liveTextCharIdx];
+        var plan = liveTextCurrentWordPlan[liveTextCharIdx];
+        var uv = sdfAtlas.letterUVs[ch];
+        if (uv) {
+            var finalY = lineY + state.letterYOffset + plan.yVar;
+            letterRipples.push({
+                x: currentCursorX + plan.advance * 0.5,
+                y: finalY,
+                size: plan.size,
+                rot: plan.rot,
+                strength: state.letterStrength,
+                u0: uv.u0, v0: uv.v0, u1: uv.u1, v1: uv.v1
+            });
+            while (letterRipples.length > MAX_LETTERS) letterRipples.shift();
+        }
+        currentCursorX += plan.advance;
+        liveTextCharIdx++;
+        lastTypeTime = tNow;
+    }
+
+    // Given a list of {advance:number} entries and a scale factor, return the
+    // multiplier needed so the total width fits within maxWidth (0..1 of the
+    // screen in UV space). Returns 1.0 if no rescale is needed.
+    function computeLineFitScale(totalWidth, maxWidth) {
+        if (!(maxWidth > 0) || maxWidth >= 1.0) return 1.0;
+        if (totalWidth <= maxWidth) return 1.0;
+        return maxWidth / totalWidth;
+    }
+
+    function spawnLetter(tNow) {
+        if (state.liveText) {
+            spawnLiveTextLetter(tNow);
+            return;
+        }
+        var text = STORY_LINES[currentLineIdx];
+
+        if (currentCharIdx === 0) {
+            currentLinePlan = [];
+            var totalWidth = 0;
+            for (var i = 0; i < text.length; i++) {
+                var c = text[i];
+                var isSpace = (c === ' ');
+                var sv = 1.0 + (Math.random() * 2.0 - 1.0) * state.letterSizeVariance;
+                var sz = state.letterSize * sv;
+                var advance = sz * state.letterSpacing;
+                var rot = (Math.random() * 2.0 - 1.0) * state.letterAngleVariance;
+                var yVar = (Math.random() * 2.0 - 1.0) * state.letterYVariance;
+                currentLinePlan.push({ char: c, isSpace: isSpace, size: sz, advance: advance, rot: rot, yVar: yVar });
+                totalWidth += advance;
+            }
+
+            // Auto-shrink the whole line if it's too wide.
+            var fit = computeLineFitScale(totalWidth, state.letterMaxLineWidth);
+            if (fit < 1.0) {
+                for (var j = 0; j < currentLinePlan.length; j++) {
+                    currentLinePlan[j].size *= fit;
+                    currentLinePlan[j].advance *= fit;
+                }
+                totalWidth *= fit;
+            }
+
+            currentCursorX = 0.5 - (totalWidth * 0.5);
+        }
+
+        if (currentCharIdx >= text.length) {
+            if (tNow - lastTypeTime > state.letterLineDelay) {
+                currentLineIdx = (currentLineIdx + 1) % STORY_LINES.length;
+                currentCharIdx = 0;
+            }
+            return;
+        }
+        var ch = text[currentCharIdx];
+        var plan = currentLinePlan[currentCharIdx];
+        var uv = sdfAtlas.letterUVs[ch];
+        if (uv) {
+            var finalY = lineY + state.letterYOffset + plan.yVar;
+            letterRipples.push({
+                x: currentCursorX + plan.advance * 0.5,
+                y: finalY,
+                size: plan.size,
+                rot: plan.rot,
+                strength: state.letterStrength,
+                u0: uv.u0, v0: uv.v0, u1: uv.u1, v1: uv.v1
+            });
+            while (letterRipples.length > MAX_LETTERS) letterRipples.shift();
+        }
+        currentCursorX += plan.advance;
+        currentCharIdx++;
+        lastTypeTime = tNow;
+    }
+
+    var lastFrameTime = 0;
+    var frameInterval = 1000 / 60;
+    var scaledTime = 0;
+
+    var dropArrScratch = new Float32Array(MAX_DROPS * 4);
+    var instDataScratch = new Float32Array(MAX_FALLING_DROPS * 4);
+
+    function animate(now) {
+        if (now - lastFrameTime >= frameInterval) {
+
+            // var frameStart = performance.now();     // ← ADD THIS LINE
+
+            var dtRealMs = (lastFrameTime === 0) ? 0 : Math.min(now - lastFrameTime, 100);
+            lastFrameTime = now;
+            var dtRealSec = dtRealMs * 0.001;
+
+            if (transitionActive) {
+                var tn = (now - transitionStartTime) / transitionDuration;
+                if (tn >= 1) {
+                    tn = 1;
+                    transitionActive = false;
+                    Object.keys(DEFAULTS).forEach(function (key) {
+                        if (STANDALONE_KEYS[key]) return;
+                        state[key] = transitionTarget[key];
+                    });
+                    refreshControlsUI();
+                    if (window.__promoteTransitionEnd) window.__promoteTransitionEnd();
+                    bgBlend = 0;
+                    bedBlend = 0;
+                } else {
+                    Object.keys(DEFAULTS).forEach(function (key) {
+                        if (STANDALONE_KEYS[key]) return;
+                        if (DISCRETE_KEYS[key]) return;
+                        var a = transitionSource[key];
+                        var b = transitionTarget[key];
+                        state[key] = a + (b - a) * tn;
+                        if (INT_KEYS[key]) state[key] = Math.round(state[key]);
+                    });
+                    bgBlend = tn;
+                    bedBlend = tn;
+                    if ((now | 0) % 4 === 0) refreshControlsUI();
+                }
+            }
+
+            scaledTime += dtRealSec * state.timeScale;
+            var tSec = scaledTime;
+            var dtSim = dtRealSec * state.timeScale;
+
+            simDriftPhaseX = mod1(simDriftPhaseX - dtSim * state.rippleDriftX);
+            simDriftPhaseY = mod1(simDriftPhaseY - dtSim * state.rippleDriftY);
+
+            var simEffectiveRate = Math.min(state.rainRate, MAX_DROPS);
+            var simSpawnInterval = simEffectiveRate > 0.001 ? 1.0 / simEffectiveRate : 1e9;
+            nextSimDropTime = advanceSpawnClock(tSec, nextSimDropTime, simSpawnInterval, 8, spawnSimDrop);
+
+            for (var pi = pendingSimDrops.length - 1; pi >= 0; pi--) {
+                var imp = pendingSimDrops[pi];
+                if (tSec >= imp.impactTime) {
+                    if (simDrops.length < MAX_DROPS) {
+                        simDrops.push({ x: imp.x, y: imp.y, z: imp.z });
+                    }
+
+                    if (!imp.isChild && state.dropSplashCount > 0) {
+                        var nMax = Math.round(state.dropSplashCount);
+                        var nSplash = Math.floor(Math.random() * (nMax + 1));
+
+                        for (var si = 0; si < nSplash; si++) {
+                            if (fallingDrops.length >= MAX_FALLING_DROPS) break;
+                            if (pendingSimDrops.length >= MAX_DROPS) break;
+
+                            var jitterX = (Math.random() * 2.0 - 1.0) * 0.005;
+                            var jitterY = (Math.random() * 2.0 - 1.0) * 0.005;
+                            var childUVx = imp.x + jitterX;
+                            var childUVy = imp.y + jitterY;
+
+                            var wx0 = (childUVx - 0.5) * 4.0;
+                            var wy0 = (childUVy - 0.5) * 4.0;
+
+                            var theta = Math.random() * Math.PI * 2.0;
+
+                            var apexH = imp.parentHeight * state.dropSplashHeightFactor
+                                * (0.5 + Math.random());
+                            if (apexH < 0.001) continue;
+
+                            var g = (state.dropFallSpeed * state.dropFallSpeed)
+                                / (2 * state.dropFallHeight);
+                            if (g < 1e-6) g = 1e-6;
+
+                            var vz = Math.sqrt(2 * g * apexH);
+                            var airTime = 2 * vz / g;
+
+                            var launchRadius = apexH * (0.4 + Math.random() * 0.6);
+                            var vh = launchRadius / airTime;
+
+                            var inheritedVX = state.rippleDriftX * 4.0 * state.dropSplashDriftInheritance;
+                            var inheritedVY = state.rippleDriftY * 4.0 * state.dropSplashDriftInheritance;
+
+                            var vx = Math.cos(theta) * vh + inheritedVX;
+                            var vy = Math.sin(theta) * vh + inheritedVY;
+
+                            var wxLand = wx0 + vx * airTime;
+                            var wyLand = wy0 + vy * airTime;
+                            var cxLand = wxLand / 4.0 + 0.5;
+                            var cyLand = wyLand / 4.0 + 0.5;
+
+                            var childZ = imp.z * state.dropSplashStrengthFactor;
+
+                            pendingSimDrops.push({
+                                x: cxLand, y: cyLand, z: childZ,
+                                impactTime: tSec + airTime,
+                                isChild: true,
+                                parentHeight: apexH
+                            });
+
+                            var childSizeVar = 1.0 + Math.random() * state.dropSizeVariance;
+                            fallingDrops.push({
+                                wx0: wx0, wy0: wy0, wz0: 0.0,
+                                vx: vx, vy: vy, vz: vz,
+                                g: g,
+                                spawnTime: tSec,
+                                duration: airTime,
+                                size: state.dropSize * state.dropSplashSizeFactor * childSizeVar,
+                                isChild: true
+                            });
+                        }
+                    }
+
+                    pendingSimDrops.splice(pi, 1);
+                }
+            }
+
+            if (state.letterRate > 0.001) {
+                var letterInterval = 1.0 / state.letterRate;
+                nextLetterTime = advanceSpawnClock(tSec, nextLetterTime, letterInterval, 4, spawnLetter);
+            }
+
+            fallingDrops = fallingDrops.filter(function (d) { return (tSec - d.spawnTime) < d.duration; });
+
+            var totalSimDt = Math.max(0, dtSim) * state.rippleSpeed * 30;
+            var maxDtPerStep = 0.1;
+            var numSimSteps = Math.max(1, Math.ceil(totalSimDt / maxDtPerStep));
+            var simDtPerStep = totalSimDt / numSimSteps;
+
+            gl.useProgram(simProgram);
+            gl.uniform1f(simU.tension, state.simTension);
+            gl.uniform1f(simU.damping, state.simDamping);
+            gl.uniform1f(simU.springiness, state.simSpringiness);
+            gl.uniform1f(simU.impulseStrength, state.simRainImpulse);
+            gl.uniform1f(simU.resolution, simRes);
+            gl.uniform1f(simU.dropRadius, state.simDropRadius);
+            gl.uniform1f(simU.dropCore, state.simDropCore);
+            gl.uniform1f(simU.simDt, simDtPerStep);   // ← no extra * rippleSpeed here
+            gl.uniform1f(simU.quadraticDrag, state.simQuadraticDrag);
+
+            var dropArr = dropArrScratch;
+            var dropSlots = 0;                // how many impulse entries we've written
+            for (var di = 0; di < simDrops.length && dropSlots < MAX_DROPS; di++) {
+                var dx = simDrops[di].x + simDriftPhaseX;
+                var dy = simDrops[di].y + simDriftPhaseY;
+                var dz = simDrops[di].z;
+
+                // Write at every wrap copy whose impulse kernel reaches into [0,1].
+                // Radius is simDropRadius in sim-texture units (a tiny fraction),
+                // so only copies very close to the seam need duplicating.
+                var r = state.simDropRadius;   // sim-UV units
+                var cx = mod1(dx);
+                var cy = mod1(dy);
+                var minWx = Math.floor(dx - r);
+                var maxWx = Math.ceil(dx + r);
+                var minWy = Math.floor(dy - r);
+                var maxWy = Math.ceil(dy + r);
+
+                for (var wx = minWx; wx <= maxWx && dropSlots < MAX_DROPS; wx++) {
+                    for (var wy = minWy; wy <= maxWy && dropSlots < MAX_DROPS; wy++) {
+                        var px = dx - wx;
+                        var py = dy - wy;
+                        // Only keep the copy if its Gaussian actually overlaps [0,1].
+                        if (px + r <= 0 || px - r >= 1) continue;
+                        if (py + r <= 0 || py - r >= 1) continue;
+                        dropArr[dropSlots * 4 + 0] = px;
+                        dropArr[dropSlots * 4 + 1] = py;
+                        dropArr[dropSlots * 4 + 2] = dz;
+                        dropArr[dropSlots * 4 + 3] = 0.0;
+                        dropSlots++;
+                    }
+                }
+            }
+            var dropCount = dropSlots;
+            if (dropCount > 0)
+                gl.uniform4fv(simU.drops, dropArr.subarray(0, dropCount * 4));
+            simDrops.length = 0;
+
+            gl.bindVertexArray(simVAO);
+            gl.viewport(0, 0, simRes, simRes);
+
+            // --- Stamp queued letters into the sim before stepping ---------
+            if (letterRipples.length > 0 && stampProgram) {
+                gl.useProgram(stampProgram);
+                gl.viewport(0, 0, simRes, simRes);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, simFBOs[simCurrent]);
+                gl.enable(gl.BLEND);
+                gl.blendEquation(gl.FUNC_ADD);
+                gl.blendFunc(gl.ONE, gl.ONE);
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, sdfAtlas.texture);
+                gl.uniform1i(stampU.atlas, 0);
+                gl.uniform1f(stampU.edgeSoft, Math.max(0.02, Math.min(1.0, state.letterWavelength)));
+                gl.uniform1f(stampU.core, Math.max(0.0, Math.min(1.0, state.letterThickness / 5.0)));
+                gl.bindVertexArray(stampVAO);
+
+                var nStamp = Math.min(letterRipples.length, 64);
+                for (var si2 = 0; si2 < nStamp; si2++) {
+                    var lr2 = letterRipples[si2];
+                    var halfX = lr2.size * 0.5;
+                    var halfY = lr2.size * 0.5;
+
+                    // Unwrapped centre in sim-texture space (may be outside [0,1]).
+                    var cx = lr2.x + simDriftPhaseX;
+                    var cy = (1.0 - lr2.y) + simDriftPhaseY;
+
+                    gl.uniform2f(stampU.halfSize, halfX, halfY);
+                    gl.uniform4f(stampU.uv, lr2.u0, lr2.v0, lr2.u1, lr2.v1);
+                    gl.uniform1f(stampU.rotation, -lr2.rot);
+                    gl.uniform1f(stampU.strength, lr2.strength * state.simRainImpulse * 5.0);
+
+                    // Work out how many integer wraps the quad spans on each axis.
+                    // For a glyph fully inside [0,1] with cx=0.5, this is nMin=nMax=0
+                    // → one draw. For a glyph straddling the right edge, it's 0 and 1
+                    // → two draws, one at the normal spot and one shifted left by 1.
+                    var nMinX = Math.floor(cx - halfX);
+                    var nMaxX = Math.ceil(cx + halfX);
+                    var nMinY = Math.floor(cy - halfY);
+                    var nMaxY = Math.ceil(cy + halfY);
+
+                    for (var nx = nMinX; nx <= nMaxX; nx++) {
+                        for (var ny = nMinY; ny <= nMaxY; ny++) {
+                            var wx = cx - nx;
+                            var wy = cy - ny;
+                            // Only draw this wrap copy if its AABB overlaps [0,1].
+                            if (wx + halfX <= 0 || wx - halfX >= 1) continue;
+                            if (wy + halfY <= 0 || wy - halfY >= 1) continue;
+                            gl.uniform2f(stampU.center, wx, wy);
+                            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                        }
+                    }
+                }
+                gl.bindVertexArray(null);
+                gl.disable(gl.BLEND);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+                letterRipples.length = 0;
+                gl.useProgram(simProgram);
+            }
+
+            gl.bindVertexArray(simVAO);   // ← re-bind before the sim loop
+
+            for (var step = 0; step < numSimSteps; step++) {
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, simTextures[simCurrent]);
+                gl.uniform1i(simU.currState, 0);
+                gl.uniform1i(simU.dropCount, step === 0 ? dropCount : 0);
+                gl.bindFramebuffer(gl.FRAMEBUFFER, simFBOs[1 - simCurrent]);
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+                simCurrent = 1 - simCurrent;
+            }
+            gl.bindVertexArray(null);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+
+            // FFT ocean update
+            runFFTOcean(tSec);
+
+            gl.useProgram(program);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, waterFBO);
+            gl.viewport(0, 0, canvas.width, canvas.height);
+
+            if (state.bgImageEnabled > 0.5) {
+                gl.disable(gl.DEPTH_TEST);
+                gl.depthMask(false);
+                gl.disable(gl.CULL_FACE);
+                gl.useProgram(skyProgram);
+
+                gl.uniform1f(skySurfaceTiltLoc, state.surfaceTilt);
+                gl.uniform1f(skyPerspStrengthLoc, state.perspectiveStrength);
+                gl.uniform1f(skyCameraHeightLoc, state.cameraHeight);
+                gl.uniform2f(skyCameraOffsetLoc, state.cameraOffsetX, state.cameraOffsetY);
+                gl.uniform1f(skyRadiusLoc, 1000.0);
+
+                gl.activeTexture(gl.TEXTURE0);
+                gl.bindTexture(gl.TEXTURE_2D, bgTextureA);
+                gl.uniform1i(skyBgTexALoc, 0);
+                gl.activeTexture(gl.TEXTURE1);
+                gl.bindTexture(gl.TEXTURE_2D, bgTextureB);
+                gl.uniform1i(skyBgTexBLoc, 1);
+                gl.uniform1f(skyBgBlendLoc, bgBlend);
+                gl.uniform2f(skyBgTileLoc, state.bgImageTileX, state.bgImageTileY);
+
+                gl.bindVertexArray(skyVAO);
+                gl.drawElements(gl.TRIANGLES, skyMesh.indexCount, gl.UNSIGNED_SHORT, 0);
+                gl.bindVertexArray(null);
+
+                gl.depthMask(true);
+            } else {
+                gl.clearColor(0, 0, 0, 1);
+                gl.clear(gl.COLOR_BUFFER_BIT);
+            }
+
+            gl.useProgram(program);
+            gl.uniform1f(timeLocation, tSec);
+            var sc = [
+                "rgbSplit", "rgbAngle", "surfaceDepth", "surfaceTilt", "perspectiveStrength", "cameraHeight",
+                "specularPower", "specularStrength", "fresnelPower", "vignetteRadius", "vignetteSoftness",
+                "waterDepth", "absorption", "sandScale", "sandContrast", "refractionStrength", "dispersionStrength", "envMapStrength",
+                "bedDisplacement", "bedHeightScale",
+                "oceanFoamScale", "oceanFoamContrast", "oceanFoamDetail", "oceanFoamTint"];
+            sc.forEach(function (k) { if (u[k]) gl.uniform1f(u[k], state[k]); });
+            if (u.cameraOffset) gl.uniform2f(u.cameraOffset, state.cameraOffsetX, state.cameraOffsetY);
+            
+            if (u.oceanTexSize) gl.uniform2f(u.oceanTexSize, fftSize, fftSize);
+            if (u.oceanPatchSize) gl.uniform1f(u.oceanPatchSize, state.oceanPatchSize);
+            if (u.foamThreshold) gl.uniform1f(u.foamThreshold, state.oceanFoamThreshold);
+            if (u.foamStrength) gl.uniform1f(u.foamStrength, state.oceanFoamStrength);
+
+            if (u.simRes) gl.uniform1f(u.simRes, simRes);
+            if (u.causticStrength) gl.uniform1f(u.causticStrength, state.causticStrength);
+            if (u.simCausticStrength) gl.uniform1f(u.simCausticStrength, state.simCausticStrength);
+            if (u.causticScale) gl.uniform1f(u.causticScale, state.causticScale);
+            if (u.causticRGBScale) gl.uniform1f(u.causticRGBScale, state.causticRGBScale);
+            if (u.causticRGBAngle) gl.uniform1f(u.causticRGBAngle, state.causticRGBAngle);
+            if (u.causticRGBAffectedBySurface) gl.uniform1f(u.causticRGBAffectedBySurface, state.causticRGBAffectedBySurface);
+            if (u.bedDepthScale) gl.uniform1f(u.bedDepthScale, state.bedDepthScale);
+            gl.uniform2f(u.rippleDrift, state.rippleDriftX, state.rippleDriftY);
+
+            gl.uniform3f(u.waterColor, state.waterColorR, state.waterColorG, state.waterColorB);
+            gl.uniform3f(u.waterDeep, state.waterDeepR, state.waterDeepG, state.waterDeepB);
+            gl.uniform3f(u.skyHorizon, state.skyHorizonR, state.skyHorizonG, state.skyHorizonB);
+            gl.uniform3f(u.skyZenith, state.skyZenithR, state.skyZenithG, state.skyZenithB);
+            gl.uniform3f(u.sandColor, state.sandR, state.sandG, state.sandB);
+
+            gl.activeTexture(gl.TEXTURE1);
+            gl.bindTexture(gl.TEXTURE_2D, simTextures[simCurrent]);
+            gl.uniform1i(u.simTexture, 1);
+            gl.uniform1i(u.simDebugTex, 1);
+            gl.uniform2f(u.simDrift, simDriftPhaseX, simDriftPhaseY);
+            gl.uniform1f(u.debugSim, state.debugSim);
+
+            gl.activeTexture(gl.TEXTURE6);
+            gl.bindTexture(gl.TEXTURE_2D, fftOutputTex);
+            if (u.oceanTex) gl.uniform1i(u.oceanTex, 6);
+
+            gl.activeTexture(gl.TEXTURE7);
+            gl.bindTexture(gl.TEXTURE_2D, fftLaplacianTex);
+            if (u.oceanLaplacianTex) gl.uniform1i(u.oceanLaplacianTex, 7);
+            if (u.oceanCausticGain) gl.uniform1f(u.oceanCausticGain, state.oceanCausticGain);
+
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, bgTextureA);
+            gl.uniform1i(u.envMapA, 0);
+            gl.activeTexture(gl.TEXTURE4);
+            gl.bindTexture(gl.TEXTURE_2D, bgTextureB);
+            gl.uniform1i(u.envMapB, 4);
+            gl.uniform1f(u.envMapBlend, bgBlend);
+            if (u.envMapZoom) gl.uniform1f(u.envMapZoom, state.envMapZoom);
+            if (u.envMapPan) gl.uniform2f(u.envMapPan, state.envMapPanX, state.envMapPanY);
+
+            gl.activeTexture(gl.TEXTURE3);
+            gl.bindTexture(gl.TEXTURE_2D, bedTextureA);
+            if (u.bedTextureA) gl.uniform1i(u.bedTextureA, 3);
+            gl.activeTexture(gl.TEXTURE5);
+            gl.bindTexture(gl.TEXTURE_2D, bedTextureB);
+            if (u.bedTextureB) gl.uniform1i(u.bedTextureB, 5);
+            if (u.bedBlend) gl.uniform1f(u.bedBlend, bedBlend);
+            if (u.bedImageEnabled) gl.uniform1f(u.bedImageEnabled, state.bedImageEnabled);
+            if (u.bedImageTile) gl.uniform2f(u.bedImageTile, state.bedImageTileX, state.bedImageTileY);
+
+           gl.activeTexture(gl.TEXTURE8);
+            gl.bindTexture(gl.TEXTURE_2D, bedHeightTextureA);
+            if (u.bedHeightA) gl.uniform1i(u.bedHeightA, 8);
+            gl.activeTexture(gl.TEXTURE9);
+            gl.bindTexture(gl.TEXTURE_2D, bedHeightTextureB);
+            if (u.bedHeightB) gl.uniform1i(u.bedHeightB, 9);
+            if (u.bedHeightBlend) gl.uniform1f(u.bedHeightBlend, bedBlend);
+
+            var sa = state.sunAngle, sh = state.sunHeight;
+            var shH = Math.sqrt(Math.max(0.01, 1.0 - sh * sh));
+            var sunDirX = Math.cos(sa) * shH;
+            var sunDirY = Math.sin(sa) * shH;
+            var sunDirZ = sh;
+            gl.uniform3f(u.sunDir, sunDirX, sunDirY, sunDirZ);
+
+            gl.bindVertexArray(waterVAO);
+            gl.drawElements(gl.TRIANGLES, indexCount, gl.UNSIGNED_INT, 0);
+            gl.bindVertexArray(null);
+
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.clearColor(0, 0, 0, 1);
+            gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+            gl.disable(gl.DEPTH_TEST);
+            gl.depthMask(false);
+            gl.useProgram(copyProgram);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, waterTexture);
+            gl.uniform1i(copyTexLoc, 0);
+            gl.uniform2f(copyInvResLoc, 1.0 / canvas.width, 1.0 / canvas.height);
+            gl.uniform1f(copyFxaaStrengthLoc, state.fxaaStrength);
+            gl.bindVertexArray(copyVAO);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+            gl.bindVertexArray(null);
+            gl.depthMask(true);
+            gl.clear(gl.DEPTH_BUFFER_BIT);
+
+            if (fallingDrops.length > 0) {
+                ensureSphereMesh(state.sphereQuality);
+
+                var instData = instDataScratch;
+                var dropInstCount = 0;
+                for (var fi = 0; fi < fallingDrops.length; fi++) {
+                    var fd = fallingDrops[fi];
+                    var age = tSec - fd.spawnTime;
+                    if (age < 0 || age > fd.duration) continue;
+                    var gX, gY, gZ;
+
+                    if (fd.isChild) {
+                        gX = fd.wx0 + fd.vx * age;
+                        gY = fd.wy0 + fd.vy * age;
+                        gZ = fd.wz0 + fd.vz * age - 0.5 * fd.g * age * age;
+                    } else {
+                        var tt = age / fd.duration;
+                        gX = (fd.x - 0.5) * 4.0;
+                        gY = (fd.y - 0.5) * 4.0;
+                        var startZ = (fd.startZ !== undefined) ? fd.startZ : state.dropFallHeight;
+                        gZ = startZ * (1.0 - tt);
+                    }
+
+                    var rad = fd.size * 3.5;
+                    instData[dropInstCount * 4 + 0] = gX;
+                    instData[dropInstCount * 4 + 1] = gY;
+                    instData[dropInstCount * 4 + 2] = gZ;
+                    instData[dropInstCount * 4 + 3] = rad;
+                    dropInstCount++;
+                    if (dropInstCount >= MAX_FALLING_DROPS) break;
+                }
+
+                if (dropInstCount > 0) {
+                    gl.useProgram(dropProgram);
+                    gl.enable(gl.DEPTH_TEST);
+                    gl.depthFunc(gl.LEQUAL);
+                    gl.disable(gl.CULL_FACE);
+
+                    gl.uniform1f(dropU.surfaceTilt, state.surfaceTilt);
+                    gl.uniform1f(dropU.perspectiveStrength, state.perspectiveStrength);
+                    gl.uniform1f(dropU.cameraHeight, state.cameraHeight);
+                    gl.uniform2f(dropU.cameraOffset, state.cameraOffsetX, state.cameraOffsetY);
+                    gl.uniform1f(dropU.specularPower, state.specularPower);
+                    gl.uniform1f(dropU.specularStrength, state.specularStrength);
+                    gl.uniform1f(dropU.fresnelPower, state.fresnelPower);
+                    gl.uniform1f(dropU.absorption, state.absorption);
+                    gl.uniform1f(dropU.envMapStrength, state.envMapStrength);
+                    gl.uniform1f(dropU.envMapZoom, state.envMapZoom);
+                    gl.uniform2f(dropU.envMapPan, state.envMapPanX, state.envMapPanY);
+                    gl.uniform1f(dropU.vignetteRadius, state.vignetteRadius);
+                    gl.uniform1f(dropU.vignetteSoftness, state.vignetteSoftness);
+                    gl.uniform3f(dropU.waterColor, state.waterColorR, state.waterColorG, state.waterColorB);
+                    gl.uniform3f(dropU.waterDeep, state.waterDeepR, state.waterDeepG, state.waterDeepB);
+                    gl.uniform3f(dropU.skyHorizon, state.skyHorizonR, state.skyHorizonG, state.skyHorizonB);
+                    gl.uniform3f(dropU.skyZenith, state.skyZenithR, state.skyZenithG, state.skyZenithB);
+                    gl.uniform3f(dropU.sunDir, sunDirX, sunDirY, sunDirZ);
+                    gl.uniform2f(dropU.screenResolution, canvas.width, canvas.height);
+
+                    gl.activeTexture(gl.TEXTURE0);
+                    gl.bindTexture(gl.TEXTURE_2D, bgTextureA);
+                    gl.uniform1i(dropU.envMapA, 0);
+                    gl.activeTexture(gl.TEXTURE2);
+                    gl.bindTexture(gl.TEXTURE_2D, bgTextureB);
+                    gl.uniform1i(dropU.envMapB, 2);
+                    gl.uniform1f(dropU.envMapBlend, bgBlend);
+
+                    gl.activeTexture(gl.TEXTURE1);
+                    gl.bindTexture(gl.TEXTURE_2D, waterTexture);
+                    gl.uniform1i(dropU.waterTexture, 1);
+
+                    gl.bindBuffer(gl.ARRAY_BUFFER, dropInstanceBuffer);
+                    gl.bufferData(gl.ARRAY_BUFFER, instData.subarray(0, dropInstCount * 4), gl.DYNAMIC_DRAW);
+
+                    gl.bindVertexArray(dropVAO);
+                    gl.drawElementsInstanced(gl.TRIANGLES, sphereMesh.indexCount,
+                        gl.UNSIGNED_SHORT, 0, dropInstCount);
+                    gl.bindVertexArray(null);
+
+                    gl.disable(gl.DEPTH_TEST);
+                    gl.depthMask(true);
+                }
+            }
+
+            gl.useProgram(program);
+
+            gl.activeTexture(gl.TEXTURE9); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE8); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE7); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE6); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE5); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE4); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE3); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE2); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE1); gl.bindTexture(gl.TEXTURE_2D, null);
+            gl.activeTexture(gl.TEXTURE0);
+
+
+
+
+
+            //     var frameEnd = performance.now();
+            //     //if ((now | 0) % 60 === 0) {
+            //         console.log(
+            //             "frameMs:", (frameEnd - frameStart).toFixed(2),
+            //             "| letterRipples:", letterRipples.length,
+            //             "| numSimSteps:", numSimSteps,
+            //             "| simDtPerStep:", simDtPerStep.toFixed(5),
+            //             "| totalSimDt:", totalSimDt.toFixed(5),
+            //             "| dtSim:", dtSim.toFixed(5)
+            //         );
+            //    // }
+
+        }
+        animationFrameId = requestAnimationFrame(animate);
+        window.animationFrameId = animationFrameId;
+    }
+
+    var fontSelect = document.getElementById("font-select");
+    if (fontSelect) {
+        fontSelect.addEventListener("change", function () {
+            var selectedFont = this.value;
+            this.style.fontFamily = "'" + selectedFont + "', monospace";
+            document.fonts.load("bold 40px '" + selectedFont + "'").then(function () {
+                var oldAtlas = sdfAtlas;
+                sdfAtlas = buildSDFAtlas(gl, selectedFont);   // build new first
+                if (oldAtlas && oldAtlas.texture) gl.deleteTexture(oldAtlas.texture);
+            });
+        });
+    }
+
+    animate();
+}
+
+// =====================================================================
+// FONT DROPDOWN
+// =====================================================================
+
+var FONT_OPTIONS = [
+    "Astloch", "Bangers", "Bonbon", "Bungee Outline", "Chicle",
+    "Comic Neue", "Courier Prime", "Crafty Girls", "Creepster", "Edu SA Hand",
+    "Finger Paint", "Great Vibes", "Henny Penny", "Indie Flower", "Kablammo",
+    "Lily Script One", "Lobster", "McLaren", "Mountains of Christmas", "New Rocker",
+    "Noto Sans", "Noto Sans Old Hungarian", "Pacifico", "Permanent Marker", "Playfair Display",
+    "Playwrite Italia Tradizionale", "Press Start 2P", "Princess Sofia", "Roboto", "Rock Salt",
+    "Rubik Puddles", "Rubik Spray Paint", "Rubik Storm", "Schoolbell", "Slackey", "VT323"
+];
+
+function buildFontDropdown() {
+    var sel = document.getElementById("font-select");
+    if (!sel) return;
+    sel.innerHTML = "";
+    FONT_OPTIONS.forEach(function (name) {
+        var opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        opt.style.fontFamily = "'" + name + "', monospace";
+        opt.style.fontSize = "18px";
+        sel.appendChild(opt);
+    });
+}
+
+// =====================================================================
+// BOOT
+// =====================================================================
+buildControlsUI();
+buildPresetDropdown();
+buildFontDropdown();
+setupControlHandlers();
+main();

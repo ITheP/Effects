@@ -347,6 +347,26 @@ var CONTROLS = [
                 icon: "🫧", key: "oceanFoamStrength", def: 0.5, min: 0.0, max: 2.0, step: 0.01,
                 label: "Foam Strength",
                 details: "Opacity multiplier for foam rendered on the water surface."
+            },
+            {
+                icon: "🔬", key: "oceanFoamScale", def: 1.7, min: 0.3, max: 100.0, step: 0.01,
+                label: "Foam Scale",
+                details: "Size of the bubble pattern. Higher = smaller, denser bubbles; lower = larger blobs."
+            },
+            {
+                icon: "🎚️", key: "oceanFoamContrast", def: 0.4, min: 0.05, max: 1.0, step: 0.01,
+                label: "Foam Contrast",
+                details: "Sharpness of the foam edge. Low = soft wispy fade, high = crisp boundary."
+            },
+            {
+                icon: "🧵", key: "oceanFoamDetail", def: 0.4, min: 0.0, max: 1.0, step: 0.01,
+                label: "Foam Detail",
+                details: "Balance between large foam shapes (0) and fine bubble texture (1)."
+            },
+            {
+                icon: "🎨", key: "oceanFoamTint", def: 0.15, min: 0.0, max: 1.0, step: 0.01,
+                label: "Foam Tint",
+                details: "How much the water colour bleeds into the foam. 0 = pure white, higher = tinted by the water."
             }
         ]
     },
@@ -569,7 +589,7 @@ var CONTROLS = [
     {
         heading: "✨ Caustics", controls: [
             {
-                icon: "✨", key: "causticStrength", def: 0.5, min: 0.0, max: 2.0, step: 0.01,
+                icon: "✨", key: "causticStrength", def: 0.01, min: 0.0, max: 1.0, step: 0.01,
                 label: "Caustic Strength",
                 details: "Brightness of light-focusing patterns on the riverbed. 0 disables caustics entirely."
             },
@@ -1249,6 +1269,166 @@ var PRESETS = [
         "skyZenithR": 0.545,
         "skyZenithG": 0.323,
         "skyZenithB": 0.293
+    }
+},
+{
+    "name": "Close Dark 1",
+    "iteration": 26,
+    "values": {
+        "timeScale": 1,
+        "rainRate": 12.1,
+        "simTension": 0.5,
+        "simRainImpulse": 1.09,
+        "rippleStrengthVariance": 2,
+        "dropFallSpeed": 9.7,
+        "dropFallSpeedVariance": 0.37,
+        "dropFallHeight": 5,
+        "dropSize": 0.0055,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "letterRate": 10.1,
+        "letterSpacing": 0.41,
+        "letterMaxLineWidth": 0.4,
+        "letterStrength": 0.025,
+        "letterSize": 0.28,
+        "letterYOffset": -0.02,
+        "letterYVariance": 0.03,
+        "letterWavelength": 0.02,
+        "letterThickness": 0.1,
+        "oceanWindSpeed": 9,
+        "oceanWindAngle": 0.3,
+        "oceanWaveScale": 1.2,
+        "oceanHeightAmp": 0.03,
+        "oceanChop": 0.7,
+        "oceanSmallWaveCut": 0.45,
+        "oceanDirectionSpread": 0.6,
+        "oceanFoamThreshold": 0.55,
+        "oceanFoamStrength": 0.8,
+        "cameraHeight": 1.8,
+        "surfaceTilt": 0.13,
+        "perspectiveStrength": 0.33,
+        "waterDepth": 0.556,
+        "absorption": 0.51,
+        "surfaceDepth": 0.101,
+        "refractionStrength": -0.14,
+        "dispersionStrength": 0.0051,
+        "waterColorR": 0.505,
+        "waterColorG": 0.556,
+        "waterColorB": 0.535,
+        "waterDeepR": 0.515,
+        "waterDeepG": 0.576,
+        "waterDeepB": 0.556,
+        "bgImageIndex": 9,
+        "envMapStrength": 0.82,
+        "envMapZoom": 2.09,
+        "envMapPanX": 0.03,
+        "envMapPanY": 0.49,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 10,
+        "bedDisplacement": 0.49,
+        "bedHeightScale": 0.111,
+        "bedHeightBlur": 24,
+        "causticStrength": 0.85,
+        "simCausticStrength": 0.39,
+        "causticRGBScale": 0.005,
+        "causticRGBAngle": -6.28,
+        "causticScale": 0.69,
+        "oceanCausticGain": 1.1,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 2.3,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
+    }
+},
+{
+    "name": "Beach Paradise",
+    "iteration": 26,
+    "values": {
+        "timeScale": 1,
+        "rainRate": 22.2,
+        "simTension": 0.421,
+        "simDamping": 0.905,
+        "simQuadraticDrag": 4.24,
+        "simRainImpulse": 1.39,
+        "rippleStrength": 0.4,
+        "rippleStrengthVariance": 2,
+        "rippleDriftX": -0.07,
+        "rippleDriftY": -0.07,
+        "dropFallSpeed": 9.7,
+        "dropFallSpeedVariance": 0.37,
+        "dropFallHeight": 5,
+        "dropSplashCount": 3,
+        "dropSplashHeightFactor": 0.02,
+        "dropSplashStrengthFactor": 0.07,
+        "dropSplashSizeFactor": 0.29,
+        "dropSplashDriftInheritance": 0.51,
+        "letterRate": 10.1,
+        "letterSpacing": 0.41,
+        "letterMaxLineWidth": 0.4,
+        "letterStrength": -0.227,
+        "letterSize": 0.28,
+        "letterYOffset": -0.21,
+        "letterYVariance": 0.03,
+        "letterWavelength": 0.02,
+        "letterThickness": 0.1,
+        "oceanPatchSize": 14.9,
+        "oceanPropagation": 0.52,
+        "oceanSpeed": 1.55,
+        "oceanWindSpeed": 25.400000000000002,
+        "oceanWindAngle": -5.52,
+        "oceanWaveScale": 1.25,
+        "oceanHeightAmp": 0.017,
+        "oceanChop": 1.2,
+        "oceanSmallWaveCut": 0.52,
+        "oceanDirectionSpread": 0.81,
+        "oceanDetail": 2.88,
+        "oceanFoamThreshold": 0.16,
+        "oceanFoamStrength": 1.19,
+        "oceanFoamScale": 2.89,
+        "oceanFoamContrast": 0.37,
+        "oceanFoamDetail": 0.36,
+        "oceanFoamTint": 0.84,
+        "cameraHeight": 2.4,
+        "surfaceTilt": 0.35,
+        "perspectiveStrength": 0.33,
+        "waterDepth": 0.697,
+        "absorption": 0,
+        "surfaceDepth": 0.242,
+        "refractionStrength": 0.34,
+        "dispersionStrength": 0.0051,
+        "waterColorR": 0.758,
+        "waterColorG": 0.798,
+        "waterColorB": 0.828,
+        "waterDeepR": 0.818,
+        "waterDeepG": 0.838,
+        "waterDeepB": 0.859,
+        "bgImageIndex": 6,
+        "bgImageTileX": 64,
+        "bgImageTileY": 64,
+        "envMapStrength": 0.79,
+        "envMapZoom": 2.09,
+        "envMapPanX": 0.03,
+        "envMapPanY": 0.49,
+        "bedImageEnabled": 1,
+        "bedImageIndex": 8,
+        "bedDisplacement": 0.49,
+        "bedHeightScale": 0.111,
+        "bedHeightBlur": 24,
+        "causticStrength": 0.85,
+        "simCausticStrength": 0.15,
+        "causticRGBScale": 0.005,
+        "causticRGBAngle": -6.28,
+        "causticScale": 0.69,
+        "oceanCausticGain": 1.1,
+        "sunAngle": 1.47,
+        "sunHeight": 1.224,
+        "specularPower": 2.3,
+        "specularStrength": -0.263,
+        "fresnelPower": 0.73
     }
 }
 ];
@@ -2377,6 +2557,7 @@ function buildFragmentSource() {
         uniform sampler2D simDebugTex;
         uniform float debugSim;
         uniform float foamThreshold, foamStrength;
+        uniform float oceanFoamScale, oceanFoamContrast, oceanFoamDetail, oceanFoamTint;
 
         uniform sampler2D simTexture;
         uniform vec2 simDrift;
@@ -2591,7 +2772,7 @@ float depthWeight = (1.0 - clamp(waterDepth, 0.0, 1.0)) * baseAbsorb * waveMod;
             vec2 causticBedUV = bedUV + causticParallax;
 
             // Caustic: same bed anchor, plus green-channel refraction, then scaled by causticScale.
-            vec2 refractedBedUV = causticBedUV + normalize(v_normal_g).xy * refractionStrength;;
+            vec2 refractedBedUV = causticBedUV + normalize(v_normal_g).xy * refractionStrength;
             vec2 causticUV = (refractedBedUV - 0.5) * causticScale + 0.5 + simDrift;
 
             vec2 causticDir = vec2(cos(causticRGBAngle), sin(causticRGBAngle)) * causticRGBScale;
@@ -2643,8 +2824,41 @@ float depthFactor = causticBaseAbsorb * causticWaveMod;
             float vig = smoothstep(vignetteRadius, vignetteRadius + vignetteSoftness, d);
             color = mix(color, vec3(0.0), vig);
 
-            float foam = smoothstep(foamThreshold, foamThreshold + 0.3, v_foam) * foamStrength;
-            color = mix(color, vec3(0.92, 0.94, 0.96), clamp(foam, 0.0, 1.0));
+          // --- Foam shading ---
+            // Combine the FFT-derived foam signal with a two-octave procedural
+            // noise pattern so the coverage has fine structure (bubbles/gaps)
+            // instead of being large smooth blobs. Sampling in world space
+            // (v_worldPos.xy) so the pattern is stable under camera motion
+            // and scales correctly with the wave scale.
+            vec2 foamUV = v_worldPos.xy * oceanFoamScale;
+            float foamNoise1 = noise2(foamUV * 6.0);
+            float foamNoise2 = noise2(foamUV * 23.0);
+            // Weighted mix: low-freq dominates overall shape, high-freq adds
+            // the bubble web. Thresholding after mixing gives islands + holes.
+            float foamPattern = foamNoise1 * 0.6 + foamNoise2 * oceanFoamDetail;
+
+            // Combine with the Jacobian signal. Multiplying means foam only
+            // appears where the FFT says there IS foam, but the noise
+            // modulates how much of it is "holes" vs "solid".
+            float foamRaw = v_foam * foamPattern;
+
+            // Soft threshold. Wider band + lower threshold than before so the
+            // edges fade gradually. The +0.15 and +0.4 push the fade-out
+            // further so the noise texture survives the thresholding.
+            float fadeWidth = mix(1.0, 0.1, oceanFoamContrast);
+            float foamStart = foamThreshold * 0.7;
+            float foamMask = smoothstep(foamStart,
+                                        foamStart + fadeWidth,
+                                        foamRaw) * foamStrength;
+
+            // Slight off-white tint, and a touch of water-colour bleed so the
+            // foam doesn't look pasted on. The mix keeps it 95% white but
+            // lets a little of the underlying surface colour through.
+            vec3 foamColour = mix(vec3(0.92, 0.94, 0.96),
+                                  waterColor * 1.05,
+                                  oceanFoamTint);
+
+            color = mix(color, foamColour, clamp(foamMask, 0.0, 1.0));
 
             fragColor = vec4(color, 1.0);
         }
@@ -3881,7 +4095,7 @@ function main() {
             "envMapStrength", "envMapZoom", "envMapPan", "simDebugTex", "debugSim",
             "bedTextureA", "bedTextureB", "bedBlend", "bedImageEnabled", "bedImageTile",
             "bedHeightA", "bedHeightB", "bedHeightBlend", "bedDisplacement", "bedHeightScale",
-            "foamThreshold", "foamStrength",
+            "foamThreshold", "foamStrength", "oceanFoamScale", "oceanFoamContrast", "oceanFoamDetail", "oceanFoamTint",
             "simRes",
             "causticStrength", "simCausticStrength", "causticScale", "oceanLaplacianTex", "oceanCausticGain",
             "causticRGBScale", "causticRGBAngle", "causticRGBAffectedBySurface", "bedDepthScale"
@@ -4871,7 +5085,8 @@ function main() {
                 "rgbSplit", "rgbAngle", "surfaceDepth", "surfaceTilt", "perspectiveStrength", "cameraHeight",
                 "specularPower", "specularStrength", "fresnelPower", "vignetteRadius", "vignetteSoftness",
                 "waterDepth", "absorption", "sandScale", "sandContrast", "refractionStrength", "dispersionStrength", "envMapStrength",
-            "bedDisplacement", "bedHeightScale"];
+                "bedDisplacement", "bedHeightScale",
+                "oceanFoamScale", "oceanFoamContrast", "oceanFoamDetail", "oceanFoamTint"];
             sc.forEach(function (k) { if (u[k]) gl.uniform1f(u[k], state[k]); });
 
             if (u.oceanTexSize) gl.uniform2f(u.oceanTexSize, fftSize, fftSize);
