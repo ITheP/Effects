@@ -1,0 +1,160 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>GamePad</title>
+    <link rel='stylesheet' type='text/css' href='default.css' />
+    <link rel='stylesheet' type='text/css' href='ui.css' />
+
+    <script>
+        // Latest version
+        var Versions = 6;
+
+        // Colours used by the examples - one is picked at random per load
+        //var VersionColours = ['#12354dDD', '#00000099', '#00320088'];
+        var VersionColours = ['#00000000'];
+
+        function PadVersion(n) {
+            return String(n).padStart(3, '0');
+        }
+
+        function RandomVersionColour() {
+            return VersionColours[Math.floor(Math.random() * VersionColours.length)];
+        }
+
+        function LoadVersion(value) {
+            LoadContent(value + '.html', RandomVersionColour(), value + '.js');
+        }
+
+        function BuildVersionMenu() {
+            var select = document.getElementById('version-select');
+
+            for (var i = Versions; i >= 1; i--) {
+                var value = PadVersion(i);
+                var option = document.createElement('option');
+                option.value = value;
+                option.textContent = value;
+                select.appendChild(option);
+            }
+
+            // Default to the latest version
+            select.value = PadVersion(Versions);
+            select.addEventListener('change', function () { LoadVersion(this.value); });
+
+            document.getElementById('version-reload').addEventListener('click', function () {
+                var select = document.getElementById('version-select');
+                if (select && select.value) LoadVersion(select.value);
+            });
+        }
+    </script>
+
+    <script>
+        var animationFrameId = 0;
+        var previousGl = null;
+
+        function LoadContent(url, colour, js) {
+            document.documentElement.style.setProperty('--bg-color', colour || '#12354dDD');
+            var content = document.getElementById('content');
+            content.innerHTML = "<h1>Loading...</h1><p>Please note there may be a delay in starting as shaders are compiled.</p>";
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) { throw new Error('Network response was not ok'); }
+
+                    // Clear out any existing timers
+                    IntervalManager.clearAll();
+
+                    return response.text();
+                })
+                .then(html => {
+                    content.innerHTML = html;
+
+                    if (js !== null) {
+                        // Stop any existing animations
+                        if (animationFrameId > 0)
+                            cancelAnimationFrame(animationFrameId);
+
+                        // Clear out previous resources
+                        document.body.querySelectorAll("canvas").forEach(canvas => canvas.remove());
+
+                        if (previousGl) {
+                            var loseExt = previousGl.getExtension('WEBGL_lose_context');
+                            if (loseExt) loseExt.loseContext();
+                        }
+
+                        const script = document.createElement("script");
+                        script.src = js;
+                        content.appendChild(script);
+                    }
+                })
+                .catch(() => {
+                    content.innerHTML = "<p class='warning'>Sorry, unable load resource.</p>";
+                });
+        }
+
+        const IntervalManager = (() => {
+            const ids = [];
+
+            return {
+                add(fn, delay) {
+                    const id = setInterval(fn, delay);
+                    ids.push(id);
+                    return id;
+                },
+                clearAll() {
+                    ids.forEach(clearInterval);
+                    ids.length = 0;
+                }
+            };
+        })();
+
+        const ResizeManager = (() => {
+            let resizeHandler = null;
+
+            return {
+                attach(fn) {
+                    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+                    resizeHandler = fn;
+                    window.addEventListener('resize', resizeHandler);
+                },
+                detach() {
+                    if (resizeHandler) {
+                        window.removeEventListener('resize', resizeHandler);
+                        resizeHandler = null;
+                    }
+                },
+                isAttached() {
+                    return !!resizeHandler;
+                }
+            };
+        })();
+
+    </script>
+</head>
+
+<body>
+    <div class="root">
+        <!-- <header id="header" class='header'>
+            <h1>Test</h1>
+        </header> -->
+
+        <div id='content' class='content'>
+        </div>
+
+        <div class='footer'>
+            <div class="footer-middle">
+                Version
+                <select id="version-select" class="version-select"></select>
+                <button id="version-reload" class="version-reload" title="Reload current version">⟳</button>
+                <i>(c) 2025-2026 MisterB @ I The P</i>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        BuildVersionMenu();
+        LoadVersion(PadVersion(Versions));
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,23 @@
+  #panel {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 10;
+    background: rgba(20,20,26,0.92);
+    color: #eee;
+    font: 12px/1.4 system-ui, sans-serif;
+    padding: 6px 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    align-items: center;
+    user-select: none;
+    border-bottom: 1px solid #333;
+  }
+  #panel .row { display: flex; align-items: center; gap: 6px; }
+  #panel label { opacity: 0.75; white-space: nowrap; }
+  #panel input[type="range"] { width: 110px; accent-color: #ff3366; }
+  #panel .val {
+    min-width: 42px; text-align: right;
+    font-variant-numeric: tabular-nums; color: #ffcc00;
+  }
+  #panel .hint { opacity: 0.4; font-size: 11px; }
