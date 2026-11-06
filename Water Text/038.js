@@ -1,3 +1,5 @@
+var VERSION = "038";
+
 // =====================================================================
 // SCALE OPTIONS
 // =====================================================================
@@ -85,6 +87,20 @@ var CONTROLS = [
                 icon: "↕️", key: "cameraOffsetY", def: 0.0, min: -2.0, max: 2.0, step: 0.001,
                 label: "Camera Offset Y",
                 details: "Vertical shift of the camera view. Positive moves the scene down."
+            }
+        ]
+    },
+    {
+        heading: "🎤 Live Text", controls: [
+            {
+                icon: "🎙️", key: "liveText", def: 0, min: 0, max: 1, step: 1, int: true, canRandomise: false,
+                label: "Live Text",
+                details: "Enable speech recognition — spoken words become ripple letters."
+            },
+            {
+                icon: "📚", key: "liveTextMaxBacklog", def: 5, min: 1, max: 20, step: 1, int: true,
+                label: "Max Backlog",
+                details: "Maximum number of recognised words queued up before new ones are dropped."
             }
         ]
     },
@@ -230,7 +246,7 @@ var CONTROLS = [
         ]
     },
     {
-        heading: "🔤 Letter Handling", controls: [
+        heading: "🔤 Letter Creation", controls: [
             {
                 icon: "⏱️", key: "letterRate", def: 9.09, min: 0.0, max: 20.0, step: 0.01,
                 label: "Letter Rate",
@@ -254,7 +270,7 @@ var CONTROLS = [
         ]
     },
     {
-        heading: "🔤 Letter Appearance", controls: [
+        heading: "🔤 Letter Rendering", controls: [
             {
                 icon: "📶", key: "letterStrength", def: 0.101, min: -0.5, max: 0.5, step: 0.001,
                 label: "Letter Strength",
@@ -288,7 +304,7 @@ var CONTROLS = [
         ]
     },
     {
-        heading: "💧Letter Ripples", controls: [
+        heading: "💧Letter Gfx", controls: [
             {
                 icon: "〰️", key: "letterWavelength", def: 0.35, min: 0.02, max: 1.0, step: 0.01,
                 label: "Letter Edge Softness",
@@ -296,22 +312,8 @@ var CONTROLS = [
             },
             {
                 icon: "📏", key: "letterThickness", def: 3.0, min: 0.1, max: 10.0, step: 0.01,
-                label: "Letter Bulge",
+                label: "Letter Fill",
                 details: "Blends the stamp between a hollow outline (low) and a solid filled glyph (high). Internally mapped to 0..1."
-            }
-        ]
-    },
-    {
-        heading: "🎤 Live Text", controls: [
-            {
-                icon: "🎙️", key: "liveText", def: 0, min: 0, max: 1, step: 1, int: true, canRandomise: false,
-                label: "Live Text",
-                details: "Enable speech recognition — spoken words become ripple letters."
-            },
-            {
-                icon: "📚", key: "liveTextMaxBacklog", def: 5, min: 1, max: 20, step: 1, int: true,
-                label: "Max Backlog",
-                details: "Maximum number of recognised words queued up before new ones are dropped."
             }
         ]
     },
@@ -732,1488 +734,12 @@ Object.keys(CONTROL_BY_KEY).forEach(function (key) {
 });
 
 // =====================================================================
-// PRESETS
-// =====================================================================
-
-var PRESETS = [
-    { name: "Default", iteration: 11, values: {} },
-    {
-        name: "Splish Splash", iteration: 12, values: {
-            timeScale: 2.31, dropFallSpeed: 2.7, dropSize: 0.0089, dropSizeVariance: 0.35,
-            dropFallHeight: 5.0, surfaceTilt: 0.13,
-            oceanWindSpeed: 3.0, oceanWindAngle: 0.4, oceanWaveScale: 0.8, oceanHeightAmp: 0.008,
-            oceanChop: 0.3, oceanDirectionSpread: 0.35, oceanSmallWaveCut: 0.6,
-            oceanFoamThreshold: 0.9, oceanFoamStrength: 0.15
-        }
-    },
-    {
-        name: "Height Test", iteration: 13, values: {
-            timeScale: 3.03, rainRate: 1, dropFallSpeed: 3.3, dropFallHeight: 2.0,
-            dropSize: 0.0188, surfaceTilt: 0.07, cameraHeight: 6.83,
-            oceanWindSpeed: 4.0, oceanWindAngle: 0.0, oceanWaveScale: 1.0, oceanHeightAmp: 0.015,
-            oceanChop: 0.4, oceanDirectionSpread: 0.4, oceanSmallWaveCut: 0.5
-        }
-    },
-    {
-        name: "Autumn Drips", iteration: 14, values: {
-            timeScale: 1.21, rainRate: 10.1, rippleStrengthVariance: 2, dropFallSpeed: 10.3,
-            dropFallHeight: 10, dropSize: 0.0059, dropSplashCount: 3, dropSplashHeightFactor: 0.02,
-            dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51,
-            letterStrength: 0.08, letterSize: 0.163, letterYOffset: 0.15,
-            letterWavelength: 0.0212, letterThickness: 2.7, surfaceDepth: 0.256, surfaceTilt: 0,
-            cameraHeight: 3.07, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5, fresnelPower: 0.4,
-            envMapStrength: 1,
-            oceanWindSpeed: 5.0, oceanWindAngle: 0.2, oceanWaveScale: 1.0, oceanHeightAmp: 0.012,
-            oceanChop: 0.4, oceanDirectionSpread: 0.45, oceanSmallWaveCut: 0.55
-        }
-    },
-    {
-        name: "Autumn Rain", iteration: 15, values: {
-            timeScale: 1.21, rainRate: 94.95, rippleStrengthVariance: 2, dropFallSpeed: 18,
-            dropFallHeight: 10, dropSize: 0.0059, dropSplashCount: 3, dropSplashHeightFactor: 0.02,
-            dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51,
-            letterStrength: 0.18, letterSize: 0.208, letterSpacing: 0.56, letterYOffset: 0.15,
-            letterWavelength: 0.0161, letterThickness: 2.7, surfaceDepth: 0.256,
-            surfaceTilt: 0, cameraHeight: 3.07, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5,
-            fresnelPower: 0.4, envMapStrength: 1,
-            oceanWindSpeed: 7.0, oceanWindAngle: 0.3, oceanWaveScale: 1.2, oceanHeightAmp: 0.022,
-            oceanChop: 0.55, oceanDirectionSpread: 0.5, oceanSmallWaveCut: 0.5
-        }
-    },
-    {
-        name: "Autumn Nicey", iteration: 16, values: {
-            timeScale: 1.21, rainRate: 10.1, rippleStrengthVariance: 2, dropFallSpeed: 10.3,
-            dropFallHeight: 10, dropSize: 0.0059, dropSplashCount: 3, dropSplashHeightFactor: 0.02,
-            dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51,
-            letterStrength: 0.08, letterSize: 0.163, letterYOffset: 0.15,
-            letterWavelength: 0.0212, letterThickness: 2.7, surfaceDepth: 0.256, surfaceTilt: 0,
-            cameraHeight: 3.07, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5, fresnelPower: 0.4,
-            envMapStrength: 0.52, waterDepth: 0.636, refractionStrength: 0.32, bedImageEnabled: 1,
-            oceanWindSpeed: 5.5, oceanWindAngle: 0.2, oceanWaveScale: 1.0, oceanHeightAmp: 0.012,
-            oceanChop: 0.4, oceanDirectionSpread: 0.45, oceanSmallWaveCut: 0.55
-        }
-    },
-    {
-        name: "FXAA Test", iteration: 17, values: {
-            timeScale: 1.21, rainRate: 10.1, gridResolution: 1016, rippleStrengthVariance: 2,
-            dropFallSpeed: 10.3, dropFallHeight: 10, dropSize: 0.0059, dropSplashCount: 3,
-            dropSplashHeightFactor: 0.02, dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29,
-            dropSplashDriftInheritance: 0.51, letterStrength: 0.08, letterSize: 0.163,
-            letterYOffset: 0.15, letterWavelength: 0.0212, letterThickness: 2.7,
-            surfaceTilt: 0.39, waterDepth: 0.636, surfaceDepth: 0.256, refractionStrength: 0.32,
-            fxaaStrength: 1, bgImageIndex: 9, envMapStrength: 1, envMapZoom: 2.59, envMapPanY: 0.6,
-            bedImageEnabled: 1, bedImageIndex: 10, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5,
-            fresnelPower: 0.4,
-            oceanWindSpeed: 6.0, oceanWindAngle: 0.0, oceanWaveScale: 1.0, oceanHeightAmp: 0.015,
-            oceanChop: 0.5, oceanDirectionSpread: 0.5, oceanSmallWaveCut: 0.5
-        }
-    },
-    {
-        name: "Night Night", iteration: 18, values: {
-            rainRate: 82.8, dropFallSpeed: 2.1, waterColorR: 0.505, waterDeepR: 0.182,
-            bgImageIndex: 8, envMapStrength: 0.38, envMapZoom: 0.92, envMapPanX: 0.09, envMapPanY: 0.09,
-            bedImageEnabled: 1, sunAngle: -1.46, specularPower: 0.2, specularStrength: -1.354,
-            fresnelPower: 0.55, skyHorizonR: 0.646, skyZenithR: 0.293,
-            oceanWindSpeed: 5.0, oceanWindAngle: 0.5, oceanWaveScale: 1.1, oceanHeightAmp: 0.02,
-            oceanChop: 0.5, oceanDirectionSpread: 0.5, oceanSmallWaveCut: 0.5
-        }
-    },
-    {
-        name: "Night Night 2", iteration: 19, values: {
-            timeScale: 1.21, rainRate: 10.1, gridResolution: 640, rippleStrengthVariance: 2,
-            dropFallSpeed: 10.3, dropFallHeight: 10, dropSize: 0.0134, dropSplashCount: 3,
-            dropSplashHeightFactor: 0.02, dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29,
-            dropSplashDriftInheritance: 0.51, letterSpacing: 0.35,
-            letterStrength: 0.08, letterSize: 0.5, letterYOffset: 0.15, letterWavelength: 0.0212,
-            letterThickness: 2.7, cameraHeight: 2, surfaceTilt: 0.13, perspectiveStrength: 0.33,
-            waterDepth: 0.515, surfaceDepth: 0.256, refractionStrength: 0.247,
-            waterColorR: 0.707, waterColorG: 0.717, waterColorB: 0.768,
-            waterDeepR: 0.293, waterDeepG: 0.303, waterDeepB: 0.333,
-            bgImageIndex: 9, envMapStrength: 0.92, envMapZoom: 2.09, envMapPanX: 0.03, envMapPanY: 0.49,
-            bedImageEnabled: 1, bedImageIndex: 10, sunAngle: 1.47, sunHeight: 1.224, specularPower: 0.5,
-            fresnelPower: 0.52,
-            oceanWindSpeed: 6.5, oceanWindAngle: 0.2, oceanWaveScale: 1.0, oceanHeightAmp: 0.016,
-            oceanChop: 0.5, oceanDirectionSpread: 0.55, oceanSmallWaveCut: 0.5
-        }
-    },
-    {
-        name: "Night Night 3", iteration: 19, values: {
-            timeScale: 1.2, rainRate: 32.3, gridResolution: 640, simRainImpulse: 0.12,
-            rippleStrengthVariance: 2, dropFallSpeed: 10.3, dropFallHeight: 10, dropSize: 0.0074,
-            dropSplashCount: 3, dropSplashHeightFactor: 0.02, dropSplashStrengthFactor: 0.07,
-            dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51, letterSpacing: 0.41,
-            letterStrength: 0.258, letterSize: 0.356, letterYOffset: 0.15,
-            letterWavelength: 0.0212, letterThickness: 2.7, cameraHeight: 2, surfaceTilt: 0.13,
-            perspectiveStrength: 0.33, waterDepth: 0.515, surfaceDepth: 0.101, refractionStrength: 0.247,
-            waterColorR: 0.505, waterColorG: 0.556, waterColorB: 0.535,
-            waterDeepR: 0.515, waterDeepG: 0.576, waterDeepB: 0.556,
-            bgImageIndex: 9, envMapStrength: 0.82, envMapZoom: 2.09, envMapPanX: 0.03, envMapPanY: 0.49,
-            bedImageEnabled: 1, bedImageIndex: 10, sunAngle: 1.47, sunHeight: 1.224, specularPower: 2.3,
-            specularStrength: -0.263, fresnelPower: 0.73,
-            oceanWindSpeed: 9.0, oceanWindAngle: 0.3, oceanWaveScale: 1.2, oceanHeightAmp: 0.03,
-            oceanChop: 0.7, oceanDirectionSpread: 0.6, oceanSmallWaveCut: 0.45,
-            oceanFoamThreshold: 0.55, oceanFoamStrength: 0.8
-        }
-    },
-    {
-        name: "Down at the beach", iteration: 18, values: {
-            timeScale: 1.2, rainRate: 20.2, gridResolution: 1024, rippleStrengthVariance: 2,
-            rippleDriftX: -0.2, rippleDriftY: -0.1, dropFallSpeed: 10.3, dropFallHeight: 10,
-            dropSize: 0.0059, dropSplashCount: 3, dropSplashHeightFactor: 0.02,
-            dropSplashStrengthFactor: 0.07, dropSplashSizeFactor: 0.29, dropSplashDriftInheritance: 0.51,
-            letterSpacing: 0.37, letterStrength: 0.116, letterSize: 0.257,
-            letterYOffset: 0.15, letterWavelength: 0.0212, cameraHeight: 2.4, surfaceTilt: 0.33,
-            waterDepth: 0, absorption: 0, surfaceDepth: 0.727, refractionStrength: 0.056,
-            waterColorR: 0.626, waterColorG: 0.687, waterColorB: 0.727,
-            waterDeepR: 0.333, waterDeepG: 0.354, waterDeepB: 0.434,
-            bgImageIndex: 6, envMapStrength: 0.55, envMapZoom: 1.3, envMapPanY: 0.6,
-            bedImageEnabled: 1, bedImageIndex: 8, sunAngle: 1.47, sunHeight: 1.224, specularPower: 50,
-            specularStrength: 0.141, fresnelPower: 0.67,
-            skyHorizonR: 0.576, skyHorizonG: 0.424, skyHorizonB: 0.394,
-            skyZenithR: 0.545, skyZenithG: 0.323, skyZenithB: 0.293,
-            oceanWindSpeed: 4.5, oceanWindAngle: -0.2, oceanWaveScale: 0.9, oceanHeightAmp: 0.01,
-            oceanChop: 0.35, oceanDirectionSpread: 0.4, oceanSmallWaveCut: 0.6
-        }
-    },
-    {
-        "name": "Preset 20",
-        "iteration": 20,
-        "values": {
-            "timeScale": 1.2,
-            "rainRate": 20.2,
-            "rippleStrengthVariance": 2,
-            "rippleDriftX": -0.2,
-            "rippleDriftY": -0.1,
-            "dropFallSpeed": 10.3,
-            "dropFallHeight": 10,
-            "dropSize": 0.0059,
-            "dropSplashCount": 3,
-            "dropSplashHeightFactor": 0.02,
-            "dropSplashStrengthFactor": 0.07,
-            "dropSplashSizeFactor": 0.29,
-            "dropSplashDriftInheritance": 0.51,
-            "letterSpacing": 0.37,
-            "letterStrength": 0.116,
-            "letterSize": 0.257,
-            "letterYOffset": 0.15,
-            "letterWavelength": 0.0212,
-            "oceanWindSpeed": 4.5,
-            "oceanWindAngle": -0.2,
-            "oceanWaveScale": 0.89,
-            "oceanHeightAmp": 0.064,
-            "oceanChop": 0.44,
-            "oceanSmallWaveCut": 0.6,
-            "oceanDirectionSpread": 0.69,
-            "oceanDetail": 1.57,
-            "oceanFoamThreshold": 0.67,
-            "oceanFoamStrength": 0.71,
-            "cameraHeight": 2.4,
-            "surfaceTilt": 0.33,
-            "waterDepth": 0.455,
-            "absorption": 0,
-            "surfaceDepth": 0.727,
-            "refractionStrength": 0.101,
-            "waterColorR": 0.556,
-            "waterColorG": 0.566,
-            "waterColorB": 0.646,
-            "waterDeepR": 0.576,
-            "waterDeepG": 0.606,
-            "waterDeepB": 0.697,
-            "bgImageIndex": 6,
-            "envMapStrength": 0.55,
-            "envMapZoom": 1.3,
-            "envMapPanY": 0.6,
-            "bedImageEnabled": 1,
-            "bedImageIndex": 8,
-            "bedImageSeamless": 9,
-            "causticStrength": 0.32,
-            "simCausticStrength": 0.46,
-            "causticRGBScale": 0,
-            "causticRGBAngle": -6.28,
-            "bedDepthScale": 6,
-            "sunAngle": 1.47,
-            "sunHeight": 1.224,
-            "specularPower": 50,
-            "specularStrength": 0.141,
-            "fresnelPower": 0.67,
-            "skyHorizonR": 0.576,
-            "skyHorizonG": 0.424,
-            "skyHorizonB": 0.394,
-            "skyZenithR": 0.545,
-            "skyZenithG": 0.323,
-            "skyZenithB": 0.293
-        }
-    },
-    {
-        "name": "Preset 21",
-        "iteration": 21,
-        "values": {
-            "timeScale": 1.2,
-            "rainRate": 0,
-            "rippleStrengthVariance": 2,
-            "rippleDriftX": -0.2,
-            "rippleDriftY": -0.1,
-            "dropFallSpeed": 10.3,
-            "dropFallHeight": 10,
-            "dropSize": 0.0059,
-            "dropSplashCount": 3,
-            "dropSplashHeightFactor": 0.02,
-            "dropSplashStrengthFactor": 0.07,
-            "dropSplashSizeFactor": 0.29,
-            "dropSplashDriftInheritance": 0.51,
-            "letterSpacing": 0.37,
-            "letterStrength": 0.116,
-            "letterSize": 0.257,
-            "letterYOffset": 0.15,
-            "letterWavelength": 0.0212,
-            "oceanWindSpeed": 4.5,
-            "oceanWindAngle": -0.2,
-            "oceanWaveScale": 1.53,
-            "oceanHeightAmp": 0.03,
-            "oceanChop": -1.5,
-            "oceanSmallWaveCut": 0.6,
-            "oceanDirectionSpread": 0.69,
-            "oceanDetail": 1.57,
-            "oceanFoamThreshold": 0.67,
-            "oceanFoamStrength": 0.71,
-            "cameraHeight": 2.4,
-            "surfaceTilt": 0.33,
-            "waterDepth": 0.333,
-            "absorption": 2.83,
-            "surfaceDepth": 0.727,
-            "refractionStrength": 0.5,
-            "waterColorR": 0.253,
-            "waterColorG": 0.293,
-            "waterColorB": 0.364,
-            "waterDeepR": 0.202,
-            "waterDeepG": 0.242,
-            "waterDeepB": 0.354,
-            "bgImageIndex": 6,
-            "envMapStrength": 0.55,
-            "envMapZoom": 1.3,
-            "envMapPanY": 0.6,
-            "bedImageEnabled": 1,
-            "bedImageIndex": 8,
-            "bedImageSeamless": 9,
-            "causticStrength": 0.32,
-            "simCausticStrength": 0.46,
-            "causticRGBScale": 0,
-            "causticRGBAngle": -6.28,
-            "bedDepthScale": 13.9,
-            "sunAngle": 1.47,
-            "sunHeight": 1.224,
-            "specularPower": 50,
-            "specularStrength": 0.141,
-            "fresnelPower": 0.67,
-            "skyHorizonR": 0.576,
-            "skyHorizonG": 0.424,
-            "skyHorizonB": 0.394,
-            "skyZenithR": 0.545,
-            "skyZenithG": 0.323,
-            "skyZenithB": 0.293
-        }
-    },
-    {
-        "name": "Preset 22",
-        "iteration": 22,
-        "values": {
-            "timeScale": 1.2,
-            "rainRate": 2.0,
-            "rippleStrengthVariance": 2,
-            "rippleDriftX": -0.2,
-            "rippleDriftY": -0.1,
-            "dropFallSpeed": 10.3,
-            "dropFallHeight": 10,
-            "dropSize": 0.0059,
-            "dropSplashCount": 3,
-            "dropSplashHeightFactor": 0.02,
-            "dropSplashStrengthFactor": 0.07,
-            "dropSplashSizeFactor": 0.29,
-            "dropSplashDriftInheritance": 0.51,
-            "letterSpacing": 0.37,
-            "letterStrength": 0.116,
-            "letterSize": 0.257,
-            "letterYOffset": 0.15,
-            "letterWavelength": 0.0212,
-            "oceanWindSpeed": 4.5,
-            "oceanWindAngle": -0.2,
-            "oceanWaveScale": 1.53,
-            "oceanHeightAmp": 0.03,
-            "oceanChop": -1.5,
-            "oceanSmallWaveCut": 0.6,
-            "oceanDirectionSpread": 0.69,
-            "oceanDetail": 1.57,
-            "oceanFoamThreshold": 0.67,
-            "oceanFoamStrength": 0.71,
-            "cameraHeight": 2.4,
-            "surfaceTilt": 0.33,
-            "waterDepth": 0,
-            "absorption": 0,
-            "surfaceDepth": 0.727,
-            "refractionStrength": 0.5,
-            "waterColorR": 0.253,
-            "waterColorG": 0.293,
-            "waterColorB": 0.364,
-            "waterDeepR": 0.202,
-            "waterDeepG": 0.242,
-            "waterDeepB": 0.354,
-            "bgImageIndex": 6,
-            "envMapStrength": 0.55,
-            "envMapZoom": 1.3,
-            "envMapPanY": 0.6,
-            "bedImageEnabled": 1,
-            "bedImageIndex": 8,
-            "bedImageSeamless": 9,
-            "causticStrength": 2,
-            "simCausticStrength": 0.46,
-            "causticRGBScale": 0,
-            "causticRGBAngle": -6.28,
-            "bedDepthScale": 11.1,
-            "sunAngle": 1.47,
-            "sunHeight": 1.224,
-            "specularPower": 50,
-            "specularStrength": 0.141,
-            "fresnelPower": 0.67,
-            "skyHorizonR": 0.576,
-            "skyHorizonG": 0.424,
-            "skyHorizonB": 0.394,
-            "skyZenithR": 0.545,
-            "skyZenithG": 0.323,
-            "skyZenithB": 0.293
-        }
-    },
-    {
-        "name": "Preset 23",
-        "iteration": 23,
-        "values": {
-            "timeScale": 1.2,
-            "rainRate": 2,
-            "rippleStrengthVariance": 2,
-            "rippleDriftX": -0.2,
-            "rippleDriftY": -0.1,
-            "dropFallSpeed": 10.3,
-            "dropFallHeight": 10,
-            "dropSize": 0.0059,
-            "dropSplashCount": 3,
-            "dropSplashHeightFactor": 0.02,
-            "dropSplashStrengthFactor": 0.07,
-            "dropSplashSizeFactor": 0.29,
-            "dropSplashDriftInheritance": 0.51,
-            "letterSpacing": 0.37,
-            "letterStrength": 0.116,
-            "letterSize": 0.257,
-            "letterYOffset": 0.15,
-            "letterWavelength": 0.0212,
-            "oceanWindSpeed": 4.5,
-            "oceanWindAngle": -0.2,
-            "oceanWaveScale": 1.53,
-            "oceanHeightAmp": 0.03,
-            "oceanChop": -1.5,
-            "oceanSmallWaveCut": 0.6,
-            "oceanDirectionSpread": 0.69,
-            "oceanDetail": 1.57,
-            "oceanFoamThreshold": 0.67,
-            "oceanFoamStrength": 0.71,
-            "cameraHeight": 2.4,
-            "surfaceTilt": 0.33,
-            "waterDepth": 0,
-            "absorption": 0,
-            "surfaceDepth": 0.727,
-            "refractionStrength": 0.5,
-            "waterColorR": 0.253,
-            "waterColorG": 0.293,
-            "waterColorB": 0.364,
-            "waterDeepR": 0.202,
-            "waterDeepG": 0.242,
-            "waterDeepB": 0.354,
-            "bgImageIndex": 6,
-            "envMapStrength": 0.55,
-            "envMapZoom": 1.3,
-            "envMapPanY": 0.6,
-            "bedImageEnabled": 1,
-            "bedImageIndex": 8,
-            "bedImageSeamless": 9,
-            "causticStrength": 2,
-            "simCausticStrength": 0.03,
-            "causticRGBScale": 0,
-            "causticRGBAngle": -6.28,
-            "bedDepthScale": 11.1,
-            "sunAngle": 1.47,
-            "sunHeight": 1.224,
-            "specularPower": 50,
-            "specularStrength": 0.141,
-            "fresnelPower": 0.67,
-            "skyHorizonR": 0.576,
-            "skyHorizonG": 0.424,
-            "skyHorizonB": 0.394,
-            "skyZenithR": 0.545,
-            "skyZenithG": 0.323,
-            "skyZenithB": 0.293
-        }
-    },
-    {
-        "name": "Preset 24",
-        "iteration": 24,
-        "values": {
-            "timeScale": 1.2,
-            "rainRate": 0,
-            "rippleStrengthVariance": 2,
-            "rippleDriftX": -0.2,
-            "rippleDriftY": -0.1,
-            "dropFallSpeed": 10.3,
-            "dropFallHeight": 10,
-            "dropSize": 0.0059,
-            "dropSplashCount": 3,
-            "dropSplashHeightFactor": 0.02,
-            "dropSplashStrengthFactor": 0.07,
-            "dropSplashSizeFactor": 0.29,
-            "dropSplashDriftInheritance": 0.51,
-            "letterSpacing": 0.37,
-            "letterStrength": 0.116,
-            "letterSize": 0.257,
-            "letterYOffset": 0.15,
-            "letterWavelength": 0.0212,
-            "oceanWindSpeed": 4.5,
-            "oceanWindAngle": -0.2,
-            "oceanWaveScale": 0.9,
-            "oceanHeightAmp": 0.01,
-            "oceanChop": 0.35,
-            "oceanSmallWaveCut": 0.6,
-            "oceanDirectionSpread": 0.4,
-            "cameraHeight": 2.4,
-            "surfaceTilt": 0.33,
-            "waterDepth": 0,
-            "absorption": 0,
-            "surfaceDepth": 0.727,
-            "refractionStrength": 1.19,
-            "dispersionStrength": 0.0273,
-            "waterColorR": 0.626,
-            "waterColorG": 0.687,
-            "waterColorB": 0.727,
-            "waterDeepR": 0.333,
-            "waterDeepG": 0.354,
-            "waterDeepB": 0.434,
-            "bgImageIndex": 6,
-            "envMapStrength": 0.55,
-            "envMapZoom": 1.3,
-            "envMapPanY": 0.6,
-            "bedImageEnabled": 1,
-            "bedImageIndex": 8,
-            "causticStrength": 0,
-            "sunAngle": 1.47,
-            "sunHeight": 1.224,
-            "specularPower": 50,
-            "specularStrength": 0.141,
-            "fresnelPower": 0.67,
-            "skyHorizonR": 0.576,
-            "skyHorizonG": 0.424,
-            "skyHorizonB": 0.394,
-            "skyZenithR": 0.545,
-            "skyZenithG": 0.323,
-            "skyZenithB": 0.293
-        }
-    },
-    {
-    "name": "Preset 25",
-    "iteration": 25,
-    "values": {
-        "timeScale": 0.2,
-        "rainRate": 2,
-        "rippleStrengthVariance": 2,
-        "rippleDriftX": -0.2,
-        "rippleDriftY": -0.1,
-        "dropFallSpeed": 10.3,
-        "dropFallHeight": 10,
-        "dropSize": 0.0059,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "letterSpacing": 0.37,
-        "letterStrength": 0,
-        "letterSize": 0.257,
-        "letterYOffset": 0.15,
-        "letterWavelength": 0.0212,
-        "oceanWindSpeed": 4.5,
-        "oceanWindAngle": -0.2,
-        "oceanWaveScale": 0.9,
-        "oceanHeightAmp": 0.01,
-        "oceanChop": 0.35,
-        "oceanSmallWaveCut": 0.6,
-        "oceanDirectionSpread": 0.4,
-        "cameraHeight": 2.4,
-        "surfaceTilt": 0.33,
-        "waterDepth": 0,
-        "absorption": 0,
-        "surfaceDepth": 0.727,
-        "refractionStrength": -2,
-        "dispersionStrength": 0,
-        "waterColorR": 0.626,
-        "waterColorG": 0.687,
-        "waterColorB": 0.727,
-        "waterDeepR": 0.333,
-        "waterDeepG": 0.354,
-        "waterDeepB": 0.434,
-        "bgImageIndex": 6,
-        "envMapStrength": 0.55,
-        "envMapZoom": 1.3,
-        "envMapPanY": 0.6,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 8,
-        "bedDisplacement": 0.52,
-        "bedHeightScale": 0.364,
-        "bedHeightBlur": 5,
-        "sandScale": 4242,
-        "causticStrength": 0.26,
-        "causticRGBScale": 0.005,
-        "bedDepthScale": 4.6,
-        "sunAngle": 1.47,
-        "sunHeight": 1.224,
-        "specularPower": 50,
-        "specularStrength": 0.141,
-        "fresnelPower": 0.67,
-        "skyHorizonR": 0.576,
-        "skyHorizonG": 0.424,
-        "skyHorizonB": 0.394,
-        "skyZenithR": 0.545,
-        "skyZenithG": 0.323,
-        "skyZenithB": 0.293
-    }
-},
-{
-    "name": "Close Dark 1",
-    "iteration": 26,
-    "values": {
-        "timeScale": 1,
-        "rainRate": 12.1,
-        "simTension": 0.5,
-        "simRainImpulse": 1.09,
-        "rippleStrengthVariance": 2,
-        "dropFallSpeed": 9.7,
-        "dropFallSpeedVariance": 0.37,
-        "dropFallHeight": 5,
-        "dropSize": 0.0055,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "letterRate": 10.1,
-        "letterSpacing": 0.41,
-        "letterMaxLineWidth": 0.4,
-        "letterStrength": 0.025,
-        "letterSize": 0.28,
-        "letterYOffset": -0.02,
-        "letterYVariance": 0.03,
-        "letterWavelength": 0.02,
-        "letterThickness": 0.1,
-        "oceanWindSpeed": 9,
-        "oceanWindAngle": 0.3,
-        "oceanWaveScale": 1.2,
-        "oceanHeightAmp": 0.03,
-        "oceanChop": 0.7,
-        "oceanSmallWaveCut": 0.45,
-        "oceanDirectionSpread": 0.6,
-        "oceanFoamThreshold": 0.55,
-        "oceanFoamStrength": 0.8,
-        "cameraHeight": 1.8,
-        "surfaceTilt": 0.13,
-        "perspectiveStrength": 0.33,
-        "waterDepth": 0.556,
-        "absorption": 0.51,
-        "surfaceDepth": 0.101,
-        "refractionStrength": -0.14,
-        "dispersionStrength": 0.0051,
-        "waterColorR": 0.505,
-        "waterColorG": 0.556,
-        "waterColorB": 0.535,
-        "waterDeepR": 0.515,
-        "waterDeepG": 0.576,
-        "waterDeepB": 0.556,
-        "bgImageIndex": 9,
-        "envMapStrength": 0.82,
-        "envMapZoom": 2.09,
-        "envMapPanX": 0.03,
-        "envMapPanY": 0.49,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 10,
-        "bedDisplacement": 0.49,
-        "bedHeightScale": 0.111,
-        "bedHeightBlur": 24,
-        "causticStrength": 0.85,
-        "simCausticStrength": 0.39,
-        "causticRGBScale": 0.005,
-        "causticRGBAngle": -6.28,
-        "causticScale": 0.69,
-        "oceanCausticGain": 1.1,
-        "sunAngle": 1.47,
-        "sunHeight": 1.224,
-        "specularPower": 2.3,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.73
-    }
-},
-{
-    "name": "Beach Paradise",
-    "iteration": 26,
-    "values": {
-        "timeScale": 1,
-        "rainRate": 22.2,
-        "simTension": 0.421,
-        "simDamping": 0.905,
-        "simQuadraticDrag": 4.24,
-        "simRainImpulse": 1.39,
-        "rippleStrength": 0.4,
-        "rippleStrengthVariance": 2,
-        "rippleDriftX": -0.07,
-        "rippleDriftY": -0.07,
-        "dropFallSpeed": 9.7,
-        "dropFallSpeedVariance": 0.37,
-        "dropFallHeight": 5,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "letterRate": 10.1,
-        "letterSpacing": 0.41,
-        "letterMaxLineWidth": 0.4,
-        "letterStrength": -0.227,
-        "letterSize": 0.28,
-        "letterYOffset": -0.21,
-        "letterYVariance": 0.03,
-        "letterWavelength": 0.02,
-        "letterThickness": 0.1,
-        "oceanPatchSize": 14.9,
-        "oceanPropagation": 0.52,
-        "oceanSpeed": 1.55,
-        "oceanWindSpeed": 25.400000000000002,
-        "oceanWindAngle": -5.52,
-        "oceanWaveScale": 1.25,
-        "oceanHeightAmp": 0.017,
-        "oceanChop": 1.2,
-        "oceanSmallWaveCut": 0.52,
-        "oceanDirectionSpread": 0.81,
-        "oceanDetail": 2.88,
-        "oceanFoamThreshold": 0.16,
-        "oceanFoamStrength": 1.19,
-        "oceanFoamScale": 2.89,
-        "oceanFoamContrast": 0.37,
-        "oceanFoamDetail": 0.36,
-        "oceanFoamTint": 0.84,
-        "cameraHeight": 2.4,
-        "surfaceTilt": 0.35,
-        "perspectiveStrength": 0.33,
-        "waterDepth": 0.697,
-        "absorption": 0,
-        "surfaceDepth": 0.242,
-        "refractionStrength": 0.34,
-        "dispersionStrength": 0.0051,
-        "waterColorR": 0.758,
-        "waterColorG": 0.798,
-        "waterColorB": 0.828,
-        "waterDeepR": 0.818,
-        "waterDeepG": 0.838,
-        "waterDeepB": 0.859,
-        "bgImageIndex": 6,
-        "bgImageTileX": 64,
-        "bgImageTileY": 64,
-        "envMapStrength": 0.79,
-        "envMapZoom": 2.09,
-        "envMapPanX": 0.03,
-        "envMapPanY": 0.49,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 8,
-        "bedDisplacement": 0.49,
-        "bedHeightScale": 0.111,
-        "bedHeightBlur": 24,
-        "causticStrength": 0.85,
-        "simCausticStrength": 0.15,
-        "causticRGBScale": 0.005,
-        "causticRGBAngle": -6.28,
-        "causticScale": 0.69,
-        "oceanCausticGain": 1.1,
-        "sunAngle": 1.47,
-        "sunHeight": 1.224,
-        "specularPower": 2.3,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.73
-    }
-},
-{
-    "name": "Beach Splosh",
-    "iteration": 27,
-    "values": {
-        "timeScale": 1,
-        "rainRate": 22.2,
-        "cameraHeight": 2,
-        "surfaceTilt": 0.39,
-        "perspectiveStrength": 0.64,
-        "cameraOffsetY": 0.38,
-        "simTension": 0.421,
-        "simDamping": 0.905,
-        "simQuadraticDrag": 4.24,
-        "simRainImpulse": 1.39,
-        "dropFallSpeed": 9.7,
-        "dropFallSpeedVariance": 0.37,
-        "dropFallHeight": 5,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrength": 0.4,
-        "rippleStrengthVariance": 2,
-        "rippleDriftX": -0.07,
-        "rippleDriftY": -0.07,
-        "letterRate": 10.1,
-        "letterSpacing": 0.41,
-        "letterMaxLineWidth": 0.4,
-        "letterStrength": -0.227,
-        "letterSize": 0.28,
-        "letterYOffset": -0.21,
-        "letterYVariance": 0.03,
-        "letterWavelength": 0.78,
-        "letterThickness": 0.1,
-        "oceanPatchSize": 14.9,
-        "oceanPropagation": 0.52,
-        "oceanSpeed": 1.55,
-        "oceanWindSpeed": 25.400000000000002,
-        "oceanWindAngle": -5.52,
-        "oceanWaveScale": 1.25,
-        "oceanHeightAmp": 0.017,
-        "oceanChop": 1.2,
-        "oceanSmallWaveCut": 0.52,
-        "oceanDirectionSpread": 0.81,
-        "oceanDetail": 2.88,
-        "oceanFoamThreshold": 0.16,
-        "oceanFoamStrength": 1.19,
-        "oceanFoamScale": 3.32,
-        "oceanFoamContrast": 0.51,
-        "oceanFoamDetail": 0.24,
-        "oceanFoamTint": 0.99,
-        "waterDepth": 0.566,
-        "absorption": 0.1,
-        "surfaceDepth": 0.242,
-        "refractionStrength": 0.34,
-        "waterColorR": 0.758,
-        "waterColorG": 0.798,
-        "waterColorB": 0.828,
-        "waterDeepR": 0.818,
-        "waterDeepG": 0.838,
-        "waterDeepB": 0.859,
-        "bgImageIndex": 6,
-        "bgImageTileX": 64,
-        "bgImageTileY": 64,
-        "envMapStrength": 0.79,
-        "envMapZoom": 2.09,
-        "envMapPanX": 0.03,
-        "envMapPanY": 0.49,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 8,
-        "bedImageSeamless": 10,
-        "bedHeightBlur": 24,
-        "causticStrength": 0.54,
-        "simCausticStrength": 0.15,
-        "causticRGBScale": 0.01,
-        "causticRGBAngle": -6.28,
-        "causticScale": 0.69,
-        "oceanCausticGain": 1.1,
-        "sunAngle": 1.47,
-        "sunHeight": 1.224,
-        "specularPower": 2.3,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.73
-    }
-},
-{
-    "name": "Beach Zoomies",
-    "iteration": 27,
-    "values": {
-        "timeScale": 1,
-        "rainRate": 0,
-        "cameraHeight": 0.4,
-        "surfaceTilt": 0,
-        "perspectiveStrength": 0.25,
-        "simTension": 0.02,
-        "simDamping": 0.8606,
-        "simRainImpulse": 1.07,
-        "simSpringiness": 0.439,
-        "dropFallSpeed": 9.7,
-        "dropFallSpeedVariance": 0.37,
-        "dropFallHeight": 5,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrength": 0.4,
-        "rippleStrengthVariance": 2,
-        "rippleDriftX": 0,
-        "rippleDriftY": 0,
-        "letterRate": 10.1,
-        "letterSpacing": 0.66,
-        "letterMaxLineWidth": 0.18,
-        "letterStrength": -0.227,
-        "letterSize": 0.19,
-        "letterYOffset": 0,
-        "letterYVariance": 0.03,
-        "letterWavelength": 0.25,
-        "letterThickness": 0.1,
-        "liveTextMaxBacklog": 6,
-        "oceanPatchSize": 14.9,
-        "oceanPropagation": 0.52,
-        "oceanSpeed": 1.55,
-        "oceanWindSpeed": 25.400000000000002,
-        "oceanWindAngle": -5.52,
-        "oceanWaveScale": 1.25,
-        "oceanHeightAmp": 0.017,
-        "oceanChop": 1.2,
-        "oceanSmallWaveCut": 0.52,
-        "oceanDirectionSpread": 0.81,
-        "oceanDetail": 2.88,
-        "oceanFoamThreshold": 0.11,
-        "oceanFoamStrength": 0,
-        "oceanFoamScale": 5.34,
-        "oceanFoamContrast": 0.51,
-        "oceanFoamDetail": 0.24,
-        "oceanFoamTint": 0.99,
-        "waterDepth": 0.566,
-        "absorption": 0.1,
-        "surfaceDepth": 0.242,
-        "refractionStrength": 0.34,
-        "waterColorR": 0.788,
-        "waterColorG": 0.798,
-        "waterColorB": 0.828,
-        "waterDeepR": 0.747,
-        "waterDeepG": 0.798,
-        "waterDeepB": 0.768,
-        "bgImageIndex": 6,
-        "bgImageTileX": 64,
-        "bgImageTileY": 64,
-        "envMapStrength": 0,
-        "envMapZoom": 2.09,
-        "envMapPanX": 0.03,
-        "envMapPanY": 0.49,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 8,
-        "bedImageSeamless": 10,
-        "bedHeightBlur": 24,
-        "causticStrength": 0.62,
-        "simCausticStrength": 0.15,
-        "causticRGBScale": 0.004,
-        "causticRGBAngle": -6.28,
-        "causticScale": 0.42,
-        "oceanCausticGain": 1.1,
-        "sunAngle": 1.47,
-        "sunHeight": 1.224,
-        "specularPower": 2.3,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.73
-    }
-},
-{
-    "name": "Beach Zoomies 2",
-    "iteration": 27,
-    "values": {
-        "timeScale": 1,
-        "rainRate": 105.1,
-        "cameraHeight": 1.1,
-        "surfaceTilt": 0,
-        "perspectiveStrength": 0.21,
-        "simTension": 0.198,
-        "simDamping": 0.8707,
-        "simQuadraticDrag": 3.43,
-        "simRainImpulse": 1.07,
-        "simSpringiness": 0.439,
-        "dropFallSpeed": 9.7,
-        "dropFallSpeedVariance": 0.37,
-        "dropFallHeight": 5,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrengthVariance": 2,
-        "rippleDriftX": 0,
-        "rippleDriftY": 0,
-        "letterRate": 10.1,
-        "letterSpacing": 0.56,
-        "letterMaxLineWidth": 0.5,
-        "letterStrength": -0.227,
-        "letterSize": 1,
-        "letterYOffset": 0,
-        "letterYVariance": 0.02,
-        "letterWavelength": 0.25,
-        "letterThickness": 0.1,
-        "liveTextMaxBacklog": 6,
-        "oceanPatchSize": 14.9,
-        "oceanPropagation": 0.52,
-        "oceanSpeed": 1.55,
-        "oceanWindSpeed": 25.400000000000002,
-        "oceanWindAngle": -5.52,
-        "oceanWaveScale": 1.25,
-        "oceanHeightAmp": 0.017,
-        "oceanChop": 1.2,
-        "oceanSmallWaveCut": 0.52,
-        "oceanDirectionSpread": 0.81,
-        "oceanDetail": 2.88,
-        "oceanFoamThreshold": 0.11,
-        "oceanFoamStrength": 0,
-        "oceanFoamScale": 5.34,
-        "oceanFoamContrast": 0.51,
-        "oceanFoamDetail": 0.24,
-        "oceanFoamTint": 0.99,
-        "waterDepth": 0.566,
-        "absorption": 0.1,
-        "surfaceDepth": 0.242,
-        "refractionStrength": 0.34,
-        "waterColorR": 0.788,
-        "waterColorG": 0.798,
-        "waterColorB": 0.828,
-        "waterDeepR": 0.747,
-        "waterDeepG": 0.798,
-        "waterDeepB": 0.768,
-        "bgImageIndex": 6,
-        "bgImageTileX": 64,
-        "bgImageTileY": 64,
-        "envMapStrength": 0,
-        "envMapZoom": 2.09,
-        "envMapPanX": 0.03,
-        "envMapPanY": 0.49,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 8,
-        "bedImageSeamless": 10,
-        "bedHeightBlur": 24,
-        "causticStrength": 0.62,
-        "simCausticStrength": 0.15,
-        "causticRGBScale": 0.004,
-        "causticRGBAngle": -6.28,
-        "causticScale": 0.42,
-        "oceanCausticGain": 1.1,
-        "sunAngle": 1.47,
-        "sunHeight": 1.224,
-        "specularPower": 2.3,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.73
-    }
-},
-{
-    "name": "Downstream",
-    "iteration": 27,
-    "values": {
-        "timeScale": 1,
-        "rainRate": 8.1,
-        "cameraHeight": 2.8,
-        "surfaceTilt": 0.37,
-        "perspectiveStrength": 1,
-        "cameraOffsetY": 0.42,
-        "dropFallSpeed": 13,
-        "dropFallHeight": 10,
-        "dropSize": 0.0055,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrengthVariance": 2,
-        "rippleDriftX": 0,
-        "rippleDriftY": -0.2,
-        "letterStrength": 0.08,
-        "letterSize": 0.16,
-        "letterYOffset": -0.24,
-        "letterYVariance": 0.02,
-        "letterWavelength": 0.0212,
-        "letterThickness": 0.1,
-        "oceanPatchSize": 8.3,
-        "oceanWindSpeed": 5,
-        "oceanWindAngle": 1.46,
-        "oceanHeightAmp": 0.077,
-        "oceanChop": 0.4,
-        "oceanSmallWaveCut": 0.55,
-        "oceanDirectionSpread": 0.69,
-        "waterDepth": 0.081,
-        "surfaceDepth": 0.25,
-        "refractionStrength": 0.1,
-        "dispersionStrength": 0.0035,
-        "waterColorR": 0.394,
-        "waterColorG": 0.515,
-        "waterColorB": 0.616,
-        "waterDeepR": 0.263,
-        "waterDeepG": 0.394,
-        "waterDeepB": 0.485,
-        "envMapStrength": 1,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 7,
-        "bedDisplacement": 0.23,
-        "bedHeightScale": 0.323,
-        "causticStrength": 0.14,
-        "oceanCausticGain": 0.6,
-        "sunAngle": 1.47,
-        "sunHeight": 1.224,
-        "specularPower": 0.5,
-        "fresnelPower": 0.4
-    }
-},
-{
-    "name": "Flash Harry",
-    "iteration": 27,
-    "values": {
-        "timeScale": 1,
-        "vignetteRadius": 1,
-        "cameraHeight": 3.2,
-        "surfaceTilt": 0,
-        "perspectiveStrength": 1,
-        "simTension": 0.297,
-        "simDamping": 0.9656,
-        "simRainImpulse": 0.91,
-        "simSpringiness": 0.293,
-        "dropFallSpeed": 18.1,
-        "dropFallSpeedVariance": 0.81,
-        "dropFallHeight": 7,
-        "dropSize": 0.0045,
-        "dropSizeVariance": 0.4,
-        "sphereQuality": 32,
-        "dropSplashCount": 3,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrength": 0.82,
-        "rippleStrengthVariance": 2,
-        "rippleSpeed": 0.81,
-        "rippleDriftX": 0,
-        "rippleDriftY": -0.2,
-        "letterRate": 11.31,
-        "letterStrength": 0.08,
-        "letterSize": 0.33,
-        "letterYOffset": -0.24,
-        "letterYVariance": 0.02,
-        "letterWavelength": 0.02,
-        "letterThickness": 1.7,
-        "oceanPatchSize": 8.3,
-        "oceanWindSpeed": 5,
-        "oceanWindAngle": 1.46,
-        "oceanHeightAmp": 0.032,
-        "oceanChop": 0.4,
-        "oceanSmallWaveCut": 0.55,
-        "oceanDirectionSpread": 0.9,
-        "waterDepth": 0.051,
-        "surfaceDepth": 0.02,
-        "refractionStrength": 0.22,
-        "dispersionStrength": 0.0015,
-        "rgbSplit": -0.088,
-        "waterColorR": 0.091,
-        "waterColorG": 0.03,
-        "waterColorB": 0.03,
-        "waterDeepR": 0.141,
-        "waterDeepG": 0.071,
-        "waterDeepB": 0.081,
-        "bgImageIndex": 0,
-        "envMapStrength": 0,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 4,
-        "bedImageSeamless": 9,
-        "bedDisplacement": 0.23,
-        "bedHeightScale": 0.323,
-        "causticStrength": 0.14,
-        "oceanCausticGain": 0.6,
-        "sunAngle": -3.24,
-        "sunHeight": -1,
-        "specularPower": 8.1,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.79
-    }
-},
-{
-    "name": "Holes",
-    "iteration": 28,
-    "values": {
-        "timeScale": 1,
-        "vignetteRadius": 1,
-        "cameraHeight": 3.2,
-        "surfaceTilt": 0,
-        "perspectiveStrength": 1,
-        "simTension": 0.322,
-        "simDamping": 0.8828,
-        "simRainImpulse": 1.01,
-        "simSpringiness": 0.005,
-        "dropFallSpeed": 18.1,
-        "dropFallSpeedVariance": 0.81,
-        "dropFallHeight": 7,
-        "dropSize": 0.0045,
-        "dropSizeVariance": 0.4,
-        "sphereQuality": 32,
-        "dropSplashCount": 3,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrength": 0.82,
-        "rippleStrengthVariance": 2,
-        "rippleSpeed": 0.81,
-        "rippleDriftX": 0,
-        "rippleDriftY": -0.2,
-        "letterRate": 11.31,
-        "letterStrength": 0.08,
-        "letterSize": 0.33,
-        "letterYOffset": -0.24,
-        "letterYVariance": 0.02,
-        "letterWavelength": 0.53,
-        "letterThickness": 1.8,
-        "oceanPatchSize": 8.3,
-        "oceanWindSpeed": 5,
-        "oceanWindAngle": 1.46,
-        "oceanHeightAmp": 0.032,
-        "oceanChop": 0.4,
-        "oceanSmallWaveCut": 0.55,
-        "oceanDirectionSpread": 0.9,
-        "waterDepth": 0.051,
-        "refractionStrength": 0.51,
-        "dispersionStrength": 0.002,
-        "rgbSplit": -0.1,
-        "waterColorR": 0.091,
-        "waterColorG": 0.03,
-        "waterColorB": 0.03,
-        "waterDeepR": 0.141,
-        "waterDeepG": 0.071,
-        "waterDeepB": 0.081,
-        "bgImageIndex": 0,
-        "envMapStrength": 0,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 4,
-        "bedImageSeamless": 9,
-        "bedHeightScale": 0,
-        "causticStrength": 0.14,
-        "oceanCausticGain": 0.6,
-        "sunAngle": -3.24,
-        "sunHeight": -1,
-        "specularPower": 8.1,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.79
-    }
-},
-{
-    "name": "Pebbles",
-    "iteration": 28,
-    "values": {
-        "timeScale": 1.2,
-        "rainRate": 18.2,
-        "vignetteRadius": 1,
-        "cameraHeight": 3.2,
-        "surfaceTilt": 0,
-        "perspectiveStrength": 1,
-        "simTension": 0.46,
-        "simDamping": 0.9232,
-        "simRainImpulse": 1.21,
-        "simSpringiness": 0.172,
-        "surfaceDepth": 0.485,
-        "dropFallSpeed": 18.1,
-        "dropFallSpeedVariance": 0.81,
-        "dropFallHeight": 7,
-        "dropSize": 0.0045,
-        "dropSizeVariance": 0.4,
-        "sphereQuality": 32,
-        "dropSplashCount": 3,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrength": 0.82,
-        "rippleStrengthVariance": 2,
-        "rippleSpeed": 0.81,
-        "rippleDriftX": 0,
-        "rippleDriftY": -0.2,
-        "letterRate": 11.31,
-        "letterStrength": 0.025,
-        "letterSize": 0.33,
-        "letterYOffset": -0.24,
-        "letterYVariance": 0.02,
-        "letterWavelength": 0.02,
-        "letterThickness": 0.1,
-        "oceanPatchSize": 8.3,
-        "oceanWindSpeed": 5,
-        "oceanWindAngle": 1.46,
-        "oceanHeightAmp": 0.032,
-        "oceanChop": 0.4,
-        "oceanSmallWaveCut": 0.55,
-        "oceanDirectionSpread": 0.9,
-        "waterDepth": 0.051,
-        "refractionStrength": 0.22,
-        "dispersionStrength": 0.0015,
-        "rgbSplit": -0.088,
-        "waterColorR": 0.091,
-        "waterColorG": 0.03,
-        "waterColorB": 0.03,
-        "waterDeepR": 0.141,
-        "waterDeepG": 0.071,
-        "waterDeepB": 0.081,
-        "bgImageIndex": 0,
-        "envMapStrength": 0.33,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 3,
-        "bedImageSeamless": 9,
-        "bedDisplacement": 0.23,
-        "bedHeightScale": 0.323,
-        "causticStrength": 0.14,
-        "oceanCausticGain": 0.6,
-        "sunAngle": -3.24,
-        "sunHeight": -1,
-        "specularPower": 8.1,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.79
-    }
-},
-{
-    "name": "Ocean Waft",
-    "iteration": 28,
-    "values": {
-        "timeScale": 1.2,
-        "rainRate": 68.7,
-        "vignetteRadius": 1,
-        "cameraHeight": 3.2,
-        "surfaceTilt": 0.37,
-        "perspectiveStrength": 1,
-        "simTension": 0.46,
-        "simDamping": 0.9232,
-        "simRainImpulse": 1.21,
-        "simSpringiness": 0.172,
-        "surfaceDepth": 0.485,
-        "dropFallSpeed": 18.1,
-        "dropFallSpeedVariance": 0.81,
-        "dropFallHeight": 7,
-        "dropSize": 0.0045,
-        "dropSizeVariance": 0.4,
-        "sphereQuality": 32,
-        "dropSplashCount": 3,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrength": 0.82,
-        "rippleStrengthVariance": 2,
-        "rippleSpeed": 0.81,
-        "rippleDriftX": 0,
-        "rippleDriftY": -0.2,
-        "letterRate": 11.31,
-        "letterStrength": 0.015,
-        "letterSize": 0.33,
-        "letterYOffset": -0.24,
-        "letterYVariance": 0.02,
-        "letterWavelength": 0.02,
-        "letterThickness": 0.1,
-        "oceanPatchSize": 12.1,
-        "oceanWindSpeed": 5,
-        "oceanWindAngle": 1.46,
-        "oceanWaveScale": 0.77,
-        "oceanHeightAmp": 0.035,
-        "oceanChop": 0.47,
-        "oceanSmallWaveCut": 0.73,
-        "oceanDirectionSpread": 1,
-        "oceanFoamThreshold": 0.08,
-        "oceanFoamStrength": 0.83,
-        "oceanFoamScale": 56.7,
-        "oceanFoamContrast": 0.61,
-        "oceanFoamDetail": 0.23,
-        "waterDepth": 0.545,
-        "absorption": 0.91,
-        "refractionStrength": 0.22,
-        "dispersionStrength": 0.0015,
-        "rgbSplit": -0.088,
-        "waterColorR": 0.091,
-        "waterColorG": 0.03,
-        "waterColorB": 0.03,
-        "waterDeepR": 0.141,
-        "waterDeepG": 0.071,
-        "waterDeepB": 0.081,
-        "bgImageIndex": 0,
-        "envMapStrength": 0.33,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 2,
-        "bedImageSeamless": 34,
-        "bedImageTileX": 7,
-        "bedImageTileY": 7,
-        "bedDisplacement": 0.23,
-        "causticStrength": 0.12,
-        "causticRGBScale": 0.14,
-        "causticRGBAngle": -5.01,
-        "oceanCausticGain": 0.6,
-        "sunAngle": -3.24,
-        "sunHeight": -1,
-        "specularPower": 8.1,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.79
-    }
-},
-{
-    "name": "Slowly Does It",
-    "iteration": 28,
-    "values": {
-        "timeScale": 0.1,
-        "rainRate": 68.7,
-        "vignetteRadius": 1,
-        "cameraHeight": 3.2,
-        "surfaceTilt": 0.37,
-        "perspectiveStrength": 1,
-        "simTension": 0.46,
-        "simDamping": 0.9232,
-        "simRainImpulse": 1.21,
-        "simSpringiness": 0.172,
-        "surfaceDepth": 0.485,
-        "dropFallSpeed": 18.1,
-        "dropFallSpeedVariance": 0.81,
-        "dropFallHeight": 7,
-        "dropSize": 0.0045,
-        "dropSizeVariance": 0.4,
-        "sphereQuality": 32,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrength": 0.64,
-        "rippleStrengthVariance": 2,
-        "rippleSpeed": 0.81,
-        "rippleDriftX": 0,
-        "rippleDriftY": -0.2,
-        "letterRate": 11.31,
-        "letterStrength": 0.015,
-        "letterSize": 0.33,
-        "letterYOffset": -0.24,
-        "letterYVariance": 0.02,
-        "letterWavelength": 0.02,
-        "letterThickness": 0.1,
-        "oceanPatchSize": 12.1,
-        "oceanWindSpeed": 5,
-        "oceanWindAngle": 1.46,
-        "oceanWaveScale": 0.77,
-        "oceanHeightAmp": 0.035,
-        "oceanChop": 0.05,
-        "oceanSmallWaveCut": 0.73,
-        "oceanDirectionSpread": 1,
-        "oceanFoamThreshold": 0.08,
-        "oceanFoamStrength": 0.83,
-        "oceanFoamScale": 56.7,
-        "oceanFoamContrast": 0.61,
-        "oceanFoamDetail": 0.23,
-        "waterDepth": 0.192,
-        "absorption": 0.91,
-        "refractionStrength": 0.22,
-        "dispersionStrength": 0.003,
-        "waterColorR": 0.091,
-        "waterColorG": 0.03,
-        "waterColorB": 0.03,
-        "waterDeepR": 0.141,
-        "waterDeepG": 0.071,
-        "waterDeepB": 0.081,
-        "bgImageIndex": 2,
-        "envMapStrength": 0.33,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 3,
-        "bedImageSeamless": 34,
-        "bedImageTileX": 3,
-        "bedImageTileY": 3,
-        "bedDisplacement": 0.23,
-        "causticStrength": 0.12,
-        "causticRGBScale": 0.14,
-        "causticRGBAngle": -5.01,
-        "oceanCausticGain": 0.6,
-        "sunAngle": -3.24,
-        "sunHeight": -1,
-        "specularPower": 8.1,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.73
-    }
-},
-{
-    "name": "Slowly Does It 2",
-    "iteration": 29,
-    "values": {
-        "timeScale": 0.3,
-        "rainRate": 68.7,
-        "vignetteRadius": 1,
-        "cameraHeight": 3.2,
-        "surfaceTilt": 0.37,
-        "perspectiveStrength": 1,
-        "simTension": 0.5,
-        "simDamping": 0.9656,
-        "simQuadraticDrag": 9.7,
-        "simRainImpulse": 1.03,
-        "simSpringiness": 0.172,
-        "surfaceDepth": 0.364,
-        "dropFallSpeed": 18.1,
-        "dropFallSpeedVariance": 0.81,
-        "dropFallHeight": 7,
-        "dropSize": 0.003,
-        "dropSizeVariance": 0.4,
-        "sphereQuality": 32,
-        "dropSplashCount": 3,
-        "dropSplashHeightFactor": 0.02,
-        "dropSplashStrengthFactor": 0.07,
-        "dropSplashSizeFactor": 0.29,
-        "dropSplashDriftInheritance": 0.51,
-        "rippleStrength": 0.64,
-        "rippleStrengthVariance": 2,
-        "rippleSpeed": 0.81,
-        "rippleDriftX": 0,
-        "rippleDriftY": -0.2,
-        "simDropRadius": 0.007,
-        "simDropCore": 0.17,
-        "letterRate": 11.31,
-        "letterStrength": 0.015,
-        "letterSize": 0.33,
-        "letterYOffset": -0.24,
-        "letterYVariance": 0.02,
-        "letterWavelength": 0.02,
-        "letterThickness": 0.1,
-        "oceanPatchSize": 12.1,
-        "oceanWindSpeed": 5,
-        "oceanWindAngle": 1.46,
-        "oceanWaveScale": 0.77,
-        "oceanHeightAmp": 0.035,
-        "oceanChop": 0.05,
-        "oceanSmallWaveCut": 0.73,
-        "oceanDirectionSpread": 1,
-        "oceanFoamThreshold": 0.08,
-        "oceanFoamStrength": 0.83,
-        "oceanFoamScale": 56.7,
-        "oceanFoamContrast": 0.61,
-        "oceanFoamDetail": 0.23,
-        "waterDepth": 0.192,
-        "absorption": 0.91,
-        "refractionStrength": 0.22,
-        "dispersionStrength": 0.003,
-        "waterColorR": 0.091,
-        "waterColorG": 0.03,
-        "waterColorB": 0.03,
-        "waterDeepR": 0.141,
-        "waterDeepG": 0.071,
-        "waterDeepB": 0.081,
-        "bgImageIndex": 2,
-        "envMapStrength": 0.33,
-        "bedImageEnabled": 1,
-        "bedImageIndex": 3,
-        "bedImageSeamless": 34,
-        "bedImageTileX": 3,
-        "bedImageTileY": 3,
-        "bedDisplacement": 0.23,
-        "causticStrength": 0.12,
-        "causticRGBScale": 0.14,
-        "causticRGBAngle": -5.01,
-        "oceanCausticGain": 0.6,
-        "sunAngle": -3.24,
-        "sunHeight": -1,
-        "specularPower": 8.1,
-        "specularStrength": -0.263,
-        "fresnelPower": 0.73
-    }
-}
-];
-
-// =====================================================================
 // GLOBALS
 // =====================================================================
 
-var MAX_DROPS = 128;
+var MAX_DROPS = 256;
 var MAX_LETTERS = 24;
-var MAX_FALLING_DROPS = 128;
+var MAX_FALLING_DROPS = 256;
 
 var state = Object.assign({}, DEFAULTS);
 var meshRebuildFn = null;
@@ -2432,25 +958,25 @@ function processImage(img, targetW, targetH, seamlessX, seamlessY) {
     return canvas;
 }
 
-    function updateThumbnailFromBitmap(slot, bitmap, suffix) {
-        var previewId = (slot === "bg" ? "bg-thumb" : "bed-thumb") + (suffix || "");
-        var el = document.getElementById(previewId);
-        if (!el || !bitmap) return;
-        try {
-            var c = document.createElement("canvas");
-            // Cap the thumbnail size — a 1024×1024 JPEG is not going into a 300px-wide <img>.
-            var maxDim = 320;
-            var sw = bitmap.width, sh = bitmap.height;
-            var s = Math.min(1, maxDim / Math.max(sw, sh));
-            c.width = Math.round(sw * s);
-            c.height = Math.round(sh * s);
-            var cx = c.getContext("2d");
-            cx.drawImage(bitmap, 0, 0, c.width, c.height);
-            el.src = c.toDataURL("image/jpeg", 0.85);
-        } catch (e) {
-            console.warn("Thumbnail encode failed for " + slot + (suffix || ""), e);
-        }
+function updateThumbnailFromBitmap(slot, bitmap, suffix) {
+    var previewId = (slot === "bg" ? "bg-thumb" : "bed-thumb") + (suffix || "");
+    var el = document.getElementById(previewId);
+    if (!el || !bitmap) return;
+    try {
+        var c = document.createElement("canvas");
+        // Cap the thumbnail size — a 1024×1024 JPEG is not going into a 300px-wide <img>.
+        var maxDim = 320;
+        var sw = bitmap.width, sh = bitmap.height;
+        var s = Math.min(1, maxDim / Math.max(sw, sh));
+        c.width = Math.round(sw * s);
+        c.height = Math.round(sh * s);
+        var cx = c.getContext("2d");
+        cx.drawImage(bitmap, 0, 0, c.width, c.height);
+        el.src = c.toDataURL("image/jpeg", 0.85);
+    } catch (e) {
+        console.warn("Thumbnail encode failed for " + slot + (suffix || ""), e);
     }
+}
 
 // =====================================================================
 // CONTROL PANEL
@@ -2657,7 +1183,7 @@ function buildControlsUI() {
         container.appendChild(row);
 
         if (key === "bgImageEnabled") makeThumbnail("bg", container);
-         if (key === "bedImageEnabled") {
+        if (key === "bedImageEnabled") {
             makeThumbnail("bed", container);            // colour thumbnail (id="bed-thumb")
             makeThumbnail("bed", container, "-depth");  // depth thumbnail (id="bed-thumb-depth")
         }
@@ -2668,14 +1194,14 @@ function buildControlsUI() {
 
         var body = document.createElement("div");
         body.className = "ctrl-group-body";
-        
+
         // Initial state: JSON default, unless the user has toggled this
         // group before (localStorage), in which case honour their last choice.
         var initialCollapsed = !group.openByDefault;
         try {
             var savedMap = JSON.parse(localStorage.getItem("ctrlGroupsCollapsed") || "{}");
             if (group.heading in savedMap) initialCollapsed = !!savedMap[group.heading];
-        } catch (_) {}
+        } catch (_) { }
         if (initialCollapsed) body.classList.add("collapsed");
 
         group.controls.forEach(function (c) { makeControl(c, body); });
@@ -2706,7 +1232,7 @@ function buildControlsUI() {
                 var map = JSON.parse(localStorage.getItem("ctrlGroupsCollapsed") || "{}");
                 map[group.heading] = body.classList.contains("collapsed");
                 localStorage.setItem("ctrlGroupsCollapsed", JSON.stringify(map));
-            } catch (_) {}
+            } catch (_) { }
         });
 
         list.appendChild(head);
@@ -2844,10 +1370,10 @@ function loadPreset(idx) {
             transitionDuration = transitionTime * 1000;
 
             ["bgImageIndex", "bgImageScale", "bgImageSeamless",
-             "bedImageIndex", "bedImageScale", "bedImageSeamless",
-             "liveText"].forEach(function (k) {
-                if (k in target && !STANDALONE_KEYS[k]) state[k] = target[k];
-            });
+                "bedImageIndex", "bedImageScale", "bedImageSeamless",
+                "liveText"].forEach(function (k) {
+                    if (k in target && !STANDALONE_KEYS[k]) state[k] = target[k];
+                });
             refreshControlsUI();
 
             if (target.gridResolution !== prevGrid && typeof meshRebuildFn === "function") {
@@ -4369,7 +2895,7 @@ function main() {
 
     window.previousGl = gl;
 
-    var imageWorker = new Worker("image-worker.js");
+    var imageWorker = new Worker(VERSION + "-image-worker.js");
     var pendingWorkerResults = {};   // id → resolve fn
     var nextWorkerId = 1;
 
@@ -4385,7 +2911,7 @@ function main() {
     // Send an already-loaded Image to the worker for processing.
     // Resolves to {albedo:ImageBitmap, heightmap:ImageBitmap|null} or null.
     function processInWorker(img, targetW, targetH, seamlessX, seamlessY,
-                             blurRadius, wantHeightmap) {
+        blurRadius, wantHeightmap) {
         return createImageBitmap(img).then(function (bitmap) {
             return new Promise(function (resolve) {
                 var id = nextWorkerId++;
@@ -4532,8 +3058,8 @@ function main() {
         var lum = new Float32Array(w * h);
         for (var i = 0; i < w * h; i++) {
             lum[i] = (srcData[i * 4] * 0.299 +
-                      srcData[i * 4 + 1] * 0.587 +
-                      srcData[i * 4 + 2] * 0.114) / 255;
+                srcData[i * 4 + 1] * 0.587 +
+                srcData[i * 4 + 2] * 0.114) / 255;
         }
 
         // 2. Separable box blur with wrap-around so the heightmap stays seamless
@@ -4553,7 +3079,7 @@ function main() {
                 for (var x = 0; x < w; x++) {
                     tmp[rowStart + x] = sum / windowCount;
                     var outX = (((x - r) % w) + w) % w;
-                    var inX  = (((x + r + 1) % w) + w) % w;
+                    var inX = (((x + r + 1) % w) + w) % w;
                     sum += lum[rowStart + inX] - lum[rowStart + outX];
                 }
             }
@@ -4567,7 +3093,7 @@ function main() {
                 for (var y = 0; y < h; y++) {
                     lum[y * w + x1] = vsum / windowCount;
                     var outY = (((y - r) % h) + h) % h;
-                    var inY  = (((y + r + 1) % h) + h) % h;
+                    var inY = (((y + r + 1) % h) + h) % h;
                     vsum += tmp[inY * w + x1] - tmp[outY * w + x1];
                 }
             }
@@ -4617,39 +3143,39 @@ function main() {
             setScaleDropdownEnabled(prefix + "Scale", !matches);
 
             return processInWorker(img, scale.w, scale.h,
-                                   params.seamless, params.seamless,
-                                   wantHeightmap ? state.bedHeightBlur : 0,
-                                   wantHeightmap).then(function (result) {
-                if (!result) return null;
+                params.seamless, params.seamless,
+                wantHeightmap ? state.bedHeightBlur : 0,
+                wantHeightmap).then(function (result) {
+                    if (!result) return null;
 
-                gl.bindTexture(gl.TEXTURE_2D, targetTex);
-                gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, result.albedo);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
-                gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-
-                if (targetHeightTex && result.heightmap) {
-                    gl.bindTexture(gl.TEXTURE_2D, targetHeightTex);
+                    gl.bindTexture(gl.TEXTURE_2D, targetTex);
                     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
-                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, result.heightmap);
+                    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, result.albedo);
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
                     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-                }
 
-                // Thumbnails: draw the ImageBitmaps into a temporary 2D canvas
-                // to get a data URL. This IS on the main thread, but it's
-                // tiny (thumbnails are downscaled) and one-shot per load.
-                //if (!isTarget) {
+                    if (targetHeightTex && result.heightmap) {
+                        gl.bindTexture(gl.TEXTURE_2D, targetHeightTex);
+                        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
+                        gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, gl.RGBA, gl.UNSIGNED_BYTE, result.heightmap);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+                        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+                    }
+
+                    // Thumbnails: draw the ImageBitmaps into a temporary 2D canvas
+                    // to get a data URL. This IS on the main thread, but it's
+                    // tiny (thumbnails are downscaled) and one-shot per load.
+                    //if (!isTarget) {
                     updateThumbnailFromBitmap(thumbSlot, result.albedo, "");
                     if (result.heightmap) updateThumbnailFromBitmap(thumbSlot, result.heightmap, "-depth");
-                //}
+                    //}
 
-                return result;
-            });
+                    return result;
+                });
         });
     }
 
@@ -4671,12 +3197,12 @@ function main() {
             bgBlend = 0; bedBlend = 0;
         }
         return applyImage("a", "bedImage", "riverbed", bedTextureA, bedTextureB, "bed",
-                   bedHeightTextureA, bedHeightTextureB);
+            bedHeightTextureA, bedHeightTextureB);
     }
 
     function applyRiverbedImageTarget() {
         return applyImage("b", "bedImage", "riverbed", bedTextureA, bedTextureB, "bed",
-                   bedHeightTextureA, bedHeightTextureB);
+            bedHeightTextureA, bedHeightTextureB);
     }
 
     window.__applyBg = applyBackgroundImage;
@@ -5586,16 +4112,21 @@ function main() {
                     bgBlend = 0;
                     bedBlend = 0;
                 } else {
+                    // --- Eased transition (slow → fast → slow) ---
+                    // Smootherstep: zero velocity AND zero acceleration at both ends.
+                    // Use smoothstep (t*t*(3-2t)) instead if you want a slightly snappier feel.
+                    var te = tn * tn * tn * (tn * (tn * 6 - 15) + 10);
+
                     Object.keys(DEFAULTS).forEach(function (key) {
                         if (STANDALONE_KEYS[key]) return;
                         if (DISCRETE_KEYS[key]) return;
                         var a = transitionSource[key];
                         var b = transitionTarget[key];
-                        state[key] = a + (b - a) * tn;
+                        state[key] = a + (b - a) * te;
                         if (INT_KEYS[key]) state[key] = Math.round(state[key]);
                     });
-                    bgBlend = tn;
-                    bedBlend = tn;
+                    bgBlend = te;
+                    bedBlend = te;
                     if ((now | 0) % 4 === 0) refreshControlsUI();
                 }
             }
@@ -5873,7 +4404,7 @@ function main() {
                 "oceanFoamScale", "oceanFoamContrast", "oceanFoamDetail", "oceanFoamTint"];
             sc.forEach(function (k) { if (u[k]) gl.uniform1f(u[k], state[k]); });
             if (u.cameraOffset) gl.uniform2f(u.cameraOffset, state.cameraOffsetX, state.cameraOffsetY);
-            
+
             if (u.oceanTexSize) gl.uniform2f(u.oceanTexSize, fftSize, fftSize);
             if (u.oceanPatchSize) gl.uniform1f(u.oceanPatchSize, state.oceanPatchSize);
             if (u.foamThreshold) gl.uniform1f(u.foamThreshold, state.oceanFoamThreshold);
@@ -5931,7 +4462,7 @@ function main() {
             if (u.bedImageEnabled) gl.uniform1f(u.bedImageEnabled, state.bedImageEnabled);
             if (u.bedImageTile) gl.uniform2f(u.bedImageTile, state.bedImageTileX, state.bedImageTileY);
 
-           gl.activeTexture(gl.TEXTURE8);
+            gl.activeTexture(gl.TEXTURE8);
             gl.bindTexture(gl.TEXTURE_2D, bedHeightTextureA);
             if (u.bedHeightA) gl.uniform1i(u.bedHeightA, 8);
             gl.activeTexture(gl.TEXTURE9);
@@ -6133,8 +4664,18 @@ function buildFontDropdown() {
 // =====================================================================
 // BOOT
 // =====================================================================
-buildControlsUI();
-buildPresetDropdown();
-buildFontDropdown();
-setupControlHandlers();
-main();
+var currentScriptUrl = document.currentScript.src;
+var presetsScript = document.createElement("script");
+presetsScript.src = new URL(VERSION + "-presets.js", currentScriptUrl).href;
+presetsScript.onload = function () {
+    buildControlsUI();
+    buildPresetDropdown();
+    buildFontDropdown();
+    setupControlHandlers();
+    main();
+};
+presetsScript.onerror = function () {
+    console.error("Failed to load " + VERSION + "-presets.js");
+};
+
+document.head.appendChild(presetsScript);
