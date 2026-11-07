@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Badger &amp; Starfish Spinner</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&family=Playfair+Display:wght@700&family=Press+Start+2P&family=Great+Vibes&family=Bangers&family=Creepster&family=Lobster&family=Pacifico&family=VT323&family=Courier+Prime:wght@700&family=Comic+Neue:wght@700&family=Rubik+Storm&family=Rubik+Spray+Paint&family=Bungee+Outline&family=Rock+Salt&family=Henny+Penny&family=Kablammo&family=Schoolbell&family=Finger+Paint&family=Indie+Flower&family=Princess+Sofia&family=Lily+Script+One&family=Crafty+Girls&family=Mountains+of+Christmas&display=swap" rel="stylesheet">
+
+<style>
+html, body {
+    margin: 0; padding: 0; overflow: hidden; height: 100%;
+    background: black; position: relative; z-index: 0;
+}
+.container { position: relative; }
+#content { position: relative; }
+
+/* ──────────────────────────────────────────────────────────────
+   Controls panel (ported from v038 shader controls)
+   ────────────────────────────────────────────────────────────── */
+#controls-panel {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 380px;
+    max-height: 90vh;
+    background: rgba(10, 10, 20, 0.92);
+    color: #ddd;
+    font-family: monospace;
+    font-size: 11px;
+    border: 1px solid #333;
+    border-radius: 4px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+#controls-header {
+    padding: 6px 10px;
+    background: #1a1a2e;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+}
+#toggle-panel {
+    background: #333;
+    color: #ddd;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 1px 8px;
+    border-radius: 2px;
+}
+#controls-body {
+    overflow-y: auto;
+    padding: 8px;
+}
+#controls-body.collapsed { display: none; }
+#presets-row {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #333;
+}
+#presets-row label { color: #888; }
+#preset-select {
+    flex: 1;
+    min-width: 100px;
+    background: #1a1a2e;
+    color: #ddd;
+    border: 1px solid #555;
+    font-family: monospace;
+    font-size: 11px;
+}
+#presets-row button {
+    background: #333;
+    color: #ddd;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-family: monospace;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 2px;
+}
+#presets-row button:hover { background: #444; }
+
+#font-select {
+    width: 100%;
+    margin-bottom: 8px;
+    background: #1a1a2e;
+    color: #ddd;
+    border: 1px solid #555;
+    font-family: monospace;
+    font-size: 11px;
+    padding: 2px;
+}
+
+.ctrl-row {
+    display: grid;
+    grid-template-columns: 130px 1fr 62px 30px;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 3px;
+}
+.ctrl-row.label-wide {
+    grid-template-columns: 130px 1fr 30px;
+}
+.ctrl-row.text-row {
+    grid-template-columns: 130px 1fr 30px;
+}
+.ctrl-row label { color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ctrl-row input[type=range] { width: 100%; }
+.ctrl-row input[type=number] {
+    background: #1a1a2e;
+    color: #ddd;
+    border: 1px solid #555;
+    font-family: monospace;
+    font-size: 10px;
+    padding: 1px 3px;
+    width: 100%;
+    text-align: right;
+}
+.ctrl-row input[type=color] {
+    width: 100%;
+    height: 20px;
+    background: #1a1a2e;
+    border: 1px solid #555;
+    padding: 0;
+    cursor: pointer;
+}
+.ctrl-row input[type=checkbox] {
+    justify-self: start;
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+.ctrl-row textarea {
+    background: #1a1a2e;
+    color: #ddd;
+    border: 1px solid #555;
+    font-family: monospace;
+    font-size: 10px;
+    padding: 2px;
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+    box-sizing: border-box;
+}
+.ctrl-row .reset-btn {
+    background: #333;
+    color: #888;
+    border: 1px solid #555;
+    cursor: pointer;
+    font-size: 10px;
+    padding: 0 4px;
+    border-radius: 2px;
+}
+.ctrl-row .reset-btn:hover { color: #fff; background: #444; }
+
+.ctrl-group-body {
+    display: contents;
+}
+.ctrl-group-body.collapsed > * {
+    display: none !important;
+}
+
+/* Ensure the original clickable canvas still receives clicks outside the panel */
+canvas { pointer-events: auto; }
+</style>
+</head>
+<body>
+
+<div id="controls-panel">
+    <div id="controls-header">
+        <button id="toggle-panel">≡</button>
+        <span>Spinner Controls</span>
+    </div>
+    <div id="controls-body">
+        <div id="presets-row">
+            <label for="preset-select">Preset:</label>
+            <select id="preset-select"></select>
+            <button id="btn-load-preset">Load</button>
+            <button id="btn-reset-all">Reset All</button>
+            <button id="btn-json">JSON</button>
+        </div>
+
+        <select id="font-select">
+            <option value='system-ui, -apple-system, "Segoe UI", sans-serif'>System (Default)</option>
+            <option value="Roboto">Roboto</option>
+            <option value="Playfair Display">Playfair Display</option>
+            <option value="Press Start 2P">Press Start 2P</option>
+            <option value="Great Vibes">Great Vibes</option>
+            <option value="Bangers">Bangers</option>
+            <option value="Creepster">Creepster</option>
+            <option value="Lobster">Lobster</option>
+            <option value="Pacifico">Pacifico</option>
+            <option value="VT323">VT323</option>
+            <option value="Courier Prime">Courier Prime</option>
+            <option value="Comic Neue">Comic Neue</option>
+            <option value="Bungee Outline">Bungee Outline</option>
+            <option value="Rock Salt">Rock Salt</option>
+            <option value="Henny Penny">Henny Penny</option>
+            <option value="Kablammo">Kablammo</option>
+            <option value="Schoolbell">Schoolbell</option>
+            <option value="Finger Paint">Finger Paint</option>
+            <option value="Indie Flower">Indie Flower</option>
+            <option value="Princess Sofia">Princess Sofia</option>
+            <option value="Lily Script One">Lily Script One</option>
+            <option value="Crafty Girls">Crafty Girls</option>
+            <option value="Mountains of Christmas">Mountains of Christmas</option>
+            <option value="Rubik Storm">Rubik Storm</option>
+            <option value="Rubik Spray Paint">Rubik Spray Paint</option>
+        </select>
+
+        <div id="controls-list"></div>
+    </div>
+</div>
+
+<div class='container'></div>
+<div id='content' class='content'></div>
+
+
+</body>
+</html>
