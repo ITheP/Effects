@@ -69,6 +69,8 @@ function main() {
         text: '★ The badger packed his tiny bag, a stripy towel and a sun hat, waddled down the sandy track, dreaming of a seaside snack ★ ',
         fontFamily: 'system-ui, -apple-system, "Segoe UI", sans-serif',
         fontSizePct: 0.045, letterSpacingPct: 0.10, radiusPct: 0.32,
+        fontSizeVar1: 0.0, fontSizeVar1Speed: 0.5,
+        fontSizeVar2: 0.0, fontSizeVar2Speed: 0.8,
         textStartAngle: -Math.PI / 2, letterInterval: 0.1,
         textFillColor: '#ffffff', textStrokeColor: '#ff2e88',
         textStrokeWidth: 0.06, textBlur: 0.0,
@@ -112,6 +114,22 @@ function main() {
                     label: "Font Size", details: "Font size × min(W, H)."
                 },
                 {
+                    icon: "📏", key: "fontSizeVar1", def: CFG.fontSizeVar1, min: 0, max: 20, step: 0.01,
+                    label: "Font Size Variance 1", details: "Amplitude of sine wave 1 (± value × font size)."
+                },
+                {
+                    icon: "⏱️", key: "fontSizeVar1Speed", def: CFG.fontSizeVar1Speed, min: 0, max: 20, step: 0.01,
+                    label: "Font Variance 1 Speed", details: "How fast sine wave 1 oscillates."
+                },
+                {
+                    icon: "📏", key: "fontSizeVar2", def: CFG.fontSizeVar2, min: 0, max: 20, step: 0.01,
+                    label: "Font Size Variance 2", details: "Amplitude of sine wave 2 (± value × font size)."
+                },
+                {
+                    icon: "⏱️", key: "fontSizeVar2Speed", def: CFG.fontSizeVar2Speed, min: 0, max: 20, step: 0.01,
+                    label: "Font Variance 2 Speed", details: "How fast sine wave 2 oscillates."
+                },
+                {
                     icon: "↔️", key: "letterSpacingPct", def: CFG.letterSpacingPct, min: 0.0, max: 0.5, step: 0.005,
                     label: "Letter Spacing", details: "Extra arc between letters, × font size."
                 },
@@ -128,7 +146,7 @@ function main() {
                     label: "Letter Delay", details: "Seconds between letters. 0 = whole ring at once."
                 },
                 {
-                    icon: "🖼️", key: "textDisplayLength", def: CFG.textDisplayLength, min: 1, max: 60, step: 1, int: true,
+                    icon: "🖼️", key: "textDisplayLength", def: CFG.textDisplayLength, min: 1, max: 240, step: 1, int: true,
                     label: "Display Length", details: "Frames each letter deposits into the effect."
                 },
                 {
@@ -674,6 +692,13 @@ function main() {
         },
     ];
 
+    function fontVarianceAt(t) {
+        const wave1 = Math.sin(t * state.fontSizeVar1Speed);
+        const wave2 = Math.sin(t * state.fontSizeVar2Speed + 1.7);
+        // ±scale × font size: at variance 1, ±10% of base font size
+        return (state.fontSizeVar1 * wave1 + state.fontSizeVar2 * wave2) * 0.1;
+    }
+
     function fmtVal(v) {
         if (v === 0) return "0";
         const a = Math.abs(v);
@@ -709,7 +734,7 @@ function main() {
     let freezeStart = 0;
 
     let textChars = Array.from(state.text || '');
-    let textWidthCache = [];
+    let textWidthCache = [];           // array of Maps: textWidthCache[charIndex][sizeKey] = width
     let textLayoutDirty = true;
     let textLetterCursor = 0;
     let textLastTick = 0;
@@ -1197,25 +1222,49 @@ function main() {
         l2Index = 0;
     }
 
+    function getCharWidth(idx, fontPx) {
+        const key = fontPx.toFixed(2);
+        const map = textWidthCache[idx];
+        if (!map) return 0;
+        let w = map.get(key);
+        if (w === undefined) {
+            stampCtx.save();
+            stampCtx.font = '700 ' + fontPx + 'px ' + fontStackFor(state.fontFamily);
+            w = stampCtx.measureText(textChars[idx]).width;
+            stampCtx.restore();
+            map.set(key, w);
+            // Cap the cache so it doesn't grow forever if variance is high & range is wide
+            if (map.size > 128) {
+                const firstKey = map.keys().next().value;
+                map.delete(firstKey);
+            }
+        }
+        return w;
+    }
+
     function recomputeTextLayout() {
         const u = Math.min(stampCanvas.width, stampCanvas.height);
-        const fontPx = Math.max(1, u * state.fontSizePct);
-        stampCtx.font = '700 ' + fontPx + 'px ' + fontStackFor(state.fontFamily);
+        const baseFontPx = Math.max(1, u * state.fontSizePct);
+        stampCtx.font = '700 ' + baseFontPx + 'px ' + fontStackFor(state.fontFamily);
         textChars = Array.from(state.text || '');
         textWidthCache = new Array(textChars.length);
         for (let i = 0; i < textChars.length; i++) {
-            textWidthCache[i] = stampCtx.measureText(textChars[i]).width;
+            textWidthCache[i] = new Map();
+            // Pre-seed the base size so the common case is instant
+            textWidthCache[i].set(baseFontPx.toFixed(2), stampCtx.measureText(textChars[i]).width);
         }
         textLayoutDirty = false;
     }
 
-    function bakeLetterBitmap(idx, angle) {
+    function bakeLetterBitmap(idx, angle, sizeVar = 0) {
         if (!textChars.length) return null;
         idx = ((idx % textChars.length) + textChars.length) % textChars.length;
 
         const u = Math.min(stampCanvas.width, stampCanvas.height);
-        const fontPx = Math.max(1, u * state.fontSizePct);
+        const baseFontPx = Math.max(1, u * state.fontSizePct);
+        const fontPx = Math.max(1, baseFontPx * (1 + sizeVar));
         const radiusPx = u * state.radiusPct;
+
         const cx = stampCanvas.width / 2;
         const cy = stampCanvas.height / 2;
 
@@ -1307,7 +1356,7 @@ function main() {
     var lastFrameTime = 0;
     var startTime = performance.now();
 
-    function animate(now) {
+     function animate(now) {
         if (__destroyed) return;
 
         if (transitionActive) {
@@ -1359,7 +1408,6 @@ function main() {
         if (textLayoutDirty) {
             recomputeTextLayout();
             state._textAllStamped = false;
-            //state._textCurrentAngle = null; // Reset continuous angle on layout change
         }
 
         var frameInterval = 1000 / Math.max(1, state.targetFPS);
@@ -1381,16 +1429,21 @@ function main() {
                     // --- STATIC RING MODE ---
                     if (!state._textAllStamped || activeLetters.length === 0) {
                         activeLetters.length = 0;
+                        
                         let angleAcc = state.textStartAngle;
                         const u = Math.min(stampCanvas.width, stampCanvas.height);
-                        const fontPx = Math.max(1, u * state.fontSizePct);
+                        const baseFontPx = Math.max(1, u * state.fontSizePct);
                         const radiusPx = u * state.radiusPct;
-                        const spacingPx = fontPx * state.letterSpacingPct;
 
                         for (let i = 0; i < textChars.length; i++) {
-                            const advance = Math.max(0.001, textWidthCache[i] + spacingPx);
+                            const sizeVarGuess = fontVarianceAt(angleAcc * 3.0);
+                            const fontPx = Math.max(1, baseFontPx * (1 + sizeVarGuess));
+                            const spacingPx = fontPx * state.letterSpacingPct;
+                            const advance = Math.max(0.001, getCharWidth(i, fontPx) + spacingPx);
                             const charAngle = angleAcc + (advance / radiusPx) / 2;
-                            const baked = bakeLetterBitmap(i, charAngle);
+                            const sizeVar = fontVarianceAt(charAngle * 3.0);
+                            
+                            const baked = bakeLetterBitmap(i, charAngle, sizeVar);
                             if (baked) {
                                 activeLetters.push({
                                     framesLeft: 9999,
@@ -1420,23 +1473,21 @@ function main() {
                         const idx = textLetterCursor;
                         textLetterCursor = (textLetterCursor + 1) % textChars.length;
                         
-                        // Calculate continuous angle for this character
                         const u = Math.min(stampCanvas.width, stampCanvas.height);
-                        const fontPx = Math.max(1, u * state.fontSizePct);
+                        const baseFontPx = Math.max(1, u * state.fontSizePct);
                         const radiusPx = u * state.radiusPct;
+
+                        const sizeVar = fontVarianceAt(shaderTime);
+                        const fontPx = Math.max(1, baseFontPx * (1 + sizeVar));
                         const spacingPx = fontPx * state.letterSpacingPct;
-                        const advance = Math.max(0.001, textWidthCache[idx] + spacingPx);
-                        
+                        const advance = Math.max(0.001, getCharWidth(idx, fontPx) + spacingPx);
                         const charAngle = state._textCurrentAngle + (advance / radiusPx) / 2;
-                        
-                        // Advance the running angle for the next letter
+
                         state._textCurrentAngle += advance / radiusPx;
-                        
-                        // Wrap the angle to keep it bounded (optional, but good practice)
                         if (state._textCurrentAngle > Math.PI * 2) state._textCurrentAngle -= Math.PI * 2;
 
                         const lifetime = Math.max(1, Math.round(state.textDisplayLength));
-                        const baked = bakeLetterBitmap(idx, charAngle);
+                        const baked = bakeLetterBitmap(idx, charAngle, sizeVar);
                         
                         if (baked) {
                             activeLetters.push({
