@@ -6,7 +6,7 @@ function main() {
     cancelAnimationFrame(window.animationFrameId);
     document.body.querySelectorAll("canvas[data-kaleido]").forEach(c => c.remove());
 
-    const MAX_BLOBS = 16;
+    const MAX_BLOBS = 64;
 
     const CFG = {
         targetFPS: 60, presetTransitionTime: 3.0,
@@ -62,7 +62,7 @@ function main() {
         specColor: '#ffffff',
         softSpecStrength: 0.27,
         softSpecSharp: 10.5,
-        reflectStrength: 0.7,
+        reflectStrength: 0.0,
         reflectWidth: 3.0,
         reflectColor: '#ffffff',
         rimStrength: 1.01,
@@ -95,7 +95,7 @@ function main() {
         {
             heading: "⚙️ General Settings", openByDefault: false, showExtras: false, controls: [
                 { icon: "🎞️", key: "targetFPS", def: CFG.targetFPS, min: 15, max: 120, step: 1, int: true, label: "Target FPS", savedInPreset: false, details: "Framerate cap." },
-                { icon: "🕐", key: "presetTransitionTime", def: CFG.presetTransitionTime, min: 0, max: 5, step: 0.01, label: "Preset Transition", savedInPreset: false, details: "Seconds preset loads animate over." },
+                { icon: "🕐", key: "presetTransitionTime", def: CFG.presetTransitionTime, min: 0, max: 15, step: 0.1, label: "Preset Transition", savedInPreset: false, details: "Seconds preset loads animate over." },
                 { icon: "⏸️", key: "freezeTime", def: CFG.freezeTime, special: "bool", savedInPreset: false, label: "Freeze Time", details: "Freeze the shader clock and physics." },
                 { icon: "🔀", key: "autoMorph", def: CFG.autoMorph, special: "bool", savedInPreset: false, label: "Auto Morph", details: "Cycle random presets." },
                 { icon: "🔄", key: "morphCycleTime", def: CFG.morphCycleTime, min: 2, max: 120, step: 0.5, savedInPreset: false, label: "Morph Cycle Time", details: "Seconds between random picks." },
@@ -106,25 +106,25 @@ function main() {
         {
             heading: "🫧 Wax Blobs", openByDefault: true, controls: [
                 { icon: "🔢", key: "blobCount", def: CFG.blobCount, min: 1, max: MAX_BLOBS, step: 1, int: true, label: "Target Population", details: "Target number of live wax blobs." },
-                { icon: "📏", key: "blobSize", def: CFG.blobSize, min: 0.015, max: 0.16, step: 0.001, label: "Blob Size", details: "Base radius in screen-height units." },
-                { icon: "🎲", key: "blobSizeVar", def: CFG.blobSizeVar, min: 0, max: 1, step: 0.01, label: "Size Variance", details: "Random spread of blob radius." },
-                { icon: "🧬", key: "traitVariance", def: CFG.traitVariance, min: 0, max: 1, step: 0.01, label: "Trait Variance", details: "Individual blobs differ in heat gain, cooling, max speed, wander and squish." },
-                { icon: "🎈", key: "buoyancy", def: CFG.buoyancy, min: 0.05, max: 3, step: 0.01, label: "Buoyancy", details: "Upward force from temperature." },
-                { icon: "💨", key: "drag", def: CFG.drag, min: 0.05, max: 4, step: 0.01, label: "Drag", details: "Velocity damping." },
-                { icon: "🔥", key: "heatGain", def: CFG.heatGain, min: 0.1, max: 3, step: 0.01, label: "Heat Gain", details: "Heat absorbed near the bulb." },
-                { icon: "❄️", key: "cooling", def: CFG.cooling, min: 0.02, max: 1.5, step: 0.01, label: "Cooling Rate", details: "Heat lost per second." },
-                { icon: "📏", key: "heatDepth", def: CFG.heatDepth, min: 0.02, max: 0.6, step: 0.005, label: "Heat Depth", details: "How far the bulb's heat reaches." },
-                { icon: "🌡️", key: "tempNeutral", def: CFG.tempNeutral, min: 0, max: 1.5, step: 0.01, label: "Neutral Temp", details: "Temperature at which blobs neither rise nor sink." },
-                { icon: "🚀", key: "maxSpeed", def: CFG.maxSpeed, min: 0.05, max: 1.5, step: 0.01, label: "Max Speed", details: "Velocity clamp." },
+                { icon: "📏", key: "blobSize", def: CFG.blobSize, min: 0.01, max: 0.32, step: 0.001, label: "Blob Size", details: "Base radius in screen-height units." },
+                { icon: "🎲", key: "blobSizeVar", def: CFG.blobSizeVar, min: 0, max: 2, step: 0.1, label: "Size Variance", details: "Random spread of blob radius." },
+                { icon: "🧬", key: "traitVariance", def: CFG.traitVariance, min: 0, max: 2, step: 0.01, label: "Trait Variance", details: "Individual blobs differ in heat gain, cooling, max speed, wander and squish." },
+                { icon: "🎈", key: "buoyancy", def: CFG.buoyancy, min: 0.01, max: 5, step: 0.01, label: "Buoyancy", details: "Upward force from temperature." },
+                { icon: "💨", key: "drag", def: CFG.drag, min: 0.01, max: 5, step: 0.01, label: "Drag", details: "Velocity damping." },
+                { icon: "🔥", key: "heatGain", def: CFG.heatGain, min: 0.1, max: 5, step: 0.01, label: "Heat Gain", details: "Heat absorbed near the bulb." },
+                { icon: "❄️", key: "cooling", def: CFG.cooling, min: 0.02, max: 3, step: 0.01, label: "Cooling Rate", details: "Heat lost per second." },
+                { icon: "📏", key: "heatDepth", def: CFG.heatDepth, min: 0.02, max: 0.8, step: 0.005, label: "Heat Depth", details: "How far the bulb's heat reaches." },
+                { icon: "🌡️", key: "tempNeutral", def: CFG.tempNeutral, min: 0, max: 2, step: 0.01, label: "Neutral Temp", details: "Temperature at which blobs neither rise nor sink." },
+                { icon: "🚀", key: "maxSpeed", def: CFG.maxSpeed, min: 0.05, max: 3, step: 0.01, label: "Max Speed", details: "Velocity clamp." },
                 { icon: "🌊", key: "wander", def: CFG.wander, min: 0, max: 2, step: 0.01, label: "Horizontal Wander", details: "Sideways drift. Movement only, no shape change." },
                 { icon: "🫧", key: "squish", def: CFG.squish, min: 0, max: 2, step: 0.01, label: "Stretch from Speed", details: "Elongation along motion." },
-                { icon: "💨", key: "turbulence", def: CFG.turbulence, min: 0, max: 1, step: 0.01, label: "Turbulence", details: "Swirling fluid forces that wobble the blobs like jelly." },
-                { icon: "🌀", key: "turbulenceFreq", def: CFG.turbulenceFreq, min: 0.1, max: 4, step: 0.01, label: "Turbulence Freq", details: "How fast the turbulent flow varies over time." },
-                { icon: "🔬", key: "turbulenceScale", def: CFG.turbulenceScale, min: 0.1, max: 5, step: 0.01, label: "Turbulence Scale", details: "Spatial frequency of the eddies." },
-                { icon: "🧱", key: "wallSquish", def: CFG.wallSquish, min: 0, max: 3, step: 0.01, label: "Wall Squish", details: "How much blobs flatten against walls and ceiling." },
-                { icon: "🏓", key: "wallRestitution", def: CFG.wallRestitution, min: 0, max: 0.9, step: 0.01, label: "Wall Bounce", details: "How much velocity is kept when bouncing off a wall." },
-                { icon: "⬇️", key: "deathDepth", def: CFG.deathDepth, min: 0.20, max: 1.50, step: 0.01, label: "Death Depth", details: "How far below screen blobs sink before dissolving." },
-                { icon: "🎯", key: "fieldThreshold", def: CFG.fieldThreshold, min: 0.40, max: 2.50, step: 0.01, label: "Metaball Threshold", details: "Isosurface level." },
+                { icon: "💨", key: "turbulence", def: CFG.turbulence, min: 0, max: 3, step: 0.01, label: "Turbulence", details: "Swirling fluid forces that wobble the blobs like jelly." },
+                { icon: "🌀", key: "turbulenceFreq", def: CFG.turbulenceFreq, min: 0.1, max: 10, step: 0.01, label: "Turbulence Freq", details: "How fast the turbulent flow varies over time." },
+                { icon: "🔬", key: "turbulenceScale", def: CFG.turbulenceScale, min: 0.1, max: 10, step: 0.01, label: "Turbulence Scale", details: "Spatial frequency of the eddies." },
+                { icon: "🧱", key: "wallSquish", def: CFG.wallSquish, min: 0, max: 5, step: 0.01, label: "Wall Squish", details: "How much blobs flatten against walls and ceiling." },
+                { icon: "🏓", key: "wallRestitution", def: CFG.wallRestitution, min: 0, max: 1, step: 0.01, label: "Wall Bounce", details: "How much velocity is kept when bouncing off a wall." },
+                { icon: "⬇️", key: "deathDepth", def: CFG.deathDepth, min: 0.05, max: 1.50, step: 0.01, label: "Death Depth", details: "How far below screen blobs sink before dissolving." },
+                { icon: "🎯", key: "fieldThreshold", def: CFG.fieldThreshold, min: 0.1, max: 5, step: 0.01, label: "Metaball Threshold", details: "Isosurface level." },
                 { icon: "⏱️", key: "spawnRate", def: CFG.spawnRate, min: 0.5, max: 30, step: 0.1, label: "Spawn Rate", details: "Blobs per second." },
                 { icon: "📦", key: "spawnBatch", def: CFG.spawnBatch, min: 1, max: 6, step: 1, int: true, label: "Spawn Batch", details: "Max blobs to spawn per tick: random(1..N)." },
             ]
@@ -141,9 +141,9 @@ function main() {
             heading: "🫗 Wax Pool", openByDefault: true, controls: [
                 { icon: "👁️", key: "poolActive", def: CFG.poolActive, special: "bool", label: "Show Pool", details: "Wax reservoir at the bottom." },
                 { icon: "📏", key: "poolLevel", def: CFG.poolLevel, min: 0.0, max: 0.4, step: 0.002, label: "Pool Level", details: "Height of the pool surface." },
-                { icon: "☁️", key: "poolSoftness", def: CFG.poolSoftness, min: 0.004, max: 0.12, step: 0.001, label: "Pool Softness", details: "How quickly the pool field fades upward." },
-                { icon: "🌊", key: "poolWave", def: CFG.poolWave, min: 0, max: 0.06, step: 0.0005, label: "Pool Wave", details: "Amplitude of the pool surface wave." },
-                { icon: "⏱️", key: "poolWaveSpeed", def: CFG.poolWaveSpeed, min: 0, max: 3, step: 0.01, label: "Pool Wave Speed", details: "How fast the surface wave travels." },
+                { icon: "☁️", key: "poolSoftness", def: CFG.poolSoftness, min: 0, max: 0.25, step: 0.001, label: "Pool Softness", details: "How quickly the pool field fades upward." },
+                { icon: "🌊", key: "poolWave", def: CFG.poolWave, min: 0, max: 0.25, step: 0.0005, label: "Pool Wave", details: "Amplitude of the pool surface wave." },
+                { icon: "⏱️", key: "poolWaveSpeed", def: CFG.poolWaveSpeed, min: -10, max: 10, step: 0.01, label: "Pool Wave Speed", details: "How fast the surface wave travels." },
             ]
         },
         {
@@ -153,8 +153,8 @@ function main() {
                 { icon: "💡", key: "waxGlow", def: CFG.waxGlow, min: 0, max: 3, step: 0.01, label: "Bulb Reach", details: "How strongly the bulb illuminates the wax surface." },
                 { icon: "🎨", key: "waxGlowColor", def: CFG.waxGlowColor, special: "color", label: "Bulb Tint", details: "Colour of the light reaching the wax surface." },
                 { icon: "🌈", key: "sssColor", def: CFG.sssColor, special: "color", label: "SSS Colour", details: "The wax's internal scattered light colour." },
-                { icon: "🔆", key: "sssStrength", def: CFG.sssStrength, min: 0, max: 3, step: 0.01, label: "SSS Strength", details: "Intensity of subsurface light transmitted through the wax." },
-                { icon: "🌫️", key: "sssFalloff", def: CFG.sssFalloff, min: 0.1, max: 5, step: 0.01, label: "SSS Falloff", details: "How quickly light dies through the wax." },
+                { icon: "🔆", key: "sssStrength", def: CFG.sssStrength, min: -1, max: 5, step: 0.01, label: "SSS Strength", details: "Intensity of subsurface light transmitted through the wax." },
+                { icon: "🌫️", key: "sssFalloff", def: CFG.sssFalloff, min: -1, max: 10, step: 0.01, label: "SSS Falloff", details: "How quickly light dies through the wax." },
             ]
         },
         {
@@ -165,32 +165,32 @@ function main() {
                 { icon: "💫", key: "softSpecStrength", def: CFG.softSpecStrength, min: 0, max: 3, step: 0.01, label: "Soft Highlight", details: "Broader sheen layer." },
                 { icon: "🌫️", key: "softSpecSharp", def: CFG.softSpecSharp, min: 1, max: 30, step: 0.5, label: "Soft Highlight Spread", details: "Lower = broader." },
                 { icon: "⚪", key: "specColor", def: CFG.specColor, special: "color", label: "Specular Colour", details: "Highlight tint." },
-                { icon: "🪞", key: "reflectStrength", def: CFG.reflectStrength, min: 0, max: 2, step: 0.01, label: "Reflection", details: "Screen-space reflection of the actual scene (previous frame). Reflects other blobs, the pool, and the bulb." },
-                { icon: "🌐", key: "reflectWidth", def: CFG.reflectWidth, min: 0.5, max: 8, step: 0.1, label: "Reflection Reach", details: "How far to sample in the reflected direction. Higher = reaches further afield." },
+                { icon: "🪞", key: "reflectStrength", def: CFG.reflectStrength, min: -1, max: 5, step: 0.01, label: "Reflection", details: "Screen-space reflection of the actual scene (previous frame). Reflects other blobs, the pool, and the bulb." },
+                { icon: "🌐", key: "reflectWidth", def: CFG.reflectWidth, min: -5, max: 25, step: 0.1, label: "Reflection Reach", details: "How far to sample in the reflected direction. Higher = reaches further afield." },
                 { icon: "🎨", key: "reflectColor", def: CFG.reflectColor, special: "color", label: "Reflection Tint", details: "Tint of the reflected scene. White = pure reflection." },
-                { icon: "🌟", key: "rimStrength", def: CFG.rimStrength, min: 0, max: 2, step: 0.01, label: "Rim Light", details: "Edge glow." },
-                { icon: "🌥️", key: "ambient", def: CFG.ambient, min: 0, max: 2, step: 0.01, label: "Ambient", details: "Base wax illumination." },
-                { icon: "☀️", key: "diffuse", def: CFG.diffuse, min: 0, max: 2, step: 0.01, label: "Diffuse", details: "Directional wax illumination." },
-                { icon: "🪨", key: "bump", def: CFG.bump, min: 0, max: 4, step: 0.01, label: "Surface Roundness", details: "1.0 = physical dome." },
-                { icon: "🖊️", key: "edgeSoft", def: CFG.edgeSoft, min: 0.01, max: 0.6, step: 0.005, label: "Edge Softness", details: "Anti-aliasing width." },
+                { icon: "🌟", key: "rimStrength", def: CFG.rimStrength, min: -2, max: 5, step: 0.01, label: "Rim Light", details: "Edge glow." },
+                { icon: "🌥️", key: "ambient", def: CFG.ambient, min: -2, max: 3, step: 0.01, label: "Ambient", details: "Base wax illumination." },
+                { icon: "☀️", key: "diffuse", def: CFG.diffuse, min: -2, max: 3, step: 0.01, label: "Diffuse", details: "Directional wax illumination." },
+                { icon: "🪨", key: "bump", def: CFG.bump, min: -2, max: 5, step: 0.01, label: "Surface Roundness", details: "1.0 = physical dome." },
+                { icon: "🖊️", key: "edgeSoft", def: CFG.edgeSoft, min: -1, max: 2, step: 0.005, label: "Edge Softness", details: "Anti-aliasing width." },
             ]
         },
         {
             heading: "💎 Translucency", openByDefault: true, controls: [
-                { icon: "🔮", key: "translucency", def: CFG.translucency, min: 0, max: 2, step: 0.01, label: "Translucency", details: "Overall see-through quality of the wax." },
-                { icon: "🌅", key: "translucencyBias", def: CFG.translucencyBias, min: 0, max: 1, step: 0.01, label: "Translucency Bias", details: "0 = uniform transparency. 1 = transparent only at edges." },
+                { icon: "🔮", key: "translucency", def: CFG.translucency, min: -1, max: 5, step: 0.01, label: "Translucency", details: "Overall see-through quality of the wax." },
+                { icon: "🌅", key: "translucencyBias", def: CFG.translucencyBias, min: -1, max: 2, step: 0.01, label: "Translucency Bias", details: "0 = uniform transparency. 1 = transparent only at edges." },
             ]
         },
         {
             heading: "🫙 Liquid & Glass", openByDefault: false, controls: [
                 { icon: "🌌", key: "bgTop", def: CFG.bgTop, special: "color", label: "Liquid Top", details: "Liquid colour at top." },
                 { icon: "🌆", key: "bgBottom", def: CFG.bgBottom, special: "color", label: "Liquid Bottom", details: "Liquid colour at bottom." },
-                { icon: "💡", key: "lampGlow", def: CFG.lampGlow, min: 0, max: 4, step: 0.01, label: "Lamp Glow", details: "Bulb glow through liquid." },
-                { icon: "⭕", key: "glowRadius", def: CFG.glowRadius, min: 0.05, max: 2, step: 0.01, label: "Glow Radius", details: "Falloff distance of the glow." },
+                { icon: "💡", key: "lampGlow", def: CFG.lampGlow, min: 0, max: 10, step: 0.01, label: "Lamp Glow", details: "Bulb glow through liquid." },
+                { icon: "⭕", key: "glowRadius", def: CFG.glowRadius, min: -2, max: 5, step: 0.01, label: "Glow Radius", details: "Falloff distance of the glow." },
                 { icon: "🎨", key: "glowColor", def: CFG.glowColor, special: "color", label: "Glow Colour", details: "Bulb colour." },
-                { icon: "🌈", key: "halo", def: CFG.halo, min: 0, max: 3, step: 0.01, label: "Wax Halo", details: "Light bleeding from wax into liquid." },
-                { icon: "📐", key: "haloWidth", def: CFG.haloWidth, min: 0.5, max: 6.0, step: 0.05, label: "Halo Width", details: "Higher = tighter halo." },
-                { icon: "🫙", key: "glassCurve", def: CFG.glassCurve, min: 0, max: 1.5, step: 0.01, label: "Glass Curve", details: "Darkening at the glass edges." },
+                { icon: "🌈", key: "halo", def: CFG.halo, min: -2, max: 5, step: 0.01, label: "Wax Halo", details: "Light bleeding from wax into liquid." },
+                { icon: "📐", key: "haloWidth", def: CFG.haloWidth, min: -1, max: 10, step: 0.05, label: "Halo Width", details: "Higher = tighter halo." },
+                { icon: "🫙", key: "glassCurve", def: CFG.glassCurve, min: -1, max: 5, step: 0.01, label: "Glass Curve", details: "Darkening at the glass edges." },
             ]
         },
         {
